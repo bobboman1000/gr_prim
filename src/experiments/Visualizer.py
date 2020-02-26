@@ -76,18 +76,19 @@ class Visualizer:
         plt.rcParams.update({'font.size': 14})
         rcParams["savefig.dpi"] = 100
         rcParams["figure.dpi"] = 100
-        self.ylim = 0.2
         if self.box_width > self.offset_in_group:
             raise Warning("box_width larger than offset: Boxplots will overlap")
 
-    def boxplot_dataset(self, q: List[List[Experiment]], q_name: str, metric, mode, vert=True, selected_methods=None, abbreviate=False):
+    def boxplot_dataset(self, q: List[List[Experiment]], q_name: str, metric, mode, vert=True, selected_methods=None, abbreviate=False, display_range=None):
         plt.figure(figsize=(7, 7))
         plt.title(q_name)
+        if display_range is None:
+            display_range = (0, self.boxplot_top_offset)
         if not vert:
-            plt.xlim((0, self.boxplot_top_offset))
+            plt.xlim(display_range)
             plt.xlabel(self.get_metric_name(metric))
         else:
-            plt.ylim((0, self.boxplot_top_offset))
+            plt.ylim(display_range)
             plt.ylabel(self.get_metric_name(metric))
 
         ticks = []
@@ -114,10 +115,10 @@ class Visualizer:
         plt.savefig("result_grafix/" + q_name + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
         plt.show()
 
-    def boxplot_all_datasets(self, metric, mode: int, vert=True, abbreviate=False, selected_methods=None):
+    def boxplot_all_datasets(self, metric, mode: int, vert=True, abbreviate=False, selected_methods=None, display_range=None):
         qs = self.exp_man.get_grouped_by(mode)
         for q_name in qs:
-            self.boxplot_dataset(qs[q_name], q_name, metric, mode, vert, abbreviate=abbreviate, selected_methods=selected_methods)
+            self.boxplot_dataset(qs[q_name], q_name, metric, mode, vert, abbreviate=abbreviate, selected_methods=selected_methods, display_range=display_range)
 
     def boxplot_all_datasets_as_one(self, metric, mode: int = 1, vert=True, abbreviate=False, selected_methods=None, legend=True, title=None):
         grouped_qs = self.exp_man.get_grouped_by(mode)
