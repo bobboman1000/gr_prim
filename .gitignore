@@ -333,3 +333,5 @@ rsconnect/
 output/*.log
 **/__pycache__
 
+resources/
+
