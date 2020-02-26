@@ -6,12 +6,11 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 
+from src.subgroup_discovery.dssd import DSSD, Config
 import src.generators.GaussianMixtures as mix
 from src.generators.KernelDensityCV import KernelDensityBW, bw_method_scott
-from src.generators.Munge_R import MUNGE
 from src.metamodels.NNProbababilityEstimation import *
 from src.subgroup_discovery.PRIM import PRIM
-from src.subgroup_discovery.BI import BestInterval
 
 enable_probabilities = True
 generator_samples = 50000
@@ -30,7 +29,9 @@ metamodels = {
     "classRF": cv_classRF,
 }
 
+conf = Config("dssd")
+
 discovery_algs = {
     #"prim": PRIM(threshold=1, mass_min=20)
-    "best-interval": BestInterval()
+    "dssd": DSSD(conf)
 }

@@ -27,17 +27,6 @@ def generate_names(number):
     return x_names
 
 
-# Create Experiment dataset: It holds all the necessary information about the dataset
-sensorless = pd.read_csv("resources/data/Sensorless_drive_diagnosis.txt", sep=" ", header=-1, names=generate_names(47))
-sensorless_yname = "y"
-sensorless = sensorless.dropna()
-
-# Maps column "y" to 1 if y = 1, 0 else
-sensorless = map_target(sensorless, sensorless_yname, 1)
-
-# Create ExperimentDataset and fragment size. Scales to [0,1] targets by default - if set scaler to None.
-sensorless = ExperimentDataset("sensorless", sensorless, sensorless_yname, fragment_size=400)
-
 
 
 # sylva
@@ -76,21 +65,11 @@ avila400 = ExperimentDataset("avila2", avila_set, avila_yname, fragment_size=400
 # New samples is the amount of samples added, enable_probabilities specifies wheter the classification should be done
 # using probabilities, the fragment_limit specifies the maximum number of fragments (small datasets).
 
-exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF_avila", new_samples=5000, fragment_limit=4, enable_probabilities=True)
-exp_man.add_experiment(avila400, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF_avila2", new_samples=5000, fragment_limit=4, enable_probabilities=False)
-exp_man.add_experiment(avila200, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_avila", new_samples=5000, fragment_limit=4, enable_probabilities=False)
-exp_man.add_experiment(avila400, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_avila2", new_samples=5000, fragment_limit=4, enable_probabilities=False)
+exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["dssd"],
+                       name="kde_classRF_avila", new_samples=5000, fragment_limit=1, enable_probabilities=True)
 
-exp_man.add_experiment(sylva200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF_sylva", new_samples=5000, fragment_limit=4, enable_probabilities=True)
-exp_man.add_experiment(sylva400, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF_sylva2", new_samples=5000, fragment_limit=4, enable_probabilities=False)
-exp_man.add_experiment(sylva200, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_sylva", new_samples=5000, fragment_limit=4, enable_probabilities=False)
-exp_man.add_experiment(sylva400, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_sylva2", new_samples=5000, fragment_limit=4, enable_probabilities=False)
-#exp_man.add_experiment(sensorless, c.generators["munge"], c.metamodels["classRF"], c.discovery_algs["prim"], name="dummy", new_samples=0, enable_probabilities=False, fragment_limit=1)
-#exp_man.add_experiment(sensorless, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["prim"], name="dummy", new_samples=0, enable_probabilities=False, fragment_limit=1)
-#exp_man.add_experiment(sensorless, DummyGenerator(), DummyMetaModel(), c.discovery_algs["prim"], name="dummy", new_samples=0, enable_probabilities=False, fragment_limit=1)
-#exp_man.add_experiment(d[1], c.generators["munge"], c.metamodels["SVC-calibrated"], c.discovery_algs["prim"], name="munge", new_samples=400, enable_probabilities=True, fragment_limit=1)
 
-res = exp_man.run_thread_per_dataset()
+res = exp_man.run_all()
 exp_man.export_experiments("prelim_refine")
 
 
