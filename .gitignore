@@ -334,4 +334,5 @@ output/*.log
 **/__pycache__
 
 resources/
+src/subgroup_discovery/dssd/
 
