@@ -1,0 +1,13 @@
+rpy2
+statsmodels
+cython
+pomegranate
+annoy
+prim
+pysubgroup
+seaborn
+matplotlib
+scipy
+pandas
+sklearn
+numpy

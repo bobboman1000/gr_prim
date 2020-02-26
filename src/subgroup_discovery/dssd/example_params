@@ -1,0 +1,47 @@
+// == DSSD == Parameters....//
+		if (TOGGLE_DSSD) {
+			vector<tuple<ind, ind, ind, ind, string, ind, bool, num, string>> configsDSSD;
+			configsDSSD.emplace_back(100, 1, 10, 10, "cover", 100, false, 0.9, "WKL");
+			//configsDSSD.emplace_back(100, 2, 10, 10, "cover", 100, false, 0.9, "WKL");
+			//configsDSSD.emplace_back(100, 3, 10, 10, "cover", 100, false, 0.9, "WKL");
+			//configsDSSD.emplace_back(100, 1, 10, 20, "cover", 100, false, 0.9, "WKL");
+			//configsDSSD.emplace_back(100, 2, 10, 20, "cover", 100, false, 0.9, "WKL");
+			//configsDSSD.emplace_back(100, 3, 10, 20, "cover", 100, false, 0.9, "WKL");
+			//configsDSSD.emplace_back(100, 1, 10, 10, "cover", 100, true, 0.9, "WKL");
+			//configsDSSD.emplace_back(100, 2, 10, 10, "cover", 100, true, 0.9, "WKL");
+			//configsDSSD.emplace_back(100, 3, 10, 10, "cover", 100, true, 0.9, "WKL");
+			//configsDSSD.emplace_back(100, 1, 10, 20, "cover", 100, true, 0.9, "WKL");
+			//configsDSSD.emplace_back(100, 2, 10, 20, "cover", 100, true, 0.9, "WKL");
+			//configsDSSD.emplace_back(100, 3, 10, 20, "cover", 100, true, 0.9, "WKL");
+			for (auto config : configsDSSD) {
+				cout << "== DSSD ==\n";
+				ind initialCandidates = get<0>(config);
+				ind depth = get<1>(config);
+				ind minCoverage = get<2>(config);
+				ind thresholds = get<3>(config);
+				string beamStrategy = get<4>(config);
+				ind beamWidth = get<5>(config);
+				bool varBeamWidth = get<6>(config);
+				num beamMultiplier = get<7>(config);
+				string quality = get<8>(config);
+				if (TOGGLE_ALL_TABLE_SIZES) {
+					for (ind r = 1; r <= maxRules; ++r) {
+						Lighthouse A(file, dataColumns, outcome);
+						ind time = A.callDSSDtable(executablePath, dataName, initialCandidates, r, depth, minCoverage, thresholds, beamStrategy, beamWidth, varBeamWidth, beamMultiplier, quality);
+						num KL = A.KLDivergence();
+						ofile << dataName << ",DSSD," << r << "," << time << "," << baseKL - KL << "," << KL << ",";
+						ofile << initialCandidates << "," << depth << "," << minCoverage << "," << thresholds << "," << beamStrategy << "," << beamWidth << "," << varBeamWidth << "," << beamMultiplier << "," << quality << "\n" << flush;
+						if (printTables) { A.printTable(); }
+					}
+				} else {
+					for (ind r : tablesizes) {
+						Lighthouse A(file, dataColumns, outcome);
+						ind time = A.callDSSDtable(executablePath, dataName, initialCandidates, r, depth, minCoverage, thresholds, beamStrategy, beamWidth, varBeamWidth, beamMultiplier, quality);
+						num KL = A.KLDivergence();
+						ofile << dataName << ",DSSD," << r << "," << time << "," << baseKL - KL << "," << KL << ",";
+						ofile<<initialCandidates<<","<<depth<<","<<minCoverage<<","<<thresholds<<","<<beamStrategy<<","<<beamWidth<<","<<varBeamWidth<<","<<beamMultiplier<<","<<quality<<"\n"<<flush;
+						if (printTables) { A.printTable(); }
+					}
+				}
+			}
+		}
