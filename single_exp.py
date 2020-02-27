@@ -66,7 +66,7 @@ avila400 = ExperimentDataset("avila2", avila_set, avila_yname, fragment_size=400
 # using probabilities, the fragment_limit specifies the maximum number of fragments (small datasets).
 
 exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["dssd"],
-                       name="kde_classRF_avila", new_samples=1000, fragment_limit=1, enable_probabilities=True)
+                       name="kde_classRF_avila", new_samples=10000, fragment_limit=1, enable_probabilities=True)
 
 
 res = exp_man.run_all()

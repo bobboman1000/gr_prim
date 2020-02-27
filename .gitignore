@@ -335,4 +335,5 @@ output/*.log
 
 resources/
 src/subgroup_discovery/dssd/
+setup/EMAworkbench/
 
