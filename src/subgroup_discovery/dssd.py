@@ -170,9 +170,9 @@ class DSSD:
 
     def launch_dssd(self, key):
         print(time.localtime())
-        dir = "src/subgroup_discovery/dssd/bin/"
-        command = "cd src/subgroup_discovery/dssd/bin/ && dssd.exe " + key + ".conf"
-        proc1 = os.system(command)
+        w_dir = "src/subgroup_discovery/dssd/bin/"
+        p = subprocess.Popen("dssd " + key + ".conf", cwd=w_dir, shell=True)
+        p.wait()
 
     def get_results(self, key: str) -> pd.DataFrame:
         result_folder_path = self.get_result_folder_name(key)
@@ -194,14 +194,15 @@ class DSSD:
     def get_stats_as_df(self, target_folder: str) -> pd.DataFrame:
         """Get all subgroups as pd.DataFrame from a target foler"""
         result_folders: List[str] = [f.path for f in os.scandir(self.dssd_root + "xps/dssd/" + target_folder)]
+        last_file = None
         for sub_f in result_folders:
             # TODO This could be a regex, might be problematic with unix/win paths
             # It really shouldn't exceed 100 stats-files - otherwise it probably won't terminate
             for i in range(1, 100):
                 if sub_f.find("stats") > 0:
-                    stats = pd.read_csv(sub_f, sep=";")
-            assert sub_f.find("stats101") < 0
-        stats = stats.drop_duplicates()
+                    last_file = sub_f
+        assert last_file is not None
+        stats = pd.read_csv(last_file, sep=";")
         return stats
 
     def cleanup(self, key: str):
@@ -242,7 +243,7 @@ def get_initial_df(lower_bound: Union[int, float], upper_bound : Union[int, floa
     return pd.DataFrame((lower, upper), columns=data.columns)
 
 
-def parse_rule(dssd_rule_string: str, initial_restriction: pd.DataFrame):
+def parse_rule(dssd_rule_string: str, initial_restriction: pd.DataFrame) -> pd.DataFrame:
     conditions = dssd_rule_string.split(sep=" && ")
     restriction = initial_restriction.copy()
     for cond in conditions:
@@ -250,4 +251,4 @@ def parse_rule(dssd_rule_string: str, initial_restriction: pd.DataFrame):
         attribute, operator, value = cond_parts[0], cond_parts[1], cond_parts[2]  # Attr > Value
         operator = 1 if operator == "<" else 0
         restriction.loc[operator, attribute] = value
-    return restriction
+    return restriction.astype(dtype='float')
