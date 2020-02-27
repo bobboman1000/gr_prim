@@ -12,10 +12,6 @@ from src.generators.Munge_R import MUNGE
 from src.metamodels.NNProbababilityEstimation import *
 from src.subgroup_discovery.PRIM import PRIM
 
-enable_probabilities = True
-generator_samples = 50000
-fragment_limit = 30
-
 generators = {
     "gaussian-mixtures": mix.GaussianMixture(),
     "kde": KernelDensityBW(bw_method_scott),

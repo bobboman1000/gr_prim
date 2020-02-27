@@ -13,10 +13,6 @@ from src.generators.KernelDensityCV import KernelDensityBW, bw_method_scott
 from src.metamodels.NNProbababilityEstimation import *
 from src.subgroup_discovery.PRIM import PRIM
 
-enable_probabilities = True
-generator_samples = 50000
-fragment_limit = 30
-
 generators = {
     "kde": KernelDensityBW(bw_method_scott)
 }
@@ -30,11 +26,11 @@ metamodels = {
     "classRF": cv_classRF,
 }
 
-conf = Config("dssd")
+
 
 discovery_algs = {
     #"prim": PRIM(threshold=1, mass_min=20)
     #"best-interval": BestInterval(),
     #"best-interval-b5": BestInterval(beam_size=5),
-    "dssd": DSSD(conf)
+    "dssd": DSSD("dssd")
 }

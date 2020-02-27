@@ -10,10 +10,6 @@ from src.generators.RandomSamples import *
 from src.metamodels.NNProbababilityEstimation import *
 from src.subgroup_discovery.PRIM import PRIM
 
-enable_probabilities = True
-generator_samples = 50000
-fragment_limit = 30
-
 generators = {
     "random-uniform": UniformRandomSamplesGenerator(),
     "random-normal": NormalRandomSampleGenerator(),
