@@ -3,4 +3,4 @@ pip install -e EMAworkbench
 
 pip install -r ../requirements.txt
 
-R install_munge.R
+R install.R
