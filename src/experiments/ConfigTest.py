@@ -32,5 +32,6 @@ metamodels = {
 
 discovery_algs = {
     #"prim": PRIM(threshold=1, mass_min=20)
-    "best-interval": BestInterval()
+    "best-interval": BestInterval(),
+    "best-interval-b5": BestInterval(beam_size=5)
 }

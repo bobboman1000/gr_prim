@@ -43,8 +43,8 @@ print("Dataset loaded")
 
 # Create ExperimentDataset and fragment size. Scales to [0,1] targets by default - if set scaler to None.
 
-X = gamma_telescope.get_subset_compound(0).complement
-y = gamma_telescope.get_subset_compound(0).complement_y
+X = gamma_telescope.get_subset_compound(0).fragment
+y = gamma_telescope.get_subset_compound(0).fragment_y
 
 print("Start sdmap")
 time = t.time()

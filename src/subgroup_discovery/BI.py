@@ -18,13 +18,13 @@ base = importr('base')
 
 class BestInterval:
 
-    def __init__(self):
-        pass
+    def __init__(self, beam_size=1):
+        self.beam_size = beam_size
 
     def find(self, X: pd.DataFrame, y: np.ndarray, regression=True):
         sdmap = SignatureTranslatedAnonymousPackage(self.get_rstring(), "sdmap")
         X_cols = X.columns
-        result = sdmap.beam_refine(X, y)
+        result = sdmap.beam_refine(X, y, beam_size=self.beam_size)
         result = pd.DataFrame(result, columns=X_cols)
         return [self.inital_restrictions(X), result]
 
