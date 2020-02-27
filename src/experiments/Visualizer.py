@@ -9,7 +9,7 @@ import seaborn as sns
 from matplotlib import rcParams
 from sklearn.metrics import auc
 
-from src.experiments.Util import ExperimentManager
+from src.experiments.Util import ExperimentManager, ensure_folder_in_root
 from src.experiments.model.Experiment import Experiment
 from src.experiments.model.FragmentResult import BoxResult
 from src.generators.DummyGenerator import DummyGenerator
@@ -76,6 +76,7 @@ class Visualizer:
         plt.rcParams.update({'font.size': 14})
         rcParams["savefig.dpi"] = 100
         rcParams["figure.dpi"] = 100
+        ensure_folder_in_root("result_grafics")
         if self.box_width > self.offset_in_group:
             raise Warning("box_width larger than offset: Boxplots will overlap")
 
@@ -112,7 +113,7 @@ class Visualizer:
             plt.xticks(range(0, (model_no[0] + self.offset_of_groups) * model_no[1], model_no[0] + self.offset_of_groups), ticks, rotation=45)
             plt.xlim(- (model_no[0] + self.offset_of_groups), model_no[1] * (model_no[0] + self.offset_of_groups))
         self._add_legend(sorted_experiments, bps, mode, abbreviate=abbreviate)
-        plt.savefig("result_grafix/" + q_name + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
+        plt.savefig("result_grafics/" + q_name + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
         plt.show()
 
     def boxplot_all_datasets(self, metric, mode: int, vert=True, abbreviate=False, selected_methods=None, display_range=None):
@@ -161,7 +162,7 @@ class Visualizer:
             plt.xlim(- (model_no[0] + self.offset_of_groups), model_no[1] * (model_no[0] + self.offset_of_groups))
         if legend:
             self._add_legend(sorted_experiments, bps, mode, abbreviate=abbreviate)
-        plt.savefig("result_grafix/" + "All" + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
+        plt.savefig("result_grafics/" + "All" + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
         plt.show()
 
     def csv_datasets_as_one(self, metric, mode: int = 1, vert=True, abbreviate=False, selected_methods=None, legend=True, title=None):
@@ -195,7 +196,7 @@ class Visualizer:
             plt.xlim(- (model_no[0] + self.offset_of_groups), model_no[1] * (model_no[0] + self.offset_of_groups))
         if legend:
             self._add_legend(sorted_experiments, bps, mode, abbreviate=abbreviate)
-        plt.savefig("result_grafix/" + "All" + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
+        plt.savefig("result_grafics/" + "All" + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
         plt.show()
 
     def boxplot_selected_methods(self, metric, selected_methods: List[str], name: str, colors=None, title=None, abbreviate=False, vert=True, legend=True,
@@ -228,7 +229,7 @@ class Visualizer:
             self._add_legend(None, None, None)
         plt.ylabel(self.get_metric_name(metric))
         plt.xlabel("Number of points for fragment size |d|")
-        plt.savefig("result_grafix/" + name + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
+        plt.savefig("result_grafics/" + name + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
         plt.show()
 
     def points_needed_ratio(self, metric, selected_methods: List[str], steps_range, median=False, epsilon=0.05):
@@ -310,10 +311,10 @@ class Visualizer:
         plt.subplots(figsize=(12,6))
         table = table.drop(columns=["dummy"]).astype(float)
         if filename is not None:
-            table.to_csv("result_grafix/" + filename)
+            table.to_csv("result_grafics/" + filename)
         sns.heatmap(table, cmap="Blues", annot=True, fmt='.4g')
         plt.title(self.get_metric_name(metric))
-        plt.savefig("result_grafix/heatmap.pdf", bbox_inches='tight')
+        plt.savefig("result_grafics/heatmap.pdf", bbox_inches='tight')
         plt.show()
 
     def export_to_csv(self, metric, abbreviate=True, filename=None, median=False):
@@ -337,7 +338,7 @@ class Visualizer:
         table /= len(qs)
         if abbreviate:
             table.rename(columns=abbreviations_dict, index=abbreviations_dict, inplace=True)
-        table.to_csv("result_grafix/" + filename)
+        table.to_csv("result_grafics/" + filename)
 
     def _map_to_metric_value(self, qs, selected_methods, metric, mode):
         new_qs = qs
@@ -429,7 +430,7 @@ class Visualizer:
             plt.xlim(- (model_no[0] + self.offset_of_groups), model_no[1] * (model_no[0] + self.offset_of_groups))
         if legend:
             self._add_legend(qs[q_name], bps, 1, show_both_methods=True, abbreviate=True, above=legend_above)
-        plt.savefig("result_grafix/" + name + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
+        plt.savefig("result_grafics/" + name + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
         plt.show()
 
     def _abbreviate(self, names: List[str]) -> List[str]:

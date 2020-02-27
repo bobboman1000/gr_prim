@@ -136,10 +136,11 @@ class DSSD:
         if exclude_columns is None:
             exclude_columns = []
         data_dir: str = self.data_file + key + "/"
-        os.mkdir(data_dir)
+        if not os.path.exists(data_dir):
+            os.mkdir(data_dir)
+
         data = X.copy()
         data.insert(data.shape[1], y_name, y, allow_duplicates=True)
-
         arff_dict = as_arff_dict(X, y)
         # TODO change mode to "x"
         # arff.dumps writes uppercase types, but dssd requires the types to be lowercase
