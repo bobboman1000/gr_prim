@@ -8,7 +8,7 @@ from src.generators.DummyGenerator import DummyGenerator
 from src.metamodels.DummyMetamodel import DummyMetaModel
 import time as t
 
-import src.subgroup_discovery.dssd.bin.dssd as dssd
+import src.subgroup_discovery.dssd as dssd
 
 exp_man = u.ExperimentManager()
 
@@ -56,8 +56,8 @@ y = gamma_telescope.get_subset_compound(0).fragment_y
 
 print("Start sdmap")
 time = t.time()
-conf = dssd.Config(dsName="gamma_telescope", maxDepth=5)
-ds = dssd.DSSD(conf, 1)
+conf = dssd.Config(dsName="gamma_telescope", maxDepth=1)
+ds = dssd.DSSD(conf, 5)
 
 rf = RandomForestClassifier()
 rf.fit(X,y)

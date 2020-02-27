@@ -6,7 +6,6 @@ import pandas as pd
 import numpy as np
 import subprocess
 import os
-from arff2pandas import a2p
 import re
 import shutil
 import arff
