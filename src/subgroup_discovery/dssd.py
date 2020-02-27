@@ -110,11 +110,12 @@ replace_dict = {
 
 class DSSD:
 
-    def __init__(self, config: Config, top_k: int = 1):
-        self.config = config
+    def __init__(self, dsName, number_of_rules: int = 1, maxTime = 0, takeItEasy = 0, maxDepth = 5, topK = 10000,
+                 minCoverage = 10, floatNumSplits = 5, beamWidth = 100):
+        self.config = Config(dsName, maxTime, takeItEasy, maxDepth, topK, minCoverage, floatNumSplits, beamWidth)
         self.dssd_root = "src/subgroup_discovery/dssd/"
         self.data_file = self.dssd_root + "data/datasets/"
-        self.top_k = top_k
+        self.number_of_rules = number_of_rules
     
     def find(self, X: pd.DataFrame, y: np.ndarray, regression=True):
         key = self.config.dsName
@@ -122,7 +123,7 @@ class DSSD:
         self.write_dataset_to_disk(key=key, X=X, y=y, y_name="y")
         self.launch_dssd(key=key)
         df = self.get_results(key=key)
-        df = df.nlargest(self.top_k, columns=["quality"])
+        df = df.nlargest(self.number_of_rules, columns=["quality"])
         initial_restriction = get_initial_df(0, 1, X)
         box_lims = [initial_restriction]
         for index, row in df.iterrows():
