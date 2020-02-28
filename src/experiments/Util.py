@@ -1,5 +1,6 @@
 import copy
 import logging
+import os
 import pickle
 import traceback
 from itertools import groupby
@@ -19,6 +20,7 @@ class ExperimentManager:
         self.experiments = []
         self.experiment_datasets = []
 
+        ensure_folder_in_root("output")
         logging.basicConfig(filename='output/' + out, filemode='w', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logger = logging.getLogger(self.prod_logger)
         logger.setLevel('INFO')
@@ -234,6 +236,7 @@ class ExperimentManager:
             f = "results"
         else:
             f = filename
+        ensure_folder_in_root("output")
         with open('output/' + f, 'rb') as infile:
             new_exps = pickle.load(infile)
         return new_exps
@@ -243,6 +246,7 @@ class ExperimentManager:
             f = "results"
         else:
             f = filename
+        ensure_folder_in_root("output")
         with open('output/' + f, 'wb') as outfile:
             pickle.dump(self.experiments, outfile)
 
@@ -321,3 +325,7 @@ def shuffle_to_head(target, t_list: List, index=False):
         o = t_list.pop(target)
         t_list.insert(0, o)
 
+
+def ensure_folder_in_root(name: str):
+    if not os.path.exists(name):
+        os.mkdir(name)
