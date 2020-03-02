@@ -95,7 +95,7 @@ for f_size in [300, 600, 1200, 2400]:
     exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), discovery_algs["prim"], "dummy_dummy_" + d.name, new_samples=0,
                            enable_probabilities=True, fragment_limit=20)
 
-exp_man.run_all_parallel(8)
+exp_man.run_all_parallel(24)
 exp_man.export_experiments("avila_steps")
 
 
