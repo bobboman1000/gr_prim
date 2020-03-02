@@ -79,15 +79,23 @@ clean2 = clean2.drop(columns=["molecule_name", "conformation_name"])
 # nomapping
 
 
+avila = pd.read_csv("resources/data/avila/avila.txt", header=0, names=generate_names(10))
+avila_yname = "y"
+avila = avila.dropna()
+avila = map_target(avila, avila_yname, "A")
 
-for f_size in range(100, 2500, 100):
-    d = ExperimentDataset("clean2" + "_" + str(f_size), clean2, clean2_yname, fragment_size=f_size)
+
+
+for f_size in [300, 600, 1200, 2400]:
+    d = ExperimentDataset("avila" + "_" + str(f_size), avila, avila_yname, fragment_size=f_size)
     exp_man.add_experiment(d, generators["kde"], metamodels["classRF"], discovery_algs["prim"], "kde_classRF_" + d.name, new_samples=50000,
-                           enable_probabilities=True, fragment_limit=30)
+                           enable_probabilities=True, fragment_limit=20)
+    exp_man.add_experiment(d, DummyGenerator(), metamodels["classRF"], discovery_algs["prim"], "dummy_classRF_" + d.name, new_samples=0,
+                           enable_probabilities=True, fragment_limit=20)
     exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), discovery_algs["prim"], "dummy_dummy_" + d.name, new_samples=0,
-                           enable_probabilities=True, fragment_limit=30)
-exp_man.run_thread_per_dataset()
-exp_man.export_experiments("clean2_steps")
-exp_man.reset_experiments()
+                           enable_probabilities=True, fragment_limit=20)
+
+exp_man.run_all_parallel(8)
+exp_man.export_experiments("avila_steps")
 
 
