@@ -5,6 +5,7 @@ from typing import List
 
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 
 from src.experiments.model.ExperimentDataset import ExperimentDataset
 from src.experiments.model.ExperimentSubsetCompound import ExperimentSubsetCompound
@@ -32,7 +33,7 @@ class Experiment:
     executed: bool = False
 
     def __init__(self, ex_data: ExperimentDataset, generator, metamodel, discovery_alg, name, new_sample_size: int,
-                 enable_probabilities=True, fragment_limit: int = None):
+                 enable_probabilities=True, fragment_limit: int = None, scale=True):
         self.ex_data: ExperimentDataset = ex_data
         self.generator = generator
         self.metamodel = metamodel
@@ -44,6 +45,7 @@ class Experiment:
         self.debug_logger = logging.getLogger('EXEC-INFO')
         self.failed = 0
         self.fragment_limit = fragment_limit
+        self.do_scale = scale
 
     def run(self):
         if self.fragment_limit is not None and len(self.ex_data.fragments) > self.fragment_limit:
@@ -57,30 +59,31 @@ class Experiment:
     def run_fragments(self, indices):
         results: List[FragmentResult] = []
         for idx in indices:
-            box, execution_times = self.run_fragment(idx)
+            box, g_data, execution_times = self.run_fragment(idx)
             if box is not None:
-                results.append(self.build_result(box, idx, execution_times))
+                results.append(self.build_result(box, g_data, idx, execution_times))
             else:
                 self.failed += 1
         return results
 
     def run_fragment(self, idx):
         subset_compound: ExperimentSubsetCompound = self.ex_data.get_subset_compound(idx)
-        box, execution_times = self.exec(subset_compound.fragment, subset_compound.fragment_y, idx)
+        box, g_data, execution_times = self.exec(subset_compound.fragment, subset_compound.fragment_y, subset_compound.y_name)
         self.debug_logger.debug(self.name + " " + str(idx) + " " + str(execution_times))
-        return box, execution_times
+        return box, g_data, execution_times
 
-    def build_result(self, box, idx, execution_times):
+    def build_result(self, box, g_data, idx, execution_times):
         start = time.time()
-        fragment_result = FragmentResult(box, self.ex_data, idx, execution_times=execution_times)
+        fragment_result = FragmentResult(restrictions=box, experiment_dataset=self.ex_data, fragment_idx=idx, training_data=g_data,
+                                         execution_times=execution_times)
         self.debug_logger.debug("fragment_eval " + str(time.time() - start))
         return fragment_result
 
     def run_fragments_to_q(self, indices, q):
         for idx in indices:
-            box, execution_times = self.run_fragment(idx)
+            box, g_data, execution_times = self.run_fragment(idx)
             if box is not None:
-                q.put(self.build_result(box, idx, execution_times))
+                q.put(self.build_result(box, g_data, idx, execution_times))
             else:
                 self.failed += 1
 
@@ -100,18 +103,22 @@ class Experiment:
             p.join()
             p.close()
 
-    def _chunks(self, l, n):
+    def _chunks(self, long_list, chunk_size):
         """Yield successive n-sized chunks from l."""
-        return [l[i::n] for i in range(n)]
+        return [long_list[i::chunk_size] for i in range(chunk_size)]
 
     def delete_models(self):
         self.generator = None
         self.discovery_alg = None
         self.metamodel = None
 
-    def exec(self, x_training: pd.DataFrame, y_training: pd.DataFrame, idx):
+    def exec(self, x_training: pd.DataFrame, y_training: pd.DataFrame, y_name: str):
         execution_times = {}
         start = time.time()
+        scaler = MinMaxScaler()
+        if self.do_scale:
+            x_training, scaler = self.scale(x_training, scaler, inverse=False)
+
         fitted_generator = self.generator.fit(x_training)
         execution_times[g_fit] = time.time() - start
 
@@ -137,10 +144,25 @@ class Experiment:
         execution_times[m_pred] = time.time() - start
 
         start = time.time()
+
+        if self.do_scale:
+            g_data, scaler = self.scale(g_data, scaler, inverse=True)
+
         result = self.discovery_alg.find(g_data, g_data_y, regression=self.enable_probabilities)
         execution_times[sub] = time.time() - start
+        g_data.insert(loc=0, column=y_name, value=g_data_y)
 
-        return result, execution_times
+        return result, g_data, execution_times
+
+    def scale(self, x: pd.DataFrame, scaler, inverse: bool = False):
+        fitted_scaler = scaler.fit(x)
+        if not inverse:
+            scaled_data = fitted_scaler.transform(x)
+        else:
+            scaled_data = fitted_scaler.inverse_transform(x)
+
+        x = pd.DataFrame(scaled_data, columns=x.columns)
+        return x, fitted_scaler
 
     def _get_method_name_by_idx(self, idx: int):
         return self.name.split("_")[idx]
@@ -150,3 +172,4 @@ class Experiment:
 
     def get_metamodel_name(self):
         return self._get_method_name_by_idx(1)
+

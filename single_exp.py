@@ -1,7 +1,6 @@
-import src.experiments.ConfigTest as c
-import src.experiments.BaselineConfig as bc
+import src.experiments.config.ConfigTest as c
 import pandas as pd
-import src.experiments.Util as u
+import src.experiments.ExperimentManager as u
 from src.experiments.model.ExperimentDataset import ExperimentDataset
 from src.generators.DummyGenerator import DummyGenerator
 from src.metamodels.DummyMetamodel import DummyMetaModel
@@ -25,8 +24,6 @@ def generate_names(number):
     x_names = list(map(lambda num: "X" + str(num), numbers))
     x_names.append("y")
     return x_names
-
-
 
 
 sylva = pd.read_csv("resources/data/sylva_prior.csv", header=0)
@@ -64,19 +61,11 @@ avila800 = ExperimentDataset("avil800", avila, avila_yname, fragment_size=800)
 avila1600 = ExperimentDataset("avila1600", avila, avila_yname, fragment_size=1600)
 avila2400 = ExperimentDataset("avila2400", avila, avila_yname, fragment_size=2400)
 
-datasets = [avila200]
 
-sizes = [200]
+exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],
+                       name="kde_classRF-prob_" + "avila200", new_samples=10000, fragment_limit=1, enable_probabilities=True)
 
-for d in datasets:
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["dssd"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["dssd"], name="kde_classRF_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
-    exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["dssd"], name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["dssd"], name="dummy_dummy_avila400" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
-
-# res = exp_man.run_all_parallel(4)
 res = exp_man.run_all()
-exp_man.export_experiments("prelim_dssd")
 
 
 # The configuration files (src/experiments/XXXXConfig.py) contain configured generators and metamodels.

@@ -2,10 +2,8 @@ import warnings
 
 from sklearn.exceptions import ConvergenceWarning
 
-import src.experiments.Util as u
-from src.experiments.Config import generators, metamodels, discovery_algs
-from src.experiments.BaselineConfig import generators as bgenerator
-import gc
+import src.experiments.ExperimentManager as u
+from src.experiments.config.Config import generators, metamodels, discovery_algs
 import pandas as pd
 
 from src.experiments.model.ExperimentDataset import ExperimentDataset

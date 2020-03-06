@@ -2,9 +2,9 @@ import warnings
 
 from sklearn.exceptions import ConvergenceWarning
 
-import src.experiments.Util as u
-from src.experiments.DatasetsConfig import large_datasets
-from src.experiments.Config import metamodels, discovery_algs, fragment_limit
+import src.experiments.ExperimentManager as u
+from src.experiments.config.DatasetsConfig import large_datasets
+from src.experiments.config.Config import metamodels, discovery_algs, fragment_limit
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=ConvergenceWarning)

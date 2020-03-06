@@ -1,11 +1,8 @@
 from sklearn.ensemble import RandomForestClassifier
 
-import src.experiments.BaselineConfig as bc
 import pandas as pd
-import src.experiments.Util as u
+import src.experiments.ExperimentManager as u
 from src.experiments.model.ExperimentDataset import ExperimentDataset
-from src.generators.DummyGenerator import DummyGenerator
-from src.metamodels.DummyMetamodel import DummyMetaModel
 import time as t
 
 import src.subgroup_discovery.dssd as dssd
