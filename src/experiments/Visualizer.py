@@ -9,7 +9,7 @@ import seaborn as sns
 from matplotlib import rcParams
 from sklearn.metrics import auc
 
-from src.experiments.Util import ExperimentManager, ensure_folder_in_root
+from src.experiments.ExperimentManager import ExperimentManager, ensure_folder_in_root
 from src.experiments.model.Experiment import Experiment
 from src.experiments.model.FragmentResult import BoxResult
 from src.generators.DummyGenerator import DummyGenerator
@@ -277,15 +277,22 @@ class Visualizer:
         a_diff, b_diff = abs(value - a), abs(value - b)
         return 0 if a_diff > b_diff else 1
 
-    def plot_trajectory_from_fragment(self, fragment_result):
+    def _trajectory_from_fragment(self, fragment_result, color, linestyle, alpha):
         cov = list(map(lambda kpis: kpis[coverage_key], fragment_result.kpis))
         density = list(map(lambda kpis: kpis[density_key], fragment_result.kpis))
-        plt.plot(cov, density, "b.")
+        plt.plot(cov, density, color=color, linestyle=linestyle, alpha=alpha)
         plt.xlim(0, 1)
         plt.ylim(0, 1)
         plt.xlabel("coverage")
         plt.ylabel("denisty")
+
+    def plot_trajectory_from_fragment(self, fragment_result, color, linestyle, alpha):
+        self._trajectory_from_fragment(fragment_result, color, linestyle, alpha)
         plt.show()
+
+    def plot_trajectories_from_experiment(self, experiment, color, linestyle, alpha):
+        for f_res in experiment.result:
+            self._trajectory_from_fragment(f_res, color, linestyle, alpha)
 
     def export_avg_metrics_to_csv(self, metric, abbreviate=True, filename=None, median=False, relative=True):
         qs = self.exp_man.get_grouped_by(1)
@@ -556,7 +563,7 @@ class Visualizer:
     def highest_wracc_metric(self, experiment: Experiment) -> List[float]:
         max_kpi = []
         for f_res in experiment.result:
-            max_kpi.append(f_res.highest_wracc[1])
+            max_kpi.append(f_res.highest_wracc_box[1])
         return max_kpi
 
     def highest_f2_metric(self, experiment: Experiment) -> List[float]:
@@ -565,34 +572,34 @@ class Visualizer:
     def restricted_dims_on_highest_metric(self, experiment: Experiment):
         max_kpi = []
         for f_res in experiment.result:
-            max_kpi.append(len(f_res.highest_box[0]) / f_res.initial_restrictions.shape[1])
+            max_kpi.append(len(f_res.highest_mean_box[0]) / f_res.initial_restrictions_train.shape[1])
         return max_kpi
 
     def restricted_dims_on_highestf2_metric(self, experiment: Experiment):
         max_kpi = []
         for f_res in experiment.result:
-            max_kpi.append(len(f_res.highest_f2[0]) / f_res.initial_restrictions.shape[1])
+            max_kpi.append(len(f_res.highest_f2_box[0]) / f_res.initial_restrictions_train.shape[1])
         return max_kpi
 
     def restricted_dims_on_highestf1_metric(self, experiment: Experiment):
         max_kpi = []
         for f_res in experiment.result:
-            max_kpi.append(len(f_res.highest_f1[0]) / f_res.initial_restrictions.shape[1])
+            max_kpi.append(len(f_res.highest_f1_box[0]) / f_res.initial_restrictions_train.shape[1])
         return max_kpi
 
     def consistency_v_highest_metric(self, experiment: Experiment) -> List[float]:
         consistency = []
-        full_res_0: pd.DataFrame = experiment.result[0].to_restriction(experiment.result[0].highest_box[0])
+        full_res_0: pd.DataFrame = experiment.result[0].to_restriction(experiment.result[0].highest_mean_box[0])
         for f_res in experiment.result[1:]:
-            full_res_i = f_res.to_restriction(f_res.highest_box[0])
+            full_res_i = f_res.to_restriction(f_res.highest_mean_box[0])
             consistency.append(self._compute_overlap(full_res_0, full_res_i))
         return consistency
 
     def consistency_v_highestf1_metric(self, experiment: Experiment) -> List[float]:
         consistency = []
-        full_res_0: pd.DataFrame = experiment.result[0].to_restriction(experiment.result[0].highest_f1[0])
+        full_res_0: pd.DataFrame = experiment.result[0].to_restriction(experiment.result[0].highest_f1_box[0])
         for f_res in experiment.result[1:]:
-            full_res_i = f_res.to_restriction(f_res.highest_f1[0])
+            full_res_i = f_res.to_restriction(f_res.highest_f1_box[0])
             consistency.append(self._compute_overlap(full_res_0, full_res_i))
         return consistency
 
@@ -620,10 +627,10 @@ class Visualizer:
     def consistency_d_highest_metric(self, experiment: Experiment) -> List[float]:
         # TODO This method goes way too deep, add methods in fragment result!
         consistency = []
-        res_0 = pd.DataFrame(experiment.result[0].highest_f1[0])
+        res_0 = pd.DataFrame(experiment.result[0].highest_f1_box[0])
         b_0 = BoxResult(experiment.result[0].experiment_dataset.get_subset_compound(0).get_complete_complement(), res_0)
         for i in range(1, len(experiment.result)):
-            res_i = pd.DataFrame(experiment.result[i].highest_f1[0])
+            res_i = pd.DataFrame(experiment.result[i].highest_f1_box[0])
             b_i = BoxResult(experiment.result[i].experiment_dataset.get_subset_compound(i).get_complete_complement(), res_i)
             v_u = sum(b_0.in_box_idxs | b_i.in_box_idxs)
             v_i = sum(b_0.in_box_idxs & b_i.in_box_idxs)
@@ -633,10 +640,10 @@ class Visualizer:
     def consistency_d_leftmost_metric(self, experiment: Experiment) -> List[float]:
         # TODO This method goes way too deep, add methods in fragment result!
         consistency = []
-        res_0 = pd.DataFrame(experiment.result[0].left_most_box[0])
+        res_0 = pd.DataFrame(experiment.result[0].min_mass_box[0])
         b_0 = BoxResult(experiment.result[0].experiment_dataset.get_subset_compound(0).get_complete_complement(), res_0)
         for i in range(1, len(experiment.result)):
-            res_i = pd.DataFrame(experiment.result[i].left_most_box[0])
+            res_i = pd.DataFrame(experiment.result[i].min_mass_box[0])
             b_i = BoxResult(experiment.result[i].experiment_dataset.get_subset_compound(i).get_complete_complement(), res_i)
             v_u = b_0.in_box_idxs | b_i.in_box_idxs
             v_i = b_0.in_box_idxs & b_i.in_box_idxs

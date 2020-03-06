@@ -264,7 +264,7 @@ class ExperimentManager:
                 self.add_experiment(dataset, DummyGenerator(), DummyMetaModel(), discovery_algs[discovery_alg], name="dummy_dummy", new_samples=0,
                                     enable_probabilities=False, fragment_limit=fragment_limit)
 
-    def get_technique_dict(self):
+    def get_method_dict(self):
         """
         Get a dictionary of all methods indexed by their name
         :return: Dictionary (string, object)
