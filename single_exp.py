@@ -61,11 +61,37 @@ avila800 = ExperimentDataset("avil800", avila, avila_yname, fragment_size=800)
 avila1600 = ExperimentDataset("avila1600", avila, avila_yname, fragment_size=1600)
 avila2400 = ExperimentDataset("avila2400", avila, avila_yname, fragment_size=2400)
 
+SAAC2 = pd.read_csv("resources/data/SAAC2.csv", na_values=['?'])
+SAAC2_yname = "class"
+SAAC2 = SAAC2.dropna()
+SAAC2 = map_target(SAAC2, SAAC2_yname, 2)
+SAAC2200 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=200)
+SAAC2400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=400)
+SAAC2800 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=800)
+SAAC21600 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=1600)
+SAAC22400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=2400)
 
-exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],
-                       name="kde_classRF-prob_" + "avila200", new_samples=10000, fragment_limit=1, enable_probabilities=True)
+electricity = pd.read_csv("resources/data/electricity-normalized.csv")
+electricity_yname = "class"
+electricity = electricity.dropna()
+map_target(electricity, electricity_yname, "UP")
+electricity200 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=200)
+electricity400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=400)
+electricity800 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=800)
+electricity1600 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=1600)
+electricity2400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=2400)
 
-res = exp_man.run_all()
+datasets = [SAAC2200, SAAC2400, SAAC2800, SAAC21600, SAAC22400] + [electricity200, electricity400, electricity800, electricity1600, electricity2400]
+
+for d in datasets:
+    exp_man.add_experiment(avila200, c.generators["dummy"], c.metamodels["dummy"], c.discovery_algs["best-interval"], name="dummy_dummy" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
+    exp_man.add_experiment(avila200, c.generators["dummy"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
+    exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
+    exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
+    exp_man.add_experiment(avila200, c.generators["dummy"], c.metamodels["dummy"], c.discovery_algs["best-interval-b5"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
+
+
+res = exp_man.run_all_parallel(32)
 
 
 # The configuration files (src/experiments/XXXXConfig.py) contain configured generators and metamodels.
