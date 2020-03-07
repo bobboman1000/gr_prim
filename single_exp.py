@@ -92,6 +92,7 @@ for d in datasets:
 
 
 res = exp_man.run_all_parallel(32)
+exp_man.export_experiments()
 
 
 # The configuration files (src/experiments/XXXXConfig.py) contain configured generators and metamodels.
