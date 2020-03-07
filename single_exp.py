@@ -77,22 +77,16 @@ electricity = electricity.dropna()
 map_target(electricity, electricity_yname, "UP")
 electricity200 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=200)
 electricity400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=400)
-electricity800 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=800)
-electricity1600 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=1600)
-electricity2400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=2400)
-
-datasets = [SAAC2200, SAAC2400, SAAC2800, SAAC21600, SAAC22400] + [electricity200, electricity400, electricity800, electricity1600, electricity2400]
-
-for d in datasets:
-    exp_man.add_experiment(avila200, c.generators["dummy"], c.metamodels["dummy"], c.discovery_algs["best-interval"], name="dummy_dummy" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(avila200, c.generators["dummy"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
-    exp_man.add_experiment(avila200, c.generators["dummy"], c.metamodels["dummy"], c.discovery_algs["best-interval-b5"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
+electricity00 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=800)
+electricity200 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=1600)
+electricity200 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=2400)
 
 
-res = exp_man.run_all_parallel(32)
-exp_man.export_experiments()
+
+exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],
+                       name="kde_classRF-prob_" + "avila200", new_samples=10000, fragment_limit=1, enable_probabilities=True)
+
+res = exp_man.run_all()
 
 
 # The configuration files (src/experiments/XXXXConfig.py) contain configured generators and metamodels.

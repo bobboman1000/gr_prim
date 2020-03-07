@@ -7,7 +7,6 @@ from src.metamodels.DummyMetamodel import DummyMetaModel
 
 exp_man = u.ExperimentManager()
 
-
 def map_target(data: pd.DataFrame, y_col_name: str, to_ones):
     data.loc[:, y_col_name] = data.loc[:, y_col_name].map(lambda e: 1 if e == to_ones else 0)
     return data
@@ -62,16 +61,35 @@ avila800 = ExperimentDataset("avil800", avila, avila_yname, fragment_size=800)
 avila1600 = ExperimentDataset("avila1600", avila, avila_yname, fragment_size=1600)
 avila2400 = ExperimentDataset("avila2400", avila, avila_yname, fragment_size=2400)
 
-datasets = [avila200, avila400, avila800, avila1600, avila2400] + [sylva200, sylva400, sylva800, sylva1600, sylva2400]
+SAAC2 = pd.read_csv("resources/data/SAAC2.csv", na_values=['?'])
+SAAC2_yname = "class"
+SAAC2 = SAAC2.dropna()
+SAAC2 = map_target(SAAC2, SAAC2_yname, 2)
+SAAC2200 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=200)
+SAAC2400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=400)
+SAAC2800 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=800)
+SAAC21600 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=1600)
+SAAC22400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=2400)
 
-sizes = [200, 400, 800, 1600, 2400]
+electricity = pd.read_csv("resources/data/electricity-normalized.csv")
+electricity_yname = "class"
+electricity = electricity.dropna()
+map_target(electricity, electricity_yname, "UP")
+electricity200 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=200)
+electricity400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=400)
+electricity800 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=800)
+electricity1600 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=1600)
+electricity2400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=2400)
+
+datasets = [SAAC2200, SAAC2400, SAAC2800, SAAC21600, SAAC22400] + [electricity200, electricity400, electricity800, electricity1600, electricity2400]
 
 for d in datasets:
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
-    exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["best-interval"], name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval-b5"], name="dummy_dummy-b5_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
+    exp_man.add_experiment(avila200, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
+    exp_man.add_experiment(avila200, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["best-interval"], name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
+    exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
+    exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
+    exp_man.add_experiment(avila200, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval-b5"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
+
 
 res = exp_man.run_all_parallel(32)
 exp_man.export_experiments("prelim_refine")
