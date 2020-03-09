@@ -29,16 +29,17 @@ def get_initial_restrictions(data: pd.DataFrame) -> pd.DataFrame:
 
 
 class BoxResult:
-    def __init__(self, data: pd.DataFrame, restrictions: pd.DataFrame = None):
+    def __init__(self, data: pd.DataFrame, restrictions: pd.DataFrame = None, y_name="y"):
         if restrictions is not None:
             in_box_idxs = self.items_idx_in_box(data[restrictions.columns], restrictions)
         else:
             in_box_idxs = data.index
+        self.y_name = y_name
         self.stats = self._compute_stats(data, in_box_idxs)
 
     def _compute_stats(self, data, in_box_idxs):
-        y_in_box: pd.Series = data.loc[in_box_idxs, RESULT_Y_KEY]
-        y: pd.Series = data[RESULT_Y_KEY]
+        y_in_box: pd.Series = data.loc[in_box_idxs, self.y_name]
+        y: pd.Series = data[self.y_name]
         return {
             "mean_in_box": y_in_box.mean(),
             "mean_out_box": y.mean(),
@@ -115,9 +116,9 @@ class FragmentResult:
         self.initial_restrictions_test = get_initial_restrictions(experiment_dataset.get_subset_compound(fragment_idx).complement)
 
         self.boxes = list(map(lambda restriction: restriction.to_dict(orient='list'), restrictions))
-        self.box_results_train = self.get_box_results(training_data, restrictions, experiment_dataset.fragment_size)
+        self.box_results_train = self.get_box_results(training_data, restrictions, experiment_dataset.fragment_size, experiment_dataset.y_name)
         test_data = experiment_dataset.get_subset_compound(fragment_idx).get_complete_complement()
-        self.box_results_test = self.get_box_results(test_data, restrictions, experiment_dataset.fragment_size)
+        self.box_results_test = self.get_box_results(test_data, restrictions, experiment_dataset.fragment_size, experiment_dataset.y_name)
 
         self.leftmost_box_idx = -1
         self.highest_mean_idx = int(np.argmax(list(map(lambda b: b.get_box_mean(), self.box_results_train))))
@@ -139,11 +140,11 @@ class FragmentResult:
             new_restriction.loc[1, key] = box[key][1]
         return new_restriction
 
-    def get_box_results(self, data: pd.DataFrame, restrictions: List[pd.DataFrame], f_size: int):
+    def get_box_results(self, data: pd.DataFrame, restrictions: List[pd.DataFrame], f_size: int, y_name: str):
         box_set = []
         for idx in range(len(restrictions)):
             restricted_dims = d_u._determine_restricted_dims(restrictions[idx], self.initial_restrictions_train)
-            br = BoxResult(data, restrictions[idx][restricted_dims])
+            br = BoxResult(data, restrictions[idx][restricted_dims], y_name)
             box_set.append(br)
             if not self.__has_min_box_mass(br.get_box_mass(), f_size, self.min_support):
                 break
