@@ -20,8 +20,7 @@ exp_man = u.ExperimentManager("eval")
 size = "600"
 v1 = Visualizer(exp_man)
 
-exp_man.import_experiments("dummies")
-exp_man.import_experiments("kde_m", True)
+exp_man.import_experiments("prelim_refine")
 
 #v1.boxplot_selected_methods(metric=v1.highest_f1_metric,
 #                            selected_methods=["dummy_dummy", "dummy_classRF", "kde_classRF"],
