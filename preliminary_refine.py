@@ -65,21 +65,21 @@ SAAC2 = pd.read_csv("resources/data/SAAC2.csv", na_values=['?'])
 SAAC2_yname = "class"
 SAAC2 = SAAC2.dropna()
 SAAC2 = map_target(SAAC2, SAAC2_yname, 2)
-SAAC2200 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=200)
-SAAC2400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=400)
-SAAC2800 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=800)
-SAAC21600 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=1600)
-SAAC22400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=2400)
+SAAC2200 = ExperimentDataset("SAAC2200", SAAC2, SAAC2_yname, fragment_size=200)
+SAAC2400 = ExperimentDataset("SAAC2400", SAAC2, SAAC2_yname, fragment_size=400)
+SAAC2800 = ExperimentDataset("SAAC2800", SAAC2, SAAC2_yname, fragment_size=800)
+SAAC21600 = ExperimentDataset("SAAC21600", SAAC2, SAAC2_yname, fragment_size=1600)
+SAAC22400 = ExperimentDataset("SAAC22400", SAAC2, SAAC2_yname, fragment_size=2400)
 
 electricity = pd.read_csv("resources/data/electricity-normalized.csv")
 electricity_yname = "class"
 electricity = electricity.dropna()
 map_target(electricity, electricity_yname, "UP")
-electricity200 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=200)
-electricity400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=400)
-electricity800 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=800)
-electricity1600 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=1600)
-electricity2400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=2400)
+electricity200 = ExperimentDataset("electricity200", electricity, electricity_yname, fragment_size=200)
+electricity400 = ExperimentDataset("electricity400", electricity, electricity_yname, fragment_size=400)
+electricity800 = ExperimentDataset("electricity800", electricity, electricity_yname, fragment_size=800)
+electricity1600 = ExperimentDataset("electricity1600", electricity, electricity_yname, fragment_size=1600)
+electricity2400 = ExperimentDataset("electricity2400", electricity, electricity_yname, fragment_size=2400)
 
 datasets = [SAAC2200, SAAC2400, SAAC2800, SAAC21600, SAAC22400] + [electricity200, electricity400, electricity800, electricity1600, electricity2400]
 
