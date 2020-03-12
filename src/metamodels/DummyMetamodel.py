@@ -29,7 +29,3 @@ class DummyMetaModel:
         [self._set_row(self.y.to_numpy()[yi], yi, probabilities) for yi in range(len(self.y))]
         return probabilities
 
-    def _set_row(self, column, row, table):
-        table[row, column] = 1
-        table[row, 1 - column] = 0
-
