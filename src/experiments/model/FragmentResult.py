@@ -126,12 +126,12 @@ class FragmentResult:
         self.highest_f2_idx = int(np.argmax(list(map(lambda b: b.get_f2(), self.box_results_train))))
         self.highest_wracc_idx = int(np.argmax(list(map(lambda b: b.getWRacc(), self.box_results_train))))
 
-        self.min_mass_box = (self.boxes[self.leftmost_box_idx], self.box_results_train[self.leftmost_box_idx].get_box_mass())
-        self.highest_mean_box = (self.boxes[self.highest_mean_idx], self.box_results_train[self.highest_mean_idx].get_box_mean())
-        self.highest_f1_box = (self.boxes[self.highest_f1_idx], self.box_results_train[self.highest_f1_idx].get_f1())
-        self.highest_f2_box = (self.boxes[self.highest_f2_idx], self.box_results_train[self.highest_f2_idx].get_f2())
-        self.highest_wracc_box = (self.boxes[self.highest_wracc_idx], self.box_results_train[self.highest_wracc_idx].getWRacc())
-        self.kpis = self.get_kpi_list(self.box_results_train)
+        self.min_mass_box = (self.boxes[self.leftmost_box_idx], self.box_results_test[self.leftmost_box_idx].get_box_mass())
+        self.highest_mean_box = (self.boxes[self.highest_mean_idx], self.box_results_test[self.highest_mean_idx].get_box_mean())
+        self.highest_f1_box = (self.boxes[self.highest_f1_idx], self.box_results_test[self.highest_f1_idx].get_f1())
+        self.highest_f2_box = (self.boxes[self.highest_f2_idx], self.box_results_test[self.highest_f2_idx].get_f2())
+        self.highest_wracc_box = (self.boxes[self.highest_wracc_idx], self.box_results_test[self.highest_wracc_idx].getWRacc())
+        self.kpis = self.get_kpi_list(self.box_results_test)
 
     def to_restriction(self, box):
         new_restriction = self.initial_restrictions_train
