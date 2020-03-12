@@ -45,9 +45,5 @@ class GaussianMixture:
                 self.logger.error(traceback._cause_message)
         return best_gmm
 
-    def fit_model(self, n_components):
-        gmm = mixture.GaussianMixture(n_components=n_components, covariance_type='full')
-        return gmm.fit(self.data)
-
     def sample(self, n_samples=1) -> np.ndarray:
         return self.model.sample(n_samples)[0]
