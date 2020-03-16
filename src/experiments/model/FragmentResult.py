@@ -133,8 +133,9 @@ class FragmentResult:
         self.highest_wracc_box = (self.boxes[self.highest_wracc_idx], self.box_results_test[self.highest_wracc_idx].getWRacc())
         self.kpis = self.get_kpi_list(self.box_results_test)
 
-    def to_restriction(self, box):
-        new_restriction = self.initial_restrictions_train
+    def to_restriction(self, box_idx, train=True):
+        new_restriction = self.initial_restrictions_test if train else self.initial_restrictions_test
+        box = self.boxes[box_idx][0] if train else self.boxes[box_idx][0]
         for key in box:
             new_restriction.loc[0, key] = box[key][0]
             new_restriction.loc[1, key] = box[key][1]
@@ -142,8 +143,9 @@ class FragmentResult:
 
     def get_box_results(self, data: pd.DataFrame, restrictions: List[pd.DataFrame], f_size: int, y_name: str):
         box_set = []
+        initial_restrictions = get_initial_restrictions(data)
         for idx in range(len(restrictions)):
-            restricted_dims = d_u._determine_restricted_dims(restrictions[idx], self.initial_restrictions_train)
+            restricted_dims = d_u._determine_restricted_dims(restrictions[idx], initial_restrictions)
             br = BoxResult(data, restrictions[idx][restricted_dims], y_name)
             box_set.append(br)
             if not self.__has_min_box_mass(br.get_box_mass(), f_size, self.min_support):

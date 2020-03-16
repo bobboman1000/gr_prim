@@ -547,59 +547,43 @@ class Visualizer:
         else:
             plt.legend(bps, names, frameon=False, ncol=len(names), loc='upper center', bbox_to_anchor=(0,1.02,1,0.2))
 
-    def _highest_box_kpi_metric(self, experiment: Experiment, kpi: str) -> List[float]:
-        max_kpi = []
-        for f_res in experiment.result:
-            result_boxes = f_res.kpis
-            max_kpi.append(np.max(list(map(lambda kpis: kpis[kpi], result_boxes))))
-        return max_kpi
 
     def highest_box_metric(self, experiment: Experiment) -> List[float]:
-        return self._highest_box_kpi_metric(experiment, density_key)
+        return [f_res.highest_mean_box[1] for f_res in experiment.result]
 
     def highest_f1_metric(self, experiment: Experiment) -> List[float]:
-        return self._highest_box_kpi_metric(experiment, f1_key)
+        return [f_res.highest_f1_box[1] for f_res in experiment.result]
 
     def highest_wracc_metric(self, experiment: Experiment) -> List[float]:
-        max_kpi = []
-        for f_res in experiment.result:
-            max_kpi.append(f_res.highest_wracc_box[1])
-        return max_kpi
+        return [f_res.highest_wracc_box[1] for f_res in experiment.result]
 
     def highest_f2_metric(self, experiment: Experiment) -> List[float]:
-        return self._highest_box_kpi_metric(experiment, f2_key)
+        return [f_res.highest_f2_box[1] for f_res in experiment.result]
 
     def restricted_dims_on_highest_metric(self, experiment: Experiment):
-        max_kpi = []
-        for f_res in experiment.result:
-            max_kpi.append(len(f_res.highest_mean_box[0]) / f_res.initial_restrictions_train.shape[1])
-        return max_kpi
+        return [(len(f_res.highest_mean_box[1]) / f_res.initial_restrictions_train.shape[1]) for f_res in experiment.result]
 
     def restricted_dims_on_highestf2_metric(self, experiment: Experiment):
-        max_kpi = []
-        for f_res in experiment.result:
-            max_kpi.append(len(f_res.highest_f2_box[0]) / f_res.initial_restrictions_train.shape[1])
-        return max_kpi
+        return [(len(f_res.highest_f2_box[1]) / f_res.initial_restrictions_train.shape[1]) for f_res in experiment.result]
 
     def restricted_dims_on_highestf1_metric(self, experiment: Experiment):
-        max_kpi = []
-        for f_res in experiment.result:
-            max_kpi.append(len(f_res.highest_f1_box[0]) / f_res.initial_restrictions_train.shape[1])
-        return max_kpi
+        return [(len(f_res.highest_f1_box[1]) / f_res.initial_restrictions_train.shape[1]) for f_res in experiment.result]
 
     def consistency_v_highest_metric(self, experiment: Experiment) -> List[float]:
         consistency = []
-        full_res_0: pd.DataFrame = experiment.result[0].to_restriction(experiment.result[0].highest_mean_box[0])
+        res_0 = experiment.result[0]
+        full_res_0: pd.DataFrame = res_0.to_restriction(res_0.highest_mean_idx)
         for f_res in experiment.result[1:]:
-            full_res_i = f_res.to_restriction(f_res.highest_mean_box[0])
+            full_res_i = f_res.to_restriction(f_res.highest_mean_idx)
             consistency.append(self._compute_overlap(full_res_0, full_res_i))
         return consistency
 
     def consistency_v_highestf1_metric(self, experiment: Experiment) -> List[float]:
         consistency = []
-        full_res_0: pd.DataFrame = experiment.result[0].to_restriction(experiment.result[0].highest_f1_box[0])
+        res_0 = experiment.result[0]
+        full_res_0: pd.DataFrame = res_0.to_restriction(res_0.highest_f1_idx)
         for f_res in experiment.result[1:]:
-            full_res_i = f_res.to_restriction(f_res.highest_f1_box[0])
+            full_res_i = f_res.to_restriction(f_res.highest_f1_idx)
             consistency.append(self._compute_overlap(full_res_0, full_res_i))
         return consistency
 
