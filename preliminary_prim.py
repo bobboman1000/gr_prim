@@ -89,8 +89,6 @@ for d in d2:
     exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["prim"], name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=20, enable_probabilities=True)
     exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["prim"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=20, enable_probabilities=True)
     exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["prim"], name="kde_classRF_" + d.name, new_samples=10000, fragment_limit=20, enable_probabilities=False)
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["prim"], name="dummy_dummy-b5_" + d.name, new_samples=10000, fragment_limit=20, enable_probabilities=False)
-
 
 res = exp_man.run_all_parallel(32)
 exp_man.export_experiments("prelim_refine")
