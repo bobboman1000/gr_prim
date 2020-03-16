@@ -143,13 +143,13 @@ class FragmentResult:
 
     def get_box_results(self, data: pd.DataFrame, restrictions: List[pd.DataFrame], f_size: int, y_name: str):
         box_set = []
-        initial_restrictions = get_initial_restrictions(data)
+        initial_restrictions = get_initial_restrictions(data.drop(columns=[y_name]))
         for idx in range(len(restrictions)):
             restricted_dims = d_u._determine_restricted_dims(restrictions[idx], initial_restrictions)
             br = BoxResult(data, restrictions[idx][restricted_dims], y_name)
             box_set.append(br)
-            if not self.__has_min_box_mass(br.get_box_mass(), f_size, self.min_support):
-                break
+            #if not self.__has_min_box_mass(br.get_box_mass(), f_size, self.min_support):
+            #    break
         return box_set
 
     def __has_min_box_mass(self, relative_box_mass: float, fragment_size: int, min_support: float) -> bool:
