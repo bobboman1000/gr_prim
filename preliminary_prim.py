@@ -82,9 +82,9 @@ electricity1600 = ExperimentDataset("electricity1600", electricity, electricity_
 electricity2400 = ExperimentDataset("electricity2400", electricity, electricity_yname, fragment_size=2400)
 
 d1 = [SAAC2200, SAAC2400, SAAC2800, SAAC21600, SAAC22400]
-#d2 = [electricity200, electricity400, electricity800, electricity1600, electricity2400]
+d2 = [electricity200, electricity400, electricity800, electricity1600, electricity2400]
 
-for d in d1:
+for d in d1 + d2:
     exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["prim"], name="dummy_dummy_" + d.name, new_samples=10000, fragment_limit=20, enable_probabilities=True)
     exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["prim"], name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=20, enable_probabilities=True)
     exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["prim"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=20, enable_probabilities=True)
@@ -92,6 +92,3 @@ for d in d1:
 
 res = exp_man.run_all_parallel(20)
 exp_man.export_experiments("prelim_prim")
-
-
-

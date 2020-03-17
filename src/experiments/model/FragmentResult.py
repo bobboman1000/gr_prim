@@ -72,7 +72,10 @@ class BoxResult:
 
     # This is not coverage!!! It's an adaption to numeric values
     def get_coverage(self) -> float:
-        return self.get_mean() / self.stats[MEAN]
+        cov = 0
+        if self.stats[MEAN_IN_BOX] and self.stats[MEAN]:
+            cov = self.stats[MEAN_IN_BOX] / self.stats[MEAN]
+        return cov
 
     def get_f1(self) -> float:
         return self.get_f_score(beta=1)
