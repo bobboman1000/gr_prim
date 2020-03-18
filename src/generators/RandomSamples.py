@@ -27,7 +27,7 @@ class UniformRandomSamplesGenerator:
     def __init__(self):
         self.data = None
 
-    def fit(self, data: pd.DataFrame):
+    def fit(self, data: pd.DataFrame, **kwargs):
         self.data = data
         return self
 

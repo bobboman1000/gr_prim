@@ -17,7 +17,7 @@ class KernelDensityBW:
         else:
             print("This is not right: method must be scott or silverman")
 
-    def fit(self, X: pd.DataFrame):
+    def fit(self, X: pd.DataFrame, **kwargs):
         bw: float = self.bw_method(X)
         if isinstance(bw, pd.Series):
             bw = bw.tolist().pop()  # If a list, take any - they are all the same anyway!

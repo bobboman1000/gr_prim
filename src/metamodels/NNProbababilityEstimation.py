@@ -36,7 +36,7 @@ class bNNProbabilityEstimator:
             bag_list.append(construct_function(**func_args))
         return bag_list
 
-    def fit(self, X: pd.DataFrame, y):
+    def fit(self, X: pd.DataFrame, y, **kwargs):
         bag = []
         for item in self.bag_list:
             bag.append(self.fit_bag_from_sample(X, y, item))
