@@ -10,6 +10,8 @@ from sklearn.preprocessing import MinMaxScaler
 from src.experiments.model.ExperimentDataset import ExperimentDataset
 from src.experiments.model.ExperimentSubsetCompound import ExperimentSubsetCompound
 from src.experiments.model.FragmentResult import FragmentResult
+from src.generators.PerfectGenerator import PerfectGenerator
+from src.metamodels.PerfectMetamodel import PerfectMetamodel
 
 
 class ExecutionTimes:
@@ -46,6 +48,7 @@ class Experiment:
         self.failed = 0
         self.fragment_limit = fragment_limit
         self.do_scale = scale
+        self.perfect = type(generator) == PerfectGenerator and type(metamodel) == PerfectMetamodel
 
     def run(self):
         if self.fragment_limit is not None and len(self.ex_data.fragments) > self.fragment_limit:
@@ -68,7 +71,7 @@ class Experiment:
 
     def run_fragment(self, idx):
         subset_compound: ExperimentSubsetCompound = self.ex_data.get_subset_compound(idx)
-        box, g_data, execution_times = self.exec(subset_compound.fragment, subset_compound.fragment_y, subset_compound.y_name)
+        box, g_data, execution_times = self._exec(subset_compound)
         self.debug_logger.debug(self.name + " " + str(idx) + " " + str(execution_times))
         return box, g_data, execution_times
 
@@ -112,10 +115,15 @@ class Experiment:
         self.discovery_alg = None
         self.metamodel = None
 
-    def exec(self, x_training: pd.DataFrame, y_training: pd.DataFrame, y_name: str):
+    def _exec(self, subset_compound: ExperimentSubsetCompound):
         execution_times = {}
         start = time.time()
         scaler = MinMaxScaler()
+
+        x_training = subset_compound.fragment
+        y_training = subset_compound.fragment_y
+        y_name = subset_compound.y_name
+
         if self.do_scale:
             x_training, scaler = self.scale(x_training, scaler, inverse=False)
 
@@ -173,3 +181,10 @@ class Experiment:
     def get_metamodel_name(self):
         return self._get_method_name_by_idx(1)
 
+    def asssert_perfect(self):
+        if not (type(self.generator) == PerfectGenerator) ^ (type(self.metamodel) == PerfectMetamodel):
+            raise MalformedExperimentError("Please only use Perfect generator with PerfectMetamodel")
+
+
+class MalformedExperimentError(Exception):
+    pass
