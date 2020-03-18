@@ -17,7 +17,7 @@ class MUNGE:
         self.p = p
         self.approximate = approximate
 
-    def fit(self, X: pd.DataFrame):
+    def fit(self, X: pd.DataFrame, **kwargs):
         self.data = X
         return self
 

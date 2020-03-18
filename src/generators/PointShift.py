@@ -11,7 +11,7 @@ class PointShift:
         self.local_variance = local_variance
         self.response_column = None
 
-    def fit(self, X, response_column=None):
+    def fit(self, X, response_column=None, **kwargs):
         self.data = X
         self.response_column = response_column
         return self

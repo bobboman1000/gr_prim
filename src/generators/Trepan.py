@@ -10,7 +10,7 @@ class TrepanSampler:
         self.kde_bandwidth = kde_bandwidth
         self.df = None
 
-    def fit(self, X: pd.DataFrame):
+    def fit(self, X: pd.DataFrame, **kwargs):
         self.df = X
         return self
 

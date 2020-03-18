@@ -21,7 +21,7 @@ class MUNGE:
         self.p_swap = p_swap
         self.local_var = local_var
 
-    def fit(self, X: pd.DataFrame):
+    def fit(self, X: pd.DataFrame, **kwargs):
         self.nn_idx = fnn.knn_index(X, 1, "kd_tree")
         self.data = X
         return self
