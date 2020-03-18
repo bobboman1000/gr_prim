@@ -1,25 +1,24 @@
 import numpy as np
 import pandas as pd
 
+from src.experiments.model.Experiment import MalformedExperimentError
+
 
 class PerfectMetamodel:
 
     def __init__(self):
         self.y: pd.DataFrame = None
-        self.known_ys: pd.DataFrame = None
+        self.y_complement: pd.DataFrame = None
 
-    def fit(self, X: pd.DataFrame, y: pd.DataFrame, known_ys: pd.DataFrame, **kwargs):
-        self.known_ys = known_ys
-        assert known_ys.index is not None
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame, y_complement: pd.DataFrame, **kwargs):
+        self.y_complement = y_complement
+        assert y_complement.index is not None
         return self
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
-        try:
-            assert X.shape[0] == len(self.y)
-        except AssertionError as e:
-            e.args += "Dummy can't be used for new datapoints"
-            raise
-        return self.known_ys[X.index].to_numpy()
+        if X.shape[0] == len(self.y):
+            raise MalformedExperimentError("Dummy can't be used for new datapoints")
+        return self.y_complement[X.index].to_numpy()
 
     def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
         raise AssertionError("Perfect metamodel can't be used with probabilities. ")

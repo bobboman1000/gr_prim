@@ -1,7 +1,7 @@
 import logging
 import time
 from multiprocessing import Queue, Process
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -55,47 +55,16 @@ class Experiment:
             indices = range(self.fragment_limit)
         else:
             indices = range(len(self.ex_data.fragments))
-        self.result = self.run_fragments(indices)
+        self.result = self._run_fragments(indices)
         self.executed = True
         return self
-
-    def run_fragments(self, indices):
-        results: List[FragmentResult] = []
-        for idx in indices:
-            box, g_data, execution_times = self.run_fragment(idx)
-            if box is not None:
-                results.append(self.build_result(box, g_data, idx, execution_times))
-            else:
-                self.failed += 1
-        return results
-
-    def run_fragment(self, idx):
-        subset_compound: ExperimentSubsetCompound = self.ex_data.get_subset_compound(idx)
-        box, g_data, execution_times = self._exec(subset_compound)
-        self.debug_logger.debug(self.name + " " + str(idx) + " " + str(execution_times))
-        return box, g_data, execution_times
-
-    def build_result(self, box, g_data, idx, execution_times):
-        start = time.time()
-        fragment_result = FragmentResult(restrictions=box, experiment_dataset=self.ex_data, fragment_idx=idx, training_data=g_data,
-                                         execution_times=execution_times)
-        self.debug_logger.debug("fragment_eval " + str(time.time() - start))
-        return fragment_result
-
-    def run_fragments_to_q(self, indices, q):
-        for idx in indices:
-            box, g_data, execution_times = self.run_fragment(idx)
-            if box is not None:
-                q.put(self.build_result(box, g_data, idx, execution_times))
-            else:
-                self.failed += 1
 
     def run_parallel(self, threads: int):
         pool = []
         chunked_fragments_idxs = self._chunks(range(len(self.ex_data.fragments)), threads)
         q = Queue()
         for i in range(threads):
-            p = Process(target=self.run_fragments_to_q, args=(chunked_fragments_idxs[i], q))
+            p = Process(target=self._run_fragments_to_q, args=(chunked_fragments_idxs[i], q))
             pool.append(p)
             p.start()
 
@@ -106,41 +75,102 @@ class Experiment:
             p.join()
             p.close()
 
+    def _run_fragments(self, indices):
+        results: List[FragmentResult] = []
+        for idx in indices:
+            box, g_data, execution_times = self._run_fragment(idx)
+            if box is not None:
+                results.append(self._build_result(box, g_data, idx, execution_times))
+            else:
+                self.failed += 1
+        return results
+
+    def _run_fragment(self, idx):
+        subset_compound: ExperimentSubsetCompound = self.ex_data.get_subset_compound(idx)
+        box, g_data, execution_times = self._exec(subset_compound)
+        self.debug_logger.debug(self.name + " " + str(idx) + " " + str(execution_times))
+        return box, g_data, execution_times
+
+    def _build_result(self, box, g_data, idx, execution_times):
+        start = time.time()
+        fragment_result = FragmentResult(restrictions=box, experiment_dataset=self.ex_data, fragment_idx=idx, training_data=g_data,
+                                         execution_times=execution_times)
+        self.debug_logger.debug("fragment_eval " + str(time.time() - start))
+        return fragment_result
+
+    def _run_fragments_to_q(self, indices, q):
+        for idx in indices:
+            box, g_data, execution_times = self._run_fragment(idx)
+            if box is not None:
+                q.put(self._build_result(box, g_data, idx, execution_times))
+            else:
+                self.failed += 1
+
     def _chunks(self, long_list, chunk_size):
         """Yield successive n-sized chunks from l."""
         return [long_list[i::chunk_size] for i in range(chunk_size)]
 
     def delete_models(self):
-        self.generator = None
-        self.discovery_alg = None
-        self.metamodel = None
+        del self.generator
+        del self.discovery_alg
+        del self.metamodel
 
     def _exec(self, subset_compound: ExperimentSubsetCompound):
         execution_times = {}
-        start = time.time()
         scaler = MinMaxScaler()
 
-        x_training = subset_compound.fragment
-        y_training = subset_compound.fragment_y
-        y_name = subset_compound.y_name
-
         if self.do_scale:
-            x_training, scaler = self.scale(x_training, scaler, inverse=False)
+            x_training, scaler = self._scale(subset_compound.fragment, scaler, inverse=False)
 
-        fitted_generator = self.generator.fit(x_training)
-        execution_times[g_fit] = time.time() - start
+        fitted_generator, execution_times[g_fit] = self._fit_generator(subset_compound)
+        fitted_metamodel, execution_times[m_fit] = self._fit_metamodel(subset_compound)
+        g_data, execution_times[g_sam] = self._generate_data(subset_compound, fitted_generator)
+        g_data_y, execution_times[m_pred] = self._label_data(g_data, fitted_metamodel)
 
+        start = time.time()
+
+        if self.do_scale:  # Revert scaling before starting SD
+            g_data, scaler = self._scale(g_data, scaler, inverse=True)
+
+        result = self.discovery_alg.find(g_data, g_data_y, regression=self.enable_probabilities)
+        execution_times[sub] = time.time() - start
+        g_data.insert(loc=0, column=subset_compound.y_name, value=g_data_y)
+
+        return result, g_data, execution_times
+
+    def _fit_generator(self, subset_compound: ExperimentSubsetCompound) -> Tuple:  # TODO Add interface
+        start = time.time()
+        if not self.perfect:
+            fitted_generator = self.generator.fit(X=subset_compound.fragment)
+        else:
+            fitted_generator = self.generator.fit(X=subset_compound.fragment, X_complement=subset_compound.complement)
+        duration = time.time() - start
+        return fitted_generator, duration
+
+    def _fit_metamodel(self, subset_compound: ExperimentSubsetCompound):
+        start = time.time()
         try:
-            fitted_classifier = self.metamodel.fit(X=x_training, y=y_training)
+            if not self.perfect:
+                fitted_classifier = self.metamodel.fit(X=subset_compound.fragment, y=subset_compound.fragment_y)
+            else:
+                fitted_classifier = self.metamodel.fit(X=subset_compound.fragment, y=subset_compound.fragment_y,
+                                                       y_complement=subset_compound.complement_y)
         except ValueError:
+            # TODO Implement y guarantee
+            # Sometimes these appear if there is only one class in the training fragment. This code simply excludes samples without
+            # an adequate guarantee.
             return None, None
-        execution_times[m_fit] = time.time() - (execution_times[g_fit] + start)
+        duration = time.time() - start
+        return fitted_classifier, duration
 
-        g_data = pd.DataFrame(fitted_generator.sample(self.new_sample_size), columns=x_training.columns)
-        execution_times[g_sam] = time.time() - (execution_times[m_fit] + execution_times[g_fit] + start)
+    def _generate_data(self, subset_compound: ExperimentSubsetCompound, fitted_generator):
+        start = time.time()
+        g_data = pd.DataFrame(fitted_generator.sample(self.new_sample_size), columns=subset_compound.fragment.columns)
+        g_data = g_data.append(subset_compound.fragment)
+        duration = time.time() - start
+        return g_data, duration
 
-        g_data = g_data.append(x_training)
-
+    def _label_data(self, g_data: pd.DataFrame, fitted_classifier):
         start = time.time()
         if self.enable_probabilities:
             g_data_y: np.ndarray = fitted_classifier.predict_proba(g_data)
@@ -149,20 +179,10 @@ class Experiment:
             g_data_y: np.ndarray = g_data_y[:, 1]
         else:
             g_data_y = fitted_classifier.predict(g_data)
-        execution_times[m_pred] = time.time() - start
+        duration = time.time() - start
+        return g_data_y, duration
 
-        start = time.time()
-
-        if self.do_scale:
-            g_data, scaler = self.scale(g_data, scaler, inverse=True)
-
-        result = self.discovery_alg.find(g_data, g_data_y, regression=self.enable_probabilities)
-        execution_times[sub] = time.time() - start
-        g_data.insert(loc=0, column=y_name, value=g_data_y)
-
-        return result, g_data, execution_times
-
-    def scale(self, x: pd.DataFrame, scaler, inverse: bool = False):
+    def _scale(self, x: pd.DataFrame, scaler, inverse: bool = False):
         fitted_scaler = scaler.fit(x)
         if not inverse:
             scaled_data = fitted_scaler.transform(x)
@@ -181,10 +201,11 @@ class Experiment:
     def get_metamodel_name(self):
         return self._get_method_name_by_idx(1)
 
-    def asssert_perfect(self):
+    def _asssert_perfect(self):
         if not (type(self.generator) == PerfectGenerator) ^ (type(self.metamodel) == PerfectMetamodel):
             raise MalformedExperimentError("Please only use Perfect generator with PerfectMetamodel")
 
 
 class MalformedExperimentError(Exception):
+    """Raises if the generator or the metamodel do not fit together. This may happen if you use dummies or perfects incorrectly."""
     pass
