@@ -83,8 +83,9 @@ electricity2400 = ExperimentDataset("electricity2400", electricity, electricity_
 
 d1 = [SAAC2200, SAAC2400, SAAC2800, SAAC21600, SAAC22400]
 d2 = [electricity200, electricity400, electricity800, electricity1600, electricity2400]
+d3 = [sylva200, sylva400, sylva800, sylva1600, sylva2400]
 
-for d in d1 + d2:
+for d in d3:
     exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_" + d.name, new_samples=10000, fragment_limit=20, enable_probabilities=True)
     exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["best-interval"], name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=20, enable_probabilities=True)
     exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=20, enable_probabilities=True)
