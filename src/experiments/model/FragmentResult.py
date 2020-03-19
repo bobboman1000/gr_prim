@@ -70,7 +70,7 @@ class BoxResult:
     def get_box_mass(self) -> float:
         return self.stats[N_IN_BOX] / self.stats[N]
 
-    # This is not coverage!!! It's an adaption to numeric values
+    # This is not real coverage! It's an adaption to numeric values
     def get_coverage(self) -> float:
         cov = 0
         if self.stats[MEAN_IN_BOX] and self.stats[MEAN]:
