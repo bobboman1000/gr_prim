@@ -16,7 +16,7 @@ class PerfectMetamodel:
         return self
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
-        if X.shape[0] == len(self.y):
+        if X.shape[0] != len(self.y):
             raise MalformedExperimentError("Dummy can't be used for new datapoints")
         return self.y_complement[X.index].to_numpy()
 
