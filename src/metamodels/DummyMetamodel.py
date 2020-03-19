@@ -14,12 +14,12 @@ class DummyMetaModel:
         return self
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
-        if X.shape[0] == len(self.y):
+        if X.shape[0] != len(self.y):
             raise MalformedExperimentError("Dummy can't be used for new datapoints")
         return self.y.to_numpy()
 
     def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
-        if X.shape[0] == len(self.y):
+        if X.shape[0] != len(self.y):
             raise MalformedExperimentError("Dummy can't be used for new datapoints")
         probabilities = np.ndarray(shape=(len(self.y), 2))
         [self._set_row(self.y.to_numpy()[yi], yi, probabilities) for yi in range(len(self.y))]
