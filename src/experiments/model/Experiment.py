@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
+from src.experiments.model.Exceptions import MalformedExperimentError
 from src.experiments.model.ExperimentDataset import ExperimentDataset
 from src.experiments.model.ExperimentSubsetCompound import ExperimentSubsetCompound
 from src.experiments.model.FragmentResult import FragmentResult
@@ -206,6 +207,3 @@ class Experiment:
             raise MalformedExperimentError("Please only use Perfect generator with PerfectMetamodel")
 
 
-class MalformedExperimentError(Exception):
-    """Raises if the generator or the metamodel do not fit together. This may happen if you use dummies or perfects incorrectly."""
-    pass

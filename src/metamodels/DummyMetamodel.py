@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from src.experiments.model.Experiment import MalformedExperimentError
+from src.experiments.model.Exceptions import MalformedExperimentError
 
 
 class DummyMetaModel:
