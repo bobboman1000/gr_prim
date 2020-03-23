@@ -10,7 +10,7 @@ warnings.simplefilter(action='ignore', category=ConvergenceWarning)
 
 
 exp_man = u.ExperimentManager("eval_steps")
-exp_man.import_experiments("prelim_prim")
+exp_man.import_experiments("prelim_refine")
 
 
 v1 = Visualizer(exp_man, detailed_mode=True)

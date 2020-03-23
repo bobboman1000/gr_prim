@@ -10,6 +10,7 @@ import pandas as pd
 from rpy2.robjects import pandas2ri  # install any dependency package if you get error like "module not found"
 from rpy2.robjects.packages import importr
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
+from src.experiments.model.FragmentResult import get_initial_restrictions
 
 
 pandas2ri.activate()
@@ -26,14 +27,7 @@ class BestInterval:
         X_cols = X.columns
         result = sdmap.beam_refine(X, y, beam_size=self.beam_size)
         result = pd.DataFrame(result, columns=X_cols)
-        return [self.inital_restrictions(X), result]
-
-    def inital_restrictions(self, X: pd.DataFrame):
-        # FIXME make it more pretty - this only works with 0-1 scaling
-        X_cols = X.columns
-        maximums = np.repeat(1, len(X_cols))
-        minimums = np.repeat(0, len(X_cols))
-        return pd.DataFrame([minimums, maximums], columns=X_cols)
+        return [get_initial_restrictions(X), result]
 
     def get_rstring(self):
         return open("src/R/Refinement.R", mode="r").read()
