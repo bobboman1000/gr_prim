@@ -22,10 +22,11 @@ POS = "pos_out_box"
 N_IN_BOX = "in_box"
 N = "n"
 
+
 def get_initial_restrictions(data: pd.DataFrame) -> pd.DataFrame:
     maximum: pd.DataFrame = data.max(axis=0)
     minimum: pd.DataFrame = data.min(axis=0)
-    return pd.DataFrame(data=[minimum, maximum])
+    return pd.DataFrame(data=[minimum, maximum], columns=data.columns)
 
 
 class BoxResult:
