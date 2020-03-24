@@ -63,7 +63,7 @@ avila800 = ExperimentDataset("avil800", avila, avila_yname, fragment_size=800)
 avila1600 = ExperimentDataset("avila1600", avila, avila_yname, fragment_size=1600)
 avila2400 = ExperimentDataset("avila2400", avila, avila_yname, fragment_size=2400)
 
-datasets = [avila200, avila400, avila800, avila1600, avila2400] + [sylva200, sylva400, sylva800, sylva1600, sylva2400]
+datasets = [sylva200, sylva400, sylva800, sylva1600, sylva2400]
 
 sizes = [200, 400, 800, 1600, 2400]
 
@@ -71,8 +71,8 @@ for d in datasets:
     exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
     exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
     exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["best-interval"], name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_avila400" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval-b5"], name="dummy_dummy-b5_avila400" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
+    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
+    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval-b5"], name="dummy_dummy-b5_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
 
 res = exp_man.run_all_parallel(32)
 exp_man.export_experiments("prelim_refine")
