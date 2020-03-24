@@ -120,10 +120,10 @@ class FragmentResult:
         self.initial_restrictions_test = get_initial_restrictions(experiment_dataset.get_subset_compound(fragment_idx).complement)
 
         self.boxes = list(map(lambda restriction: restriction.to_dict(orient='list'), restrictions))
-        self.box_results_train = self.get_box_results(training_data, restrictions, experiment_dataset.fragment_size, experiment_dataset.y_name)
+        min_support_idx_original = self.__min_support_on_original(experiment_dataset, fragment_idx, restrictions)
+        self.box_results_train = self.get_box_results(training_data, restrictions, experiment_dataset.y_name, max_box_idx=min_support_idx_original)
         test_data = experiment_dataset.get_subset_compound(fragment_idx).get_complete_complement()
-        self.box_results_test = self.get_box_results(test_data, restrictions, experiment_dataset.fragment_size,
-                                                     experiment_dataset.y_name, max_box_idx=len(self.box_results_train))
+        self.box_results_test = self.get_box_results(test_data, restrictions, experiment_dataset.y_name, min_box_idx=len(self.box_results_train))
 
         self.leftmost_box_idx = -1
         self.highest_mean_idx = self._get_box_max_box_idx(self.box_results_train, DENSITY_KEY)
@@ -146,25 +146,27 @@ class FragmentResult:
             new_restriction.loc[1, key] = box[key][1]
         return new_restriction
 
-    def get_box_results(self, data: pd.DataFrame, restrictions: List[pd.DataFrame], f_size: int, y_name: str, max_box_idx: int = None) -> List[BoxResult]:
+    def get_box_results(self, data: pd.DataFrame, restrictions: List[pd.DataFrame], y_name: str, min_box_idx: int = 0,
+                        max_box_idx: int = np.inf) -> List[BoxResult]:
         """
         Builds a list of box results. The box results contain the quality measures of each box based on the input data. The list only contains boxes
         that have a minimum box mass. The box mass is specified in self.min_support. The f_size is necessary to ensure relative box masses.
+        :param max_box_idx:
         :param data: Data to evaluate boxes on. This includes the response column.
         :param restrictions: The restrtictions indicating the boxes
         :param f_size: the size of the fragments. this is important for finding the min_mass of a box
         :param y_name: The name of the response column
-        :param max_box_idx: Providing a value disables checking the minimum mass of a box, instead it uses a fixed maximum of the box idx
+        :param min_box_idx: Providing a value disables checking the minimum mass of a box, instead it uses a fixed maximum of the box idx
         :return:
         """
         box_set = []
         initial_restrictions = get_initial_restrictions(data.drop(columns=[y_name]))
-        r = max_box_idx if max_box_idx is not None else len(restrictions)
+        r = min_box_idx if min_box_idx > 0 else len(restrictions)
         for idx in range(r):
             restricted_dims = d_u._determine_restricted_dims(restrictions[idx], initial_restrictions)
             br = BoxResult(data, restrictions[idx][restricted_dims], y_name)
             box_set.append(br)
-            if not self.__has_min_box_mass(br.get_box_mass(), f_size, self.min_support) and max_box_idx is None:
+            if (not self.__has_min_box_mass(br.get_box_mass(), data.shape[0], self.min_support) and min_box_idx <= idx) or idx >= max_box_idx:
                 break
         return box_set
 
@@ -177,3 +179,8 @@ class FragmentResult:
         else:
             mass = relative_box_mass
         return mass >= min_support and mass > 0
+
+    def __min_support_on_original(self, experiment_dataset: ExperimentDataset, fragment_idx: int, restrictions: List[pd.DataFrame]):
+        box_results_original = self.get_box_results(experiment_dataset.get_subset_compound(fragment_idx).get_complete_fragment(),
+                                                    restrictions, experiment_dataset.y_name)
+        return len(box_results_original) - 1

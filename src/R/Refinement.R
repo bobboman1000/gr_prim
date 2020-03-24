@@ -111,8 +111,8 @@ beam.refine <- function(dx, dy, beam.size = 1, depth = 4){
   
   winner <- which(res.tab[, 1] == max(res.tab[, 1]))[1]
   res <- res.box[[winner]]
-  res[1, res[1, ] == box.init[1, ]] <- -10^8
-  res[2, res[2, ] == box.init[2, ]] <- 10^8
+  #res[1, res[1, ] == box.init[1, ]] <- -10^8
+  #res[2, res[2, ] == box.init[2, ]] <- 10^8
   res
 }
 
