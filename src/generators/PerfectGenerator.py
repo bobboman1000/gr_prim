@@ -4,6 +4,7 @@ import pandas as pd
 class PerfectGenerator:
     def __init__(self):
         self.data = None
+        self.X_complement = None
 
     def fit(self, X, X_complement: pd.DataFrame, **kwargs):
         self.data = X

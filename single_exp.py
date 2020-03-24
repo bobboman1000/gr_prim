@@ -3,7 +3,9 @@ import pandas as pd
 import src.experiments.ExperimentManager as u
 from src.experiments.model.ExperimentDataset import ExperimentDataset
 from src.generators.DummyGenerator import DummyGenerator
+from src.generators.PerfectGenerator import PerfectGenerator
 from src.metamodels.DummyMetamodel import DummyMetaModel
+from src.metamodels.PerfectMetamodel import PerfectMetamodel
 
 exp_man = u.ExperimentManager()
 
@@ -84,8 +86,10 @@ electricity2400 = ExperimentDataset("electricity", electricity, electricity_ynam
 
 
 
-exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],
-                       name="kde_classRF-prob_" + "avila200", new_samples=600, fragment_limit=1, enable_probabilities=True)
+exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["prim"],name="kde_classRF-prob_" + "avila200", new_samples=600, fragment_limit=1, enable_probabilities=True)
+exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],name="kde_classRF-prob_" + "avila200", new_samples=600, fragment_limit=1, enable_probabilities=True)
+exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["prim"],
+                       name="perfect_perfect_" + "avila200", new_samples=600, fragment_limit=1, enable_probabilities=False)
 
 res = exp_man.run_all()
 
