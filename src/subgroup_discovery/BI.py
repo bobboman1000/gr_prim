@@ -32,7 +32,7 @@ class BestInterval:
         # FIXME make it more pretty - this only works with 0-1 scaling
         X_cols = X.columns
         maximums = np.repeat(1, len(X_cols))
-        minimums = np.repeat(0, len(X_cols))
+        minimums = np.repeat(-1, len(X_cols))
         return pd.DataFrame([minimums, maximums], columns=X_cols)
 
     def get_rstring(self):
