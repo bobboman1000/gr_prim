@@ -121,7 +121,7 @@ class Experiment:
         scaler = MinMaxScaler()
 
         if self.do_scale:
-            x_training, scaler = self._scale(subset_compound.fragment, scaler, inverse=False)
+            x_training, scaler = self._scale(subset_compound.fragment, scaler)
 
         fitted_generator, execution_times[g_fit] = self._fit_generator(subset_compound)
         fitted_metamodel, execution_times[m_fit] = self._fit_metamodel(subset_compound)
@@ -131,7 +131,7 @@ class Experiment:
         start = time.time()
 
         if self.do_scale:  # Revert scaling before starting SD
-            g_data, scaler = self._scale(g_data, scaler, inverse=True)
+            g_data, scaler = self._scale_inverse(g_data, scaler)
 
         result = self.discovery_alg.find(g_data, g_data_y, regression=self.enable_probabilities)
         execution_times[sub] = time.time() - start
@@ -183,13 +183,14 @@ class Experiment:
         duration = time.time() - start
         return g_data_y, duration
 
-    def _scale(self, x: pd.DataFrame, scaler, inverse: bool = False):
+    def _scale(self, x: pd.DataFrame, scaler):
         fitted_scaler = scaler.fit(x)
-        if not inverse:
-            scaled_data = fitted_scaler.transform(x)
-        else:
-            scaled_data = fitted_scaler.inverse_transform(x)
+        scaled_data = fitted_scaler.transform(x)
+        x = pd.DataFrame(scaled_data, columns=x.columns)
+        return x, fitted_scaler
 
+    def _scale_inverse(self, x: pd.DataFrame, fitted_scaler):
+        scaled_data = fitted_scaler.inverse_transform(x)
         x = pd.DataFrame(scaled_data, columns=x.columns)
         return x, fitted_scaler
 
