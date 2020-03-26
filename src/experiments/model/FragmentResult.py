@@ -153,7 +153,7 @@ class FragmentResult:
         that have a minimum box mass. The box mass is specified in self.min_support. The f_size is necessary to ensure relative box masses.
         :param max_box_idx:
         :param data: Data to evaluate boxes on. This includes the response column.
-        :param restrictions: The restrtictions indicating the boxes
+        :param restrictions: The restrictions indicating the boxes
         :param f_size: the size of the fragments. this is important for finding the min_mass of a box
         :param y_name: The name of the response column
         :param min_box_idx: Providing a value disables checking the minimum mass of a box, instead it uses a fixed maximum of the box idx
@@ -176,6 +176,8 @@ class FragmentResult:
     def __has_min_box_mass(self, relative_box_mass: float, fragment_size: int, min_support: float) -> bool:
         if min_support >= 1:
             mass = relative_box_mass * fragment_size
+        elif min_support == 0:
+            return True
         else:
             mass = relative_box_mass
         return mass >= min_support and mass > 0

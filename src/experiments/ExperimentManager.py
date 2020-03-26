@@ -44,11 +44,12 @@ class ExperimentManager:
         self.queues = {}
 
     def add_experiment(self, dataset: ExperimentDataset, generator, metamodel, discovery_alg, name, new_samples, enable_probabilities=True,
-                       fragment_limit=None):
+                       fragment_limit=None, min_support=20, scale=True):
         if not self.experiment_datasets.__contains__(dataset):
             self.experiment_datasets.append(dataset)
         experiment = Experiment(dataset, copy.deepcopy(generator), copy.deepcopy(metamodel), copy.deepcopy(discovery_alg),
-                                name, new_sample_size=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit)
+                                name, new_sample_size=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit,
+                                min_support=min_support, scale=scale)
         self.experiments.append(experiment)
         self._enqueue(experiment)
         self.logger.info("Added experiment " + experiment.name)

@@ -1,7 +1,7 @@
 import logging
 import time
 from multiprocessing import Queue, Process
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -36,7 +36,7 @@ class Experiment:
     executed: bool = False
 
     def __init__(self, ex_data: ExperimentDataset, generator, metamodel, discovery_alg, name, new_sample_size: int,
-                 enable_probabilities=True, fragment_limit: int = None, scale=True):
+                 enable_probabilities=True, fragment_limit: int = None, scale=True, min_support=20):
         self.ex_data: ExperimentDataset = ex_data
         self.generator = generator
         self.metamodel = metamodel
@@ -50,6 +50,7 @@ class Experiment:
         self.fragment_limit = fragment_limit
         self.do_scale = scale
         self.perfect = type(generator) == PerfectGenerator and type(metamodel) == PerfectMetamodel
+        self.min_support = min_support
 
     def run(self):
         if self.fragment_limit is not None and len(self.ex_data.fragments) > self.fragment_limit:
@@ -95,7 +96,7 @@ class Experiment:
     def _build_result(self, box, g_data, idx, execution_times):
         start = time.time()
         fragment_result = FragmentResult(restrictions=box, experiment_dataset=self.ex_data, fragment_idx=idx, training_data=g_data,
-                                         execution_times=execution_times)
+                                         execution_times=execution_times, min_support=self.min_support)
         self.debug_logger.debug("fragment_eval " + str(time.time() - start))
         return fragment_result
 
@@ -121,17 +122,30 @@ class Experiment:
         scaler = MinMaxScaler()
 
         if self.do_scale:
-            x_training, scaler = self._scale(subset_compound.fragment, scaler)
+            x_training, fitted_scaler = self._scale(subset_compound.fragment, scaler)
+            x_complement = self._scale(subset_compound.complement, fitted_scaler, fit=False) if self.perfect \
+                else None  # Don't waste time scaling if it's not a perfect metamodel
+        else:
+            x_training = subset_compound.fragment
+            x_complement = subset_compound.complement
 
-        fitted_generator, execution_times[g_fit] = self._fit_generator(subset_compound)
-        fitted_metamodel, execution_times[m_fit] = self._fit_metamodel(subset_compound)
+        y_training = subset_compound.fragment_y
+        y_complement = subset_compound.complement_y
+
+        if not self.perfect:
+            fitted_generator, execution_times[g_fit] = self._fit_generator(x_training)
+            fitted_metamodel, execution_times[m_fit] = self._fit_metamodel(x_training, y_training)
+        else:
+            fitted_generator, execution_times[g_fit] = self._fit_perfect_generator(x_training, x_complement)
+            fitted_metamodel, execution_times[m_fit] = self._fit_perfect_metamodel(x_training, y_training, y_complement)
+
         g_data, execution_times[g_sam] = self._generate_data(subset_compound, fitted_generator)
         g_data_y, execution_times[m_pred] = self._label_data(g_data, fitted_metamodel)
 
         start = time.time()
 
         if self.do_scale:  # Revert scaling before starting SD
-            g_data, scaler = self._scale_inverse(g_data, scaler)
+            g_data, fitted_scaler = self._scale_inverse(g_data, scaler)
 
         result = self.discovery_alg.find(g_data, g_data_y, regression=self.enable_probabilities)
         execution_times[sub] = time.time() - start
@@ -139,23 +153,34 @@ class Experiment:
 
         return result, g_data, execution_times
 
-    def _fit_generator(self, subset_compound: ExperimentSubsetCompound) -> Tuple:  # TODO Add interface
+    def _fit_generator(self, x_training: pd.DataFrame) -> Tuple:  # TODO Add interface
         start = time.time()
-        if not self.perfect:
-            fitted_generator = self.generator.fit(X=subset_compound.fragment)
-        else:
-            fitted_generator = self.generator.fit(X=subset_compound.fragment, X_complement=subset_compound.complement)
+        fitted_generator = self.generator.fit(X=x_training)
         duration = time.time() - start
         return fitted_generator, duration
 
-    def _fit_metamodel(self, subset_compound: ExperimentSubsetCompound):
+    def _fit_perfect_generator(self, x_training: pd.DataFrame, x_complement: pd.DataFrame) -> Tuple:  # TODO Add interface
+        start = time.time()
+        fitted_generator = self.generator.fit(X=x_training, X_complement=x_complement)
+        duration = time.time() - start
+        return fitted_generator, duration
+
+    def _fit_metamodel(self, x_training: pd.DataFrame, y_training: Union[np.ndarray, pd.DataFrame, pd.Series]):
         start = time.time()
         try:
-            if not self.perfect:
-                fitted_classifier = self.metamodel.fit(X=subset_compound.fragment, y=subset_compound.fragment_y)
-            else:
-                fitted_classifier = self.metamodel.fit(X=subset_compound.fragment, y=subset_compound.fragment_y,
-                                                       y_complement=subset_compound.complement_y)
+            fitted_classifier = self.metamodel.fit(X=x_training, y=y_training)
+        except ValueError:
+            # TODO Implement y guarantee
+            # Sometimes these appear if there is only one class in the training fragment. This code simply excludes samples without
+            # an adequate guarantee.
+            return None, None
+        duration = time.time() - start
+        return fitted_classifier, duration
+
+    def _fit_perfect_metamodel(self, x_training: pd.DataFrame, y_training, y_complement):
+        start = time.time()
+        try:
+            fitted_classifier = self.metamodel.fit(X=x_training, y=y_training, y_complement=y_complement)
         except ValueError:
             # TODO Implement y guarantee
             # Sometimes these appear if there is only one class in the training fragment. This code simply excludes samples without
@@ -183,11 +208,12 @@ class Experiment:
         duration = time.time() - start
         return g_data_y, duration
 
-    def _scale(self, x: pd.DataFrame, scaler):
-        fitted_scaler = scaler.fit(x)
-        scaled_data = fitted_scaler.transform(x)
+    def _scale(self, x: pd.DataFrame, scaler, fit=True):
+        if fit:
+            scaler = scaler.fit(x)
+        scaled_data = scaler.transform(x)
         x = pd.DataFrame(scaled_data, columns=x.columns)
-        return x, fitted_scaler
+        return x, scaler
 
     def _scale_inverse(self, x: pd.DataFrame, fitted_scaler):
         scaled_data = fitted_scaler.inverse_transform(x)
