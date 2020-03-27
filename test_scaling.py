@@ -84,9 +84,14 @@ electricity800 = ExperimentDataset("electricity", electricity, electricity_yname
 electricity1600 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=1600)
 electricity2400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=2400)
 
-exp_man.add_experiment(avila200, DummyGenerator(), DummyMetaModel(), c.discovery_algs["prim"],name="kde_classRF-prob_" + "avila200", new_samples=5000, fragment_limit=10, enable_probabilities=True)
-exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],name="kde_classRF-prob_" + "avila200",new_samples=5000, fragment_limit=10, enable_probabilities=True, min_support=0, scale=True)
-exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],name="kde_classRF-prob-unscaled_" + "avila200", new_samples=5000, fragment_limit=10, enable_probabilities=True, min_support=0, scale=False)
+d1 = [SAAC2200, SAAC2400, SAAC2800, SAAC21600, SAAC22400]
+d2 = [electricity200, electricity400, electricity800, electricity1600, electricity2400]
+d3 = [sylva200, sylva400, sylva800, sylva1600, sylva2400]
+
+for d in d1:
+    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"],name="kde_classRF-prob_" + d.name, new_samples=5000, fragment_limit=10, enable_probabilities=True)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],name="kde_classRF-prob_" + d.name,new_samples=5000, fragment_limit=10, enable_probabilities=True, min_support=0, scale=True)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],name="kde_classRF-prob-unscaled_" + d.name, new_samples=5000, fragment_limit=10, enable_probabilities=True, min_support=0, scale=False)
 
 #exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"], name="perfect_perfect_" + "avila200", new_samples=5000, fragment_limit=2, enable_probabilities=False)
 
