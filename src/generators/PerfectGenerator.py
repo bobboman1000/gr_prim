@@ -6,7 +6,7 @@ class PerfectGenerator:
         self.data = None
         self.X_complement = None
 
-    def fit(self, X, X_complement: pd.DataFrame, **kwargs):
+    def fit(self, X: pd.DataFrame, X_complement: pd.DataFrame, **kwargs):
         self.data = X
         self.X_complement = X_complement
         return self

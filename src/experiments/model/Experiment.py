@@ -119,11 +119,12 @@ class Experiment:
 
     def _exec(self, subset_compound: ExperimentSubsetCompound):
         execution_times = {}
-        scaler = MinMaxScaler()
 
         if self.do_scale:
-            x_training, fitted_scaler = self._scale(subset_compound.fragment, scaler)
-            x_complement = self._scale(subset_compound.complement, fitted_scaler, fit=False) if self.perfect \
+            scaler = MinMaxScaler()
+            scaler.fit(subset_compound.fragment)
+            x_training = self._scale(subset_compound.fragment, scaler)
+            x_complement = self._scale(subset_compound.complement, scaler) if self.perfect \
                 else None  # Don't waste time scaling if it's not a perfect metamodel
         else:
             x_training = subset_compound.fragment
@@ -145,7 +146,7 @@ class Experiment:
         start = time.time()
 
         if self.do_scale:  # Revert scaling before starting SD
-            g_data, fitted_scaler = self._scale_inverse(g_data, scaler)
+            g_data = self._scale_inverse(g_data, scaler)
 
         result = self.discovery_alg.find(g_data, g_data_y, regression=self.enable_probabilities)
         execution_times[sub] = time.time() - start
@@ -208,17 +209,15 @@ class Experiment:
         duration = time.time() - start
         return g_data_y, duration
 
-    def _scale(self, x: pd.DataFrame, scaler, fit=True):
-        if fit:
-            scaler = scaler.fit(x)
-        scaled_data = scaler.transform(x)
+    def _scale(self, x: pd.DataFrame, fitted_scaler):
+        scaled_data = fitted_scaler.transform(x)
         x = pd.DataFrame(scaled_data, columns=x.columns)
-        return x, scaler
+        return x
 
     def _scale_inverse(self, x: pd.DataFrame, fitted_scaler):
         scaled_data = fitted_scaler.inverse_transform(x)
         x = pd.DataFrame(scaled_data, columns=x.columns)
-        return x, fitted_scaler
+        return x
 
     def _get_method_name_by_idx(self, idx: int):
         return self.name.split("_")[idx]
