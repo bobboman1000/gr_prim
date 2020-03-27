@@ -95,7 +95,7 @@ for d in d1:
 
 #exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"], name="perfect_perfect_" + "avila200", new_samples=5000, fragment_limit=2, enable_probabilities=False)
 
-res = exp_man.run_fragments_parallel(10)
+res = exp_man.run_all_parallel(15)
 exp_man.export_experiments("scaling_test")
 
 
