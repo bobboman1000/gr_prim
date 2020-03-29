@@ -192,7 +192,7 @@ class Experiment:
     def _generate_data(self, scaled_fragment: pd.DataFrame, fitted_generator):
         start = time.time()
         g_data = pd.DataFrame(fitted_generator.sample(self.new_sample_size), columns=scaled_fragment.columns)
-        g_data = g_data.append(scaled_fragment)
+        g_data = g_data.append(scaled_fragment, ignore_index=not self.perfect)
         duration = time.time() - start
         return g_data, duration
 
