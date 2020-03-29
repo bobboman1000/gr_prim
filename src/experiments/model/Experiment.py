@@ -210,12 +210,12 @@ class Experiment:
 
     def _scale(self, x: pd.DataFrame, fitted_scaler):
         scaled_data = fitted_scaler.transform(x)
-        x = pd.DataFrame(scaled_data, columns=x.columns)
+        x = pd.DataFrame(scaled_data, columns=x.columns, index=x.index)
         return x
 
     def _scale_inverse(self, x: pd.DataFrame, fitted_scaler):
         scaled_data = fitted_scaler.inverse_transform(x)
-        x = pd.DataFrame(scaled_data, columns=x.columns)
+        x = pd.DataFrame(scaled_data, columns=x.columns, index=x.index)
         return x
 
     def _get_method_name_by_idx(self, idx: int):
