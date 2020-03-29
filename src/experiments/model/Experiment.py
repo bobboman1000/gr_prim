@@ -119,9 +119,8 @@ class Experiment:
 
     def _exec(self, subset_compound: ExperimentSubsetCompound):
         execution_times = {}
-
+        scaler = MinMaxScaler()
         if self.do_scale:
-            scaler = MinMaxScaler()
             scaler.fit(subset_compound.fragment)
             x_training = self._scale(subset_compound.fragment, scaler)
             x_complement = self._scale(subset_compound.complement, scaler) if self.perfect \
@@ -140,7 +139,7 @@ class Experiment:
             fitted_generator, execution_times[g_fit] = self._fit_perfect_generator(x_training, x_complement)
             fitted_metamodel, execution_times[m_fit] = self._fit_perfect_metamodel(x_training, y_training, y_complement)
 
-        g_data, execution_times[g_sam] = self._generate_data(subset_compound, fitted_generator)
+        g_data, execution_times[g_sam] = self._generate_data(x_training, fitted_generator)
         g_data_y, execution_times[m_pred] = self._label_data(g_data, fitted_metamodel)
 
         start = time.time()
@@ -190,22 +189,22 @@ class Experiment:
         duration = time.time() - start
         return fitted_classifier, duration
 
-    def _generate_data(self, subset_compound: ExperimentSubsetCompound, fitted_generator):
+    def _generate_data(self, scaled_fragment: pd.DataFrame, fitted_generator):
         start = time.time()
-        g_data = pd.DataFrame(fitted_generator.sample(self.new_sample_size), columns=subset_compound.fragment.columns)
-        g_data = g_data.append(subset_compound.fragment)
+        g_data = pd.DataFrame(fitted_generator.sample(self.new_sample_size), columns=scaled_fragment.columns)
+        g_data = g_data.append(scaled_fragment)
         duration = time.time() - start
         return g_data, duration
 
-    def _label_data(self, g_data: pd.DataFrame, fitted_classifier):
+    def _label_data(self, gerenated_data: pd.DataFrame, fitted_classifier):
         start = time.time()
         if self.enable_probabilities:
-            g_data_y: np.ndarray = fitted_classifier.predict_proba(g_data)
+            g_data_y: np.ndarray = fitted_classifier.predict_proba(gerenated_data)
             if not(len(g_data_y.shape) > 1 and g_data_y.shape[1] == 2):
                 raise AssertionError
             g_data_y: np.ndarray = g_data_y[:, 1]
         else:
-            g_data_y = fitted_classifier.predict(g_data)
+            g_data_y = fitted_classifier.predict(gerenated_data)
         duration = time.time() - start
         return g_data_y, duration
 

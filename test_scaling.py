@@ -89,9 +89,9 @@ d2 = [electricity200, electricity400, electricity800, electricity1600, electrici
 d3 = [sylva200, sylva400, sylva800, sylva1600, sylva2400]
 
 for d in d1:
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"],name="dummy_dummy_" + d.name, new_samples=5000, fragment_limit=10, enable_probabilities=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],name="kde_classRF-prob_" + d.name,new_samples=5000, fragment_limit=10, enable_probabilities=True, min_support=0, scale=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],name="kde_classRF-prob-unscaled_" + d.name, new_samples=5000, fragment_limit=10, enable_probabilities=True, min_support=0, scale=False)
+    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_" + d.name, new_samples=5000, fragment_limit=10, enable_probabilities=True, scale=True)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob_" + d.name, new_samples=5000, fragment_limit=10, enable_probabilities=True, min_support=0, scale=True)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob-unscaled_" + d.name, new_samples=5000, fragment_limit=10, enable_probabilities=True, min_support=0, scale=False)
 
 #exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"], name="perfect_perfect_" + "avila200", new_samples=5000, fragment_limit=2, enable_probabilities=False)
 
