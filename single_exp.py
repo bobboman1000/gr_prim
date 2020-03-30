@@ -87,10 +87,8 @@ electricity2400 = ExperimentDataset("electricity", electricity, electricity_ynam
 
 
 #exp_man.add_experiment(avila200, DummyGenerator(), DummyMetaModel(), c.discovery_algs["prim"],name="kde_classRF-prob_" + "avila200", new_samples=600, fragment_limit=5, enable_probabilities=True)
-exp_man.add_experiment(sylva200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],name="kde_classRF-prob_" + "avila200",
-                       new_samples=1000, fragment_limit=2, enable_probabilities=True, min_support=0, scale=True)
-#exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"],
-#                       name="perfect_perfect_" + "avila200", new_samples=600, fragment_limit=5, enable_probabilities=False)
+#exp_man.add_experiment(sylva200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],name="kde_classRF-prob_" + "avila200", new_samples=600, fragment_limit=2, enable_probabilities=True, min_support=0, scale=True)
+exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"], name="perfect_perfect_" + "avila200", new_samples=600, fragment_limit=2, enable_probabilities=False)
 res = exp_man.run_all()
 
 
