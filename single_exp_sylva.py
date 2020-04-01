@@ -28,8 +28,6 @@ def generate_names(number):
     return x_names
 
 
-
-
 sylva = pd.read_csv("resources/data/sylva_prior.csv", header=0)
 sylva_yname = "label"
 sylva = sylva.dropna()
@@ -50,47 +48,19 @@ sylva = sylva.drop(columns=["Rawah_Wilderness_Area","Neota_Wilderness_Area","Com
 sylva = map_target(sylva, sylva_yname, 1)
 sylva200 = ExperimentDataset("sylva200", sylva, sylva_yname, fragment_size=200)
 sylva400 = ExperimentDataset("sylva400", sylva, sylva_yname, fragment_size=400)
-sylva800 = ExperimentDataset("sylva800", sylva, sylva_yname, fragment_size=800)
-sylva1600 = ExperimentDataset("sylva1600", sylva, sylva_yname, fragment_size=1600)
-sylva2400 = ExperimentDataset("sylva2400", sylva, sylva_yname, fragment_size=2400)
 
-
-avila = pd.read_csv("resources/data/avila/avila.txt", header=0, names=generate_names(10))
-avila_yname = "y"
-avila = avila.dropna()
-avila = map_target(avila, avila_yname, "A")
-avila200 = ExperimentDataset("avila200", avila, avila_yname, fragment_size=200)
-avila400 = ExperimentDataset("avila400", avila, avila_yname, fragment_size=400)
-avila800 = ExperimentDataset("avil800", avila, avila_yname, fragment_size=800)
-avila1600 = ExperimentDataset("avila1600", avila, avila_yname, fragment_size=1600)
-avila2400 = ExperimentDataset("avila2400", avila, avila_yname, fragment_size=2400)
-
-datasets = [sylva200, sylva400]
+datasets = [sylva200]
 var_sylva = DSSD("dssd")
-
-sizes = [200, 400]
+sizes = [200]
 
 for d in datasets:
     exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], var_sylva, name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
     exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], var_sylva, name="kde_classRF_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
     exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], var_sylva, name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), var_sylva, name="dummy_dummy_avila400" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
+    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), var_sylva, name="dummy_dummy_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
 
-# res = exp_man.run_all_parallel(4)
 res = exp_man.run_all()
 exp_man.export_experiments("prelim_dssd_sylva")
-
-
-# The configuration files (src/experiments/XXXXConfig.py) contain configured generators and metamodels.
-# New samples is the amount of samples added, enable_probabilities specifies wheter the classification should be done
-# using probabilities, the fragment_limit specifies the maximum number of fragments (small datasets).
-
-# exp_man.add_experiment(avila200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["dssd"],
-#                        name="kde_classRF_avila", new_samples=10000, fragment_limit=1, enable_probabilities=True)
-
-
-# res = exp_man.run_all()
-# exp_man.export_experiments("prelim_refine")
 
 
 
