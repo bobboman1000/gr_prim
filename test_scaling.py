@@ -58,11 +58,11 @@ avila = pd.read_csv("resources/data/avila/avila.txt", header=0, names=generate_n
 avila_yname = "y"
 avila = avila.dropna()
 avila = map_target(avila, avila_yname, "A")
-avila200 = ExperimentDataset("avila200", avila, avila_yname, fragment_size=200)
-avila400 = ExperimentDataset("avila400", avila, avila_yname, fragment_size=400)
-avila800 = ExperimentDataset("avil800", avila, avila_yname, fragment_size=800)
-avila1600 = ExperimentDataset("avila1600", avila, avila_yname, fragment_size=1600)
-avila2400 = ExperimentDataset("avila2400", avila, avila_yname, fragment_size=2400)
+avila200 = ExperimentDataset("avila", avila, avila_yname, fragment_size=200)
+avila400 = ExperimentDataset("avila", avila, avila_yname, fragment_size=400)
+avila800 = ExperimentDataset("avila", avila, avila_yname, fragment_size=800)
+avila1600 = ExperimentDataset("avila", avila, avila_yname, fragment_size=1600)
+avila2400 = ExperimentDataset("avila", avila, avila_yname, fragment_size=2400)
 
 SAAC2 = pd.read_csv("resources/data/SAAC2.csv", na_values=['?'])
 SAAC2_yname = "class"
@@ -88,10 +88,10 @@ d1 = [SAAC2200, SAAC2400, SAAC2800, SAAC21600, SAAC22400]
 d2 = [electricity200, electricity400, electricity800, electricity1600, electricity2400]
 d3 = [sylva200, sylva400, sylva800, sylva1600, sylva2400]
 
-for d in d1:
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, scale=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob_" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, min_support=0, scale=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob-unscaled_" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, min_support=0, scale=False)
+for d in d2:
+    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_BI" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, scale=True)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob_BI" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, min_support=0, scale=True)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob-unscaled_BI" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, min_support=0, scale=False)
 
 #exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"], name="perfect_perfect_" + "avila200", new_samples=5000, fragment_limit=2, enable_probabilities=False)
 
