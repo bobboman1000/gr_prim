@@ -47,11 +47,11 @@ sylva = sylva.drop(columns=["Rawah_Wilderness_Area","Neota_Wilderness_Area","Com
                             "dup_Soil_Type_29","dup_Soil_Type_30","dup_Soil_Type_31","dup_Soil_Type_32","dup_Soil_Type_33","dup_Soil_Type_34",
                             "dup_Soil_Type_35","dup_Soil_Type_36","dup_Soil_Type_37","dup_Soil_Type_38","dup_Soil_Type_39","dup_Soil_Type_40"])
 sylva = map_target(sylva, sylva_yname, 1)
-sylva200 = ExperimentDataset("sylva200", sylva, sylva_yname, fragment_size=200)
-sylva400 = ExperimentDataset("sylva400", sylva, sylva_yname, fragment_size=400)
-sylva800 = ExperimentDataset("sylva800", sylva, sylva_yname, fragment_size=800)
-sylva1600 = ExperimentDataset("sylva1600", sylva, sylva_yname, fragment_size=1600)
-sylva2400 = ExperimentDataset("sylva2400", sylva, sylva_yname, fragment_size=2400)
+sylva200 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=200)
+sylva400 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=400)
+sylva800 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=800)
+sylva1600 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=1600)
+sylva2400 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=2400)
 
 
 avila = pd.read_csv("resources/data/avila/avila.txt", header=0, names=generate_names(10))
@@ -87,8 +87,8 @@ electricity2400 = ExperimentDataset("electricity", electricity, electricity_ynam
 
 
 #exp_man.add_experiment(avila200, DummyGenerator(), DummyMetaModel(), c.discovery_algs["prim"],name="kde_classRF-prob_" + "avila200", new_samples=600, fragment_limit=5, enable_probabilities=True)
-#exp_man.add_experiment(sylva200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],name="kde_classRF-prob_" + "avila200", new_samples=600, fragment_limit=2, enable_probabilities=True, min_support=0, scale=True)
-exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"], name="perfect_perfect_" + "avila200", new_samples=600, fragment_limit=2, enable_probabilities=False)
+exp_man.add_experiment(sylva200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"],name="kde_classRF-prob_" + "avila200", new_samples=600, fragment_limit=2, enable_probabilities=True, min_support=0, scale=True)
+#exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"], name="perfect_perfect_" + "avila200", new_samples=600, fragment_limit=2, enable_probabilities=False)
 res = exp_man.run_all()
 
 
