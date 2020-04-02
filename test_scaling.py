@@ -68,7 +68,7 @@ method = BestInterval()
 for ds1, ds2 in zip(d1, d2):
     exp_man.add_experiment(ds1, DummyGenerator(), DummyMetaModel(), method, name="dummy_dummy_" + ds1.name, new_samples=5000, fragment_limit=20, enable_probabilities=True)
     exp_man.add_experiment(ds1, c.generators["kde"], c.metamodels["classRF"], method, name="kde_classRF-prob_" + ds1.name, new_samples=5000, fragment_limit=20, enable_probabilities=True)
-    exp_man.add_experiment(ds1, c.generators["kde"], c.metamodels["classRF"], method, name="kde_classRF-prob-unscaled_" + ds2.name, new_samples=5000, fragment_limit=20, enable_probabilities=True)
+    exp_man.add_experiment(ds2, c.generators["kde"], c.metamodels["classRF"], method, name="kde_classRF-prob-unscaled_" + ds2.name, new_samples=5000, fragment_limit=20, enable_probabilities=True)
 
 
 res = exp_man.run_all_parallel(15)
