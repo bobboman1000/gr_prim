@@ -46,50 +46,28 @@ sylva = sylva.drop(columns=["Rawah_Wilderness_Area","Neota_Wilderness_Area","Com
                             "dup_Soil_Type_29","dup_Soil_Type_30","dup_Soil_Type_31","dup_Soil_Type_32","dup_Soil_Type_33","dup_Soil_Type_34",
                             "dup_Soil_Type_35","dup_Soil_Type_36","dup_Soil_Type_37","dup_Soil_Type_38","dup_Soil_Type_39","dup_Soil_Type_40"])
 sylva = map_target(sylva, sylva_yname, 1)
-sylva200 = ExperimentDataset("sylva200", sylva, sylva_yname, fragment_size=200)
-sylva400 = ExperimentDataset("sylva400", sylva, sylva_yname, fragment_size=400)
-sylva800 = ExperimentDataset("sylva800", sylva, sylva_yname, fragment_size=800)
-sylva1600 = ExperimentDataset("sylva1600", sylva, sylva_yname, fragment_size=1600)
-sylva2400 = ExperimentDataset("sylva2400", sylva, sylva_yname, fragment_size=2400)
+sylva200 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=200)
+sylva400 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=400)
+sylva800 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=800)
+sylva1600 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=1600)
+sylva2400 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=2400)
+
+sylva_u = map_target(sylva, sylva_yname, 1)
+sylva200_u = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=200, scaler=None)
+sylva400_u = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=400, scaler=None)
+sylva800_u = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=800, scaler=None)
+sylva1600_u = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=1600, scaler=None)
+sylva2400_u = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=2400, scaler=None)
 
 
-avila = pd.read_csv("resources/data/avila/avila.txt", header=0, names=generate_names(10))
-avila_yname = "y"
-avila = avila.dropna()
-avila = map_target(avila, avila_yname, "A")
-avila200 = ExperimentDataset("avila", avila, avila_yname, fragment_size=200)
-avila400 = ExperimentDataset("avila", avila, avila_yname, fragment_size=400)
-avila800 = ExperimentDataset("avila", avila, avila_yname, fragment_size=800)
-avila1600 = ExperimentDataset("avila", avila, avila_yname, fragment_size=1600)
-avila2400 = ExperimentDataset("avila", avila, avila_yname, fragment_size=2400)
 
-SAAC2 = pd.read_csv("resources/data/SAAC2.csv", na_values=['?'])
-SAAC2_yname = "class"
-SAAC2 = SAAC2.dropna()
-SAAC2 = map_target(SAAC2, SAAC2_yname, 2)
-SAAC2200 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=200)
-SAAC2400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=400)
-SAAC2800 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=800)
-SAAC21600 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=1600)
-SAAC22400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=2400)
+d1 = [sylva200, sylva400, sylva800, sylva1600, sylva2400]
+d2 = [sylva_u, sylva200_u, sylva800_u, sylva1600_u, sylva2400_u]
 
-electricity = pd.read_csv("resources/data/electricity-normalized.csv")
-electricity_yname = "class"
-electricity = electricity.dropna()
-map_target(electricity, electricity_yname, "UP")
-electricity200 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=200)
-electricity400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=400)
-electricity800 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=800)
-electricity1600 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=1600)
-electricity2400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=2400)
-
-d1 = [SAAC2200, SAAC2400, SAAC2800, SAAC21600, SAAC22400]
-d2 = [electricity200, electricity400, electricity800, electricity1600, electricity2400]
-d3 = [sylva200, sylva400, sylva800, sylva1600, sylva2400]
-
-for d,D in zip(d3,d31):
+for d,D in zip(d1,d2):
     exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True)
     exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True)
+    exp_man.add_experiment(D, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob-unscaled" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True)
 
 #exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"], name="perfect_perfect_" + "avila200", new_samples=5000, fragment_limit=2, enable_probabilities=False)
 
