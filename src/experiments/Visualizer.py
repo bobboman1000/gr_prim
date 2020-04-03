@@ -1,6 +1,6 @@
 import math
 from decimal import Decimal, getcontext
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict, Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -208,28 +208,33 @@ class Visualizer:
         self._plot_datasets_together(qs, metric, selected_methods, name, vert=True, title=title, abbreviate=abbreviate, legend=legend, colors=colors,
                                      legend_above=legend_above)
 
-    def plot_detailed_curve(self, metric, selected_methods: List[str], colors: List[str], steps_range, name: str, title=None, w_variance=False, median=False,
+    def plot_detailed_curve(self, metric, selected_methods: List[str], colors: List[str], steps_range, name: str = None, title=None, w_variance=False, median=False,
                             legend=False):
         assert self.detailed_mode
-        qs = self.exp_man.queues
+        qs: Dict[str, Any] = self.exp_man.queues
         methods_list = self._map_methods_list_and_apply_metric(qs, selected_methods, metric)
         for i in range(len(selected_methods)):
             if not median:
                 means = self._aggregate(methods_list[i], np.mean)
             else:
                 means = self._aggregate(methods_list[i], np.median)
-            plt.plot(list(steps_range), means, color=colors[i])
+            plt.plot(list(steps_range), means, color=colors[i], label=selected_methods[i])
             if w_variance:
                 stds = np.array(list(map(lambda e_list: np.std(e_list), methods_list[i])))
                 plt.fill_between(list(steps_range), means + stds, means - stds,
                                  alpha=0.2, edgecolor=colors[i], facecolor=colors[i], linewidth=2, antialiased=True)
-        if title is not None: plt.title(title)
+        ex0: Experiment = list(qs.values())[0][0]  # take the first experiment to read general parameters
+        if title is not None:
+            plt.title(title)
+        else:
+            plt.title(ex0.ex_data.name)
         if legend:
-            # FIXME
-            self._add_legend(None, None, None)
+            plt.legend(loc='best')
+        desc = txt = "fragment limit = " + str(ex0.fragment_limit) + "; generated points = " + str(ex0.new_sample_size)
         plt.ylabel(self.get_metric_name(metric))
-        plt.xlabel("Number of points for fragment size |d|")
-        plt.savefig("result_grafics/" + name + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
+        plt.xlabel("Number of points for fragment size |d| \n\n" + desc)
+        plt.savefig("result_grafics/" + name + "_" + self.get_metric_name(metric, short=True)
+                    + "f_lim" + str(ex0.fragment_limit) + "gen_pt" + str(ex0.new_sample_size) + ".pdf", bbox_inches='tight')
         plt.show()
 
     def points_needed_ratio(self, metric, selected_methods: List[str], steps_range, median=False, epsilon=0.05):
