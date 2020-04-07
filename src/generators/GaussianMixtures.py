@@ -1,11 +1,14 @@
 import logging
 import traceback
+from typing import List, Union
 
 import numpy as np
 from sklearn import mixture
+from sklearn.mixture import GaussianMixture
+from sklearn.model_selection import GridSearchCV
 
 
-class GaussianMixture:
+class GaussianMixtureBIC:
 
     logger = logging.getLogger('Debug')
 
@@ -44,6 +47,25 @@ class GaussianMixture:
                 self.logger.error("VALUE ERROR IN GMM. Something didnt work. Check your datasets for invalid types.")
                 self.logger.error(traceback._cause_message)
         return best_gmm
+
+    def sample(self, n_samples=1) -> np.ndarray:
+        return self.model.sample(n_samples)[0]
+
+
+class GaussianMixtureCV:
+
+    logger = logging.getLogger('Debug')
+
+    def __init__(self, no_components_list: Union[np.ndarray, List[int]]):
+        self.no_components_list = no_components_list
+        self.model = None
+
+    def fit(self, X, **kwargs):
+        gmm_paramas = {"n_components": self.no_components_list, "covariance_type": ["full", "tied", "diag", "spherical"]}
+        gmm_cv = GridSearchCV(GaussianMixture(), gmm_paramas)
+        gmm_cv.fit(X)
+        self.model = gmm_cv.best_estimator_
+        return self
 
     def sample(self, n_samples=1) -> np.ndarray:
         return self.model.sample(n_samples)[0]

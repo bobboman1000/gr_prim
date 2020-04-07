@@ -1,6 +1,10 @@
+from typing import List, Union
+
 import pandas as pd
+from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KernelDensity
 from statsmodels.nonparametric.bandwidths import bw_silverman, bw_scott
+import numpy as np
 
 bw_method_silverman = 'silverman'
 bw_method_scott = 'scott'
@@ -27,6 +31,23 @@ class KernelDensityBW:
 
     def sample(self, size: int):
         sample = self.kde.sample(size)
-        self.kde = None
+        return sample
+
+
+class KernelDensityCV:
+
+    def __init__(self, bandwidth_list: Union[np.ndarray, List[float]], cv=5):
+        self.kde: KernelDensity = KernelDensity()
+        self.bandwidth_list: List[float] = bandwidth_list
+
+    def fit(self, X: pd.DataFrame, **kwargs):
+        kde_params = {"bandwidth": self.bandwidth_list}
+        kde_cv = GridSearchCV(self.kde, kde_params)
+        self.kde = kde_cv.best_estimator_
+        self.kde.fit(X)
+        return self
+
+    def sample(self, size: int):
+        sample = self.kde.sample(size)
         return sample
 
