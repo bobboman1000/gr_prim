@@ -16,7 +16,6 @@ from src.subgroup_discovery.PRIM import PRIM
 
 cv = 5
 
-
 generators = {
     "random-unif": UniformRandomSamplesGenerator(),
     "random-norm": NormalRandomSampleGenerator(),
