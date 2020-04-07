@@ -21,7 +21,7 @@ generators = {
 cv = 3
 
 classRF_cv_params = { "n_estimators": [30, 90] }
-cv_classRF = GridSearchCV(estimator=RandomForestClassifier(), param_grid=classRF_cv_params, cv=cv, iid=True)
+cv_classRF = GridSearchCV(estimator=RandomForestClassifier(), param_grid=classRF_cv_params, cv=cv)
 
 metamodels = {
     "classRF": cv_classRF,

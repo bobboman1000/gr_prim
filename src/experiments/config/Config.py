@@ -27,7 +27,7 @@ generators = {
 
 # Metamodel Configuration
 svc_cv_params = {"C": [0.1, 1, 10, 100], "gamma": [0.001, 0.01, 0.1, 1]}
-cv_svc = GridSearchCV(estimator=SVC(), param_grid=svc_cv_params, cv=cv, iid=True)
+cv_svc = GridSearchCV(estimator=SVC(), param_grid=svc_cv_params, cv=cv)
 
 metamodels = {
     "classRF": RandomForestCV(cv=cv),

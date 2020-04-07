@@ -56,15 +56,14 @@ class GaussianMixtureCV:
 
     logger = logging.getLogger('Debug')
 
-    def __init__(self, no_components_list: Union[np.ndarray, List[int]], cv=5, iid=True):
+    def __init__(self, no_components_list: Union[np.ndarray, List[int]], cv=5):
         self.no_components_list = no_components_list
         self.model = None
         self.cv = cv
-        self.iid = iid
 
     def fit(self, X, **kwargs):
         gmm_paramas = {"n_components": self.no_components_list, "covariance_type": ["full", "tied", "diag", "spherical"]}
-        gmm_cv = GridSearchCV(GaussianMixture(), gmm_paramas, cv=self.cv, iid=self.iid)
+        gmm_cv = GridSearchCV(GaussianMixture(), gmm_paramas, cv=self.cv)
         gmm_cv.fit(X)
         self.model = gmm_cv.best_estimator_
         return self

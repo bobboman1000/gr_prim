@@ -19,16 +19,16 @@ generators = {
 cv = 3
 
 classRF_cv_params = { "n_estimators": [30, 90] }
-cv_classRF = GridSearchCV(estimator=RandomForestClassifier(), param_grid=classRF_cv_params, cv=cv, iid=True)
+cv_classRF = GridSearchCV(estimator=RandomForestClassifier(), param_grid=classRF_cv_params, cv=cv)
 
 bnn_cv_params = {
     "n_estimators": [30, 90],
     "base_estimator": [KNeighborsClassifier(n_neighbors=1), KNeighborsClassifier(n_neighbors=5), KNeighborsClassifier(n_neighbors=20)],
 }
-cv_bnn = GridSearchCV(estimator=BaggingClassifier(), param_grid=bnn_cv_params, cv=cv, iid=True)
+cv_bnn = GridSearchCV(estimator=BaggingClassifier(), param_grid=bnn_cv_params, cv=cv)
 
 svc_cv_params = {"C": [1, 10, 100]}
-cv_svc = GridSearchCV(estimator=SVC(gamma='auto'), param_grid=svc_cv_params, cv=cv, iid=True)
+cv_svc = GridSearchCV(estimator=SVC(gamma='auto'), param_grid=svc_cv_params, cv=cv)
 
 
 metamodels = {
