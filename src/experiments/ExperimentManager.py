@@ -257,9 +257,9 @@ class ExperimentManager:
     def add_dummies(self, datasets, metamodels, discovery_algs, fragment_limit=None, enable_probabilities=True):
         self.build_cartesian_experiments(datasets, {"dummy": DummyGenerator()}, metamodels, discovery_algs, new_samples=0,
                                          enable_probabilities=enable_probabilities, fragment_limit=fragment_limit)
-        self.add_double_dummies(datasets, discovery_algs, fragment_limit=fragment_limit)
+        self._add_double_dummies(datasets, discovery_algs, fragment_limit=fragment_limit)
 
-    def add_double_dummies(self, datasets, discovery_algs, fragment_limit=None):
+    def _add_double_dummies(self, datasets, discovery_algs, fragment_limit=None):
         for dataset in datasets:
             for discovery_alg in discovery_algs:
                 self.add_experiment(dataset, DummyGenerator(), DummyMetaModel(), discovery_algs[discovery_alg], name="dummy_dummy", new_samples=0,

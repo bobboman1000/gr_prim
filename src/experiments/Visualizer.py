@@ -230,7 +230,8 @@ class Visualizer:
             plt.title(ex0.ex_data.name)
         if legend:
             plt.legend(loc='best')
-        desc = txt = "fragment limit = " + str(ex0.fragment_limit) + "; generated points = " + str(ex0.new_sample_size)
+        desc = "SD algorithm:" + ex0.name.split("_")[2] + "fragment limit = " \
+               + str(ex0.fragment_limit) + "; generated points = " + str(ex0.new_sample_size)
         plt.ylabel(self.get_metric_name(metric))
         plt.xlabel("Number of points for fragment size |d| \n\n" + desc)
         plt.savefig("result_grafics/" + name + "_" + self.get_metric_name(metric, short=True)
@@ -551,7 +552,6 @@ class Visualizer:
             plt.legend(bps, names, loc=1, frameon=False, ncol=n_col)
         else:
             plt.legend(bps, names, frameon=False, ncol=len(names), loc='upper center', bbox_to_anchor=(0,1.02,1,0.2))
-
 
     def highest_box_metric(self, experiment: Experiment) -> List[float]:
         return [f_res.highest_mean_box[1] for f_res in experiment.result]
