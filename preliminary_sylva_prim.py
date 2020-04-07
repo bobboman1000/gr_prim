@@ -61,7 +61,8 @@ exp_man.build_cartesian_experiments(
     fragment_limit=30
 )
 exp_man.add_dummies(datasets=[sylva200], metamodels=c.metamodels, discovery_algs=c.discovery_algs, fragment_limit=30)
-exp_man.add_experiment(dataset=sylva200, generator=PerfectGenerator(), metamodel=PerfectMetamodel(), fragment_limit=30, new_samples=10000)
+exp_man.add_experiment(dataset=sylva200, generator=PerfectGenerator(), metamodel=PerfectMetamodel(), discovery_alg=c.discovery_algs["prim"],
+                       name="perfect_perfect_prim_" + sylva200.name, fragment_limit=30, new_samples=10000)
 
 res = exp_man.run_all_parallel(32)
 exp_man.export_experiments("full_sylva")
