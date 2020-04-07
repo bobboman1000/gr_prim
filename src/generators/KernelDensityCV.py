@@ -36,13 +36,15 @@ class KernelDensityBW:
 
 class KernelDensityCV:
 
-    def __init__(self, bandwidth_list: Union[np.ndarray, List[float]], cv=5):
+    def __init__(self, bandwidth_list: Union[np.ndarray, List[float]], cv=5, iid=True):
         self.kde: KernelDensity = KernelDensity()
         self.bandwidth_list: List[float] = bandwidth_list
+        self.cv = cv
+        self.iid = iid
 
     def fit(self, X: pd.DataFrame, **kwargs):
         kde_params = {"bandwidth": self.bandwidth_list}
-        kde_cv = GridSearchCV(self.kde, kde_params)
+        kde_cv = GridSearchCV(self.kde, kde_params, cv=self.cv, iid=self.iid)
         kde_cv.fit(X)
         self.kde = kde_cv.best_estimator_
         self.kde.fit(X)
