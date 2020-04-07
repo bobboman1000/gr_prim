@@ -1,3 +1,5 @@
+import os
+
 from sklearn.ensemble import RandomForestClassifier
 
 import pandas as pd
@@ -6,6 +8,8 @@ from src.experiments.model.ExperimentDataset import ExperimentDataset
 import time as t
 
 import src.subgroup_discovery.dssd as dssd
+
+os.chdir("../../")
 
 exp_man = u.ExperimentManager()
 
@@ -30,13 +34,13 @@ def generate_names(number):
 
 gamma_telescope_names = ["fLength", "fWidth", "fSize", "fConc", "fConc1", "fAsym", "fM3Long", "fM3Trans", "fAlpha",
                          "fDist", "class"]
-gamma_telescope = pd.read_csv("resources/data/gammatelescope/magic04.data", names=gamma_telescope_names)
+gamma_telescope = pd.read_csv("../resources/data/gammatelescope/magic04.data", names=gamma_telescope_names)
 gamma_telescope_yname = "class"
 gamma_telescope = gamma_telescope.dropna()
 gamma_telescope = map_target(gamma_telescope, gamma_telescope_yname, "g")
 gamma_telescope = ExperimentDataset("gamma_telescope", gamma_telescope, gamma_telescope_yname, fragment_size=400)
 
-eye = pd.read_csv("resources/data/eeg-eye-state.csv")
+eye = pd.read_csv("../resources/data/eeg-eye-state.csv")
 eye_yname = "Class"
 eye = eye.dropna()
 eye = map_target(eye, eye_yname, 2)

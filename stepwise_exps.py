@@ -81,11 +81,15 @@ avila = pd.read_csv("resources/data/avila/avila.txt", header=0, names=generate_n
 avila_yname = "y"
 avila = avila.dropna()
 avila = map_target(avila, avila_yname, "A")
+avila200 = ExperimentDataset("avila200", avila, avila_yname, fragment_size=200)
+avila400 = ExperimentDataset("avila400", avila, avila_yname, fragment_size=400)
+avila800 = ExperimentDataset("avil800", avila, avila_yname, fragment_size=800)
+avila1600 = ExperimentDataset("avila1600", avila, avila_yname, fragment_size=1600)
+avila2400 = ExperimentDataset("avila2400", avila, avila_yname, fragment_size=2400)
 
+datasets = [avila200, avila400, avila800, avila1600, avila2400]
 
-
-for f_size in [300, 600, 1200, 2400]:
-    d = ExperimentDataset("avila" + "_" + str(f_size), avila, avila_yname, fragment_size=f_size)
+for d in datasets:
     exp_man.add_experiment(d, generators["kde"], metamodels["classRF"], discovery_algs["prim"], "kde_classRF_" + d.name, new_samples=50000,
                            enable_probabilities=True, fragment_limit=20)
     exp_man.add_experiment(d, DummyGenerator(), metamodels["classRF"], discovery_algs["prim"], "dummy_classRF_" + d.name, new_samples=0,

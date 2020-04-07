@@ -230,7 +230,7 @@ class Visualizer:
             plt.title(ex0.ex_data.name)
         if legend:
             plt.legend(loc='best')
-        desc = "SD algorithm:" + ex0.name.split("_")[2] + "fragment limit = " \
+        desc = "SD algorithm:" + ex0.name.split("_")[2] + "; fragment limit = " \
                + str(ex0.fragment_limit) + "; generated points = " + str(ex0.new_sample_size)
         plt.ylabel(self.get_metric_name(metric))
         plt.xlabel("Number of points for fragment size |d| \n\n" + desc)
