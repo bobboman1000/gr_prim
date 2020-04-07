@@ -1,4 +1,4 @@
-import src.experiments.config.ConfigTest as c
+import src.experiments.config.Config as c
 import pandas as pd
 import src.experiments.ExperimentManager as u
 from src.experiments.model.ExperimentDataset import ExperimentDataset
@@ -6,6 +6,7 @@ from src.generators.DummyGenerator import DummyGenerator
 from src.generators.PerfectGenerator import PerfectGenerator
 from src.metamodels.DummyMetamodel import DummyMetaModel
 from src.metamodels.PerfectMetamodel import PerfectMetamodel
+import numpy as np
 
 exp_man = u.ExperimentManager()
 
@@ -48,46 +49,22 @@ sylva = sylva.drop(columns=["Rawah_Wilderness_Area","Neota_Wilderness_Area","Com
                             "dup_Soil_Type_35","dup_Soil_Type_36","dup_Soil_Type_37","dup_Soil_Type_38","dup_Soil_Type_39","dup_Soil_Type_40"])
 sylva = map_target(sylva, sylva_yname, 1)
 sylva200 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=200)
-sylva400 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=400)
-sylva800 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=800)
-sylva1600 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=1600)
-sylva2400 = ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=2400)
 
+np.random.seed(1)
 
-avila = pd.read_csv("resources/data/avila/avila.txt", header=0, names=generate_names(10))
-avila_yname = "y"
-avila = avila.dropna()
-avila = map_target(avila, avila_yname, "A")
-avila200 = ExperimentDataset("avila", avila, avila_yname, fragment_size=200)
-avila400 = ExperimentDataset("avila", avila, avila_yname, fragment_size=400)
-avila800 = ExperimentDataset("avil", avila, avila_yname, fragment_size=800)
-avila1600 = ExperimentDataset("avila", avila, avila_yname, fragment_size=1600)
-avila2400 = ExperimentDataset("avila", avila, avila_yname, fragment_size=2400)
+exp_man.build_cartesian_experiments(
+    datasets=[sylva200],
+    generators=c.generators,
+    metamodels=c.metamodels,
+    discovery_algs=c.discovery_algs,
+    new_samples=10000,
+    enable_probabilities=True,
+    fragment_limit=30
+)
+exp_man.add_dummies(datasets=[sylva200], metamodels=c.metamodels, discovery_algs=c.discovery_algs, fragment_limit=30)
 
-SAAC2 = pd.read_csv("resources/data/SAAC2.csv", na_values=['?'])
-SAAC2_yname = "class"
-SAAC2 = SAAC2.dropna()
-SAAC2 = map_target(SAAC2, SAAC2_yname, 2)
-SAAC2200 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=200)
-SAAC2400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=400)
-SAAC2800 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=800)
-SAAC21600 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=1600)
-SAAC22400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=2400)
-
-electricity = pd.read_csv("resources/data/electricity-normalized.csv")
-electricity_yname = "class"
-electricity = electricity.dropna()
-map_target(electricity, electricity_yname, "UP")
-electricity200 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=200)
-electricity400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=400)
-electricity800 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=800)
-electricity1600 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=1600)
-electricity2400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=2400)
-
-#exp_man.add_experiment(avila200, DummyGenerator(), DummyMetaModel(), c.discovery_algs["prim"],name="kde_classRF-prob_" + "avila200", new_samples=600, fragment_limit=5, enable_probabilities=True)
-exp_man.add_experiment(sylva200, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["prim"], name="kde_classRF-prob_BI_" + "avila", new_samples=600, fragment_limit=2, enable_probabilities=True, min_support=0, scale=True)
-#exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"], name="perfect_perfect_" + "avila200", new_samples=600, fragment_limit=2, enable_probabilities=False)
-res = exp_man.run_all()
+res = exp_man.run_all_parallel(32)
+exp_man.export_experiments("full_sylva")
 
 # The configuration files (src/experiments/XXXXConfig.py) contain configured generators and metamodels.
 # New samples is the amount of samples added, enable_probabilities specifies wheter the classification should be done
