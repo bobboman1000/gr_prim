@@ -44,4 +44,4 @@ class UniformRandomSamplesGenerator:
         return pd.Series(np.random.uniform(low, high, size))
 
     def __min_max_of_column(self, df: pd.DataFrame, col_idx: int):
-        return df.iloc[:, col_idx].min(), df.iloc[:, col_idx].maximum()
+        return df.iloc[:, col_idx].min(), df.iloc[:, col_idx].max()

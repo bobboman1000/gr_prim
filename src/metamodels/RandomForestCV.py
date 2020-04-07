@@ -13,12 +13,15 @@ class RandomForestCV:
         m = X.shape[1]
 
         params = {"n_estimators": [2, np.sqrt(m), m]}
-        self.rf = GridSearchCV(RandomForestClassifier(), params, cv=self.cv, iid=self.iid)
-        self.rf.fit(X, y)
+        grid = GridSearchCV(RandomForestClassifier(), params, cv=self.cv, iid=self.iid).best_estimator_
+        self.rf = grid.fit(X, y)
         return self
 
     def predict(self, X):
         return self.rf.predict(X)
+
+    def predict_proba(self, X):
+        return self.rf.predict_proba(X)
 
 
 
