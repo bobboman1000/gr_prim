@@ -18,7 +18,6 @@ cv = 5
 
 
 generators = {
-    "perfect": PerfectGenerator(),
     "random-unif": UniformRandomSamplesGenerator(),
     "random-norm": NormalRandomSampleGenerator(),
     "gaussian-mixtures": GaussianMixtureCV(list(range(1,30))),

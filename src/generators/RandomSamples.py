@@ -7,8 +7,8 @@ class NormalRandomSampleGenerator:
     def __init__(self):
         self.data = None
 
-    def fit(self, data: pd.DataFrame):
-        self.data = data
+    def fit(self, X: pd.DataFrame):
+        self.data = X
         return self
 
     def sample(self, size: int) -> pd.DataFrame:
@@ -27,8 +27,8 @@ class UniformRandomSamplesGenerator:
     def __init__(self):
         self.data = None
 
-    def fit(self, data: pd.DataFrame, **kwargs):
-        self.data = data
+    def fit(self, X: pd.DataFrame, **kwargs):
+        self.data = X
         return self
 
     def sample(self, size: int) -> pd.DataFrame:

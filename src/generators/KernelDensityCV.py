@@ -43,6 +43,7 @@ class KernelDensityCV:
     def fit(self, X: pd.DataFrame, **kwargs):
         kde_params = {"bandwidth": self.bandwidth_list}
         kde_cv = GridSearchCV(self.kde, kde_params)
+        kde_cv.fit(X)
         self.kde = kde_cv.best_estimator_
         self.kde.fit(X)
         return self
