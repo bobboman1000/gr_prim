@@ -4,6 +4,8 @@
 #' local_var - local variance parameter
 
 munge <- function(data, reps, p_swap = 0.5, local_var = 0.2){
+  
+  data <- as.matrix(data)
 
   require(FNN)
   index <- as.numeric(get.knn(data, 1)$nn.index)
