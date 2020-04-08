@@ -7,8 +7,7 @@ from src.generators.KernelDensityCV import KernelDensityCV
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 
-from src.generators.Munge_R import MUNGE
-from src.generators.PerfectGenerator import PerfectGenerator
+from src.generators.Munge_R import Munge
 from src.generators.RandomSamples import NormalRandomSampleGenerator, UniformRandomSamplesGenerator
 from src.metamodels.NNProbababilityEstimation import *
 from src.metamodels.RandomForestCV import RandomForestCV
@@ -22,8 +21,8 @@ generators = {
     "random-norm": NormalRandomSampleGenerator(),
     "gaussian-mixtures": GaussianMixtureCV(list(range(1,30))),
     "kde": KernelDensityCV(np.linspace(0.1, 1.0, 30)),
-    "munge1": MUNGE(local_var=1),
-    "munge0.2": MUNGE(local_var=0.2)
+    "munge1": Munge(local_var=1),
+    "munge0.2": Munge(local_var=0.2)
 }
 
 # Metamodel Configuration
