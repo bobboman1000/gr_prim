@@ -7,6 +7,7 @@ from src.metamodels.DummyMetamodel import DummyMetaModel
 
 exp_man = u.ExperimentManager()
 
+
 def map_target(data: pd.DataFrame, y_col_name: str, to_ones):
     data.loc[:, y_col_name] = data.loc[:, y_col_name].map(lambda e: 1 if e == to_ones else 0)
     return data
@@ -85,16 +86,14 @@ d1 = [SAAC2200, SAAC2400, SAAC2800, SAAC21600, SAAC22400]
 d2 = [electricity200, electricity400, electricity800, electricity1600, electricity2400]
 d3 = [sylva200, sylva400, sylva800, sylva1600, sylva2400]
 
-for d in d1:
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_" + d.name, new_samples=10000, fragment_limit=10, enable_probabilities=True)
-    exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["best-interval"], name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=10, enable_probabilities=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=10, enable_probabilities=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF_" + d.name, new_samples=10000, fragment_limit=10, enable_probabilities=False)
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval-b5"], name="dummy_dummy-b5_" + d.name, new_samples=10000, fragment_limit=10, enable_probabilities=False)
+for d in d3:
+    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_BI_" + d.name, new_samples=10000, fragment_limit=30, enable_probabilities=True)
+    exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["best-interval"], name="dummy_classRF-prob_BI_" + d.name, new_samples=10000, fragment_limit=30, enable_probabilities=True)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob_BI_" + d.name, new_samples=10000, fragment_limit=30, enable_probabilities=True)
 
 
-res = exp_man.run_all_parallel(20)
-exp_man.export_experiments("prelim_refine")
+res = exp_man.run_all_parallel(15)
+exp_man.export_experiments("full_bi")
 
 
 

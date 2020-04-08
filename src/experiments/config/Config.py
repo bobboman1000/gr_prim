@@ -12,6 +12,7 @@ from src.generators.PerfectGenerator import PerfectGenerator
 from src.generators.RandomSamples import NormalRandomSampleGenerator, UniformRandomSamplesGenerator
 from src.metamodels.NNProbababilityEstimation import *
 from src.metamodels.RandomForestCV import RandomForestCV
+from src.subgroup_discovery.BI import BestInterval
 from src.subgroup_discovery.PRIM import PRIM
 
 cv = 5
@@ -38,5 +39,6 @@ metamodels = {
 }
 
 discovery_algs = {
-    "prim": PRIM(threshold=1, mass_min=20)
+    "prim": PRIM(threshold=1, mass_min=20),
+    "best-interval": BestInterval()
 }
