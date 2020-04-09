@@ -32,7 +32,7 @@ cv_svc = GridSearchCV(estimator=SVC(), param_grid=svc_cv_params, cv=cv)
 metamodels = {
     "classRF": RandomForestCV(cv=cv),
     "kriging": GaussianProcessClassifier(),
-    "neural-net": MLPClassifier(),
+    #"neural-net": MLPClassifier(),
     "SVC-calibrated": CalibratedClassifierCV(base_estimator=cv_svc),
     "nb-calibrated": CalibratedClassifierCV(base_estimator=GaussianNB())
 }
