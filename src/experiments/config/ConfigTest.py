@@ -4,7 +4,6 @@ from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
-from sklearn.svm import SVC
 
 #from src.subgroup_discovery.BI import BestInterval
 from src.subgroup_discovery.BI import BestInterval

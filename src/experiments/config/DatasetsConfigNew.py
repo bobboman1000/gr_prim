@@ -1,7 +1,6 @@
 import logging
-
 import pandas as pd
-from scipy.io import arff
+from src.experiments.config.DataUtils import map_target, clean, generate_names
 
 from src.experiments.model.ExperimentDataset import ExperimentDataset
 
@@ -24,17 +23,6 @@ logger.addHandler(ch)
 
 
 large_datasets = []
-
-def map_target(data: pd.DataFrame, y_col_name: str, to_ones):
-    data.loc[:, y_col_name] = data.loc[:, y_col_name].map(lambda e: 1 if e == to_ones else 0)
-    return data
-
-
-def clean(data: pd.DataFrame, value):
-    for row in range(data.shape[0]):
-        if data.loc[row,:].isin([value]).any():
-            data = data.drop(index=row)
-    return data
 
 
 # ====
