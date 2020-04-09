@@ -5,9 +5,6 @@ from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr, SignatureTranslatedAnonymousPackage
 
 pandas2ri.activate()
-utils = importr("utils")
-munge = importr("munge")
-fnn = importr("FNN")
 base = importr('base')
 
 

@@ -27,6 +27,9 @@ for d_list in large_datasets:
     for d in d_list:
         exp_man.add_experiment(dataset=d, generator=PerfectGenerator(), metamodel=PerfectMetamodel(), discovery_alg=c.discovery_algs["prim"],
                            name="perfect_perfect_prim_" + d.name, fragment_limit=30, new_samples=10000, enable_probabilities=False)
+        for metamodel in metamodels:
+            exp_man.add_experiment(dataset=d, generator=PerfectGenerator(), metamodel=metamodels[metamodel], discovery_alg=c.discovery_algs["prim"],
+                                   name="perfect_" + metamodel + "_prim_" + d.name, fragment_limit=30, new_samples=10000, enable_probabilities=False)
     res = exp_man.run_all_parallel(32)
     exp_man.export_experiments(d_list[0].name)
     exp_man.reset_experiments()

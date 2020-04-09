@@ -120,10 +120,13 @@ class Experiment:
     def _exec(self, subset_compound: ExperimentSubsetCompound):
         execution_times = {}
         scaler = MinMaxScaler()
+        perfect_gen = type(self.generator) == PerfectGenerator
+        perfect_meta = type(self.metamodel) == PerfectMetamodel
+
         if self.do_scale:
             scaler.fit(subset_compound.fragment)
             x_training = self._scale(subset_compound.fragment, scaler)
-            x_complement = self._scale(subset_compound.complement, scaler) if self.perfect \
+            x_complement = self._scale(subset_compound.complement, scaler) if perfect_gen \
                 else None  # Don't waste time scaling if it's not a perfect metamodel
         else:
             x_training = subset_compound.fragment
@@ -132,14 +135,17 @@ class Experiment:
         y_training = subset_compound.fragment_y
         y_complement = subset_compound.complement_y
 
-        if not self.perfect:
-            fitted_generator, execution_times[g_fit] = self._fit_generator(x_training)
-            fitted_metamodel, execution_times[m_fit] = self._fit_metamodel(x_training, y_training)
-        else:
+        if perfect_gen:
             fitted_generator, execution_times[g_fit] = self._fit_perfect_generator(x_training, x_complement)
-            fitted_metamodel, execution_times[m_fit] = self._fit_perfect_metamodel(x_training, y_training, y_complement)
+        else:
+            fitted_generator, execution_times[g_fit] = self._fit_generator(x_training)
 
-        g_data, execution_times[g_sam] = self._generate_data(x_training, fitted_generator)
+        if perfect_meta:
+            fitted_metamodel, execution_times[m_fit] = self._fit_perfect_metamodel(x_training, y_training, y_complement)
+        else:
+            fitted_metamodel, execution_times[m_fit] = self._fit_metamodel(x_training, y_training)
+
+        g_data, execution_times[g_sam] = self._generate_data(x_training, fitted_generator, perfect_gen)
         g_data_y, execution_times[m_pred] = self._label_data(g_data, fitted_metamodel)
 
         start = time.time()
@@ -189,10 +195,10 @@ class Experiment:
         duration = time.time() - start
         return fitted_classifier, duration
 
-    def _generate_data(self, scaled_fragment: pd.DataFrame, fitted_generator):
+    def _generate_data(self, scaled_fragment: pd.DataFrame, fitted_generator, perfect_gen):
         start = time.time()
         g_data = pd.DataFrame(fitted_generator.sample(self.new_sample_size), columns=scaled_fragment.columns)
-        g_data = g_data.append(scaled_fragment, ignore_index=not self.perfect)
+        g_data = g_data.append(scaled_fragment, ignore_index=not perfect_gen)
         duration = time.time() - start
         return g_data, duration
 
