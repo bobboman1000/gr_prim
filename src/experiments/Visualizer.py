@@ -22,6 +22,7 @@ f1_key = "f1"
 f2_key = "f2"
 wracc_key = "wracc"
 
+# Standard colors need some updates - we should probably not use them. Instead configure it for each experiment
 gen_c = {
     "dummy": "darkgrey",
     "random-uniform": "steelblue",
@@ -198,6 +199,37 @@ class Visualizer:
             self._add_legend(sorted_experiments, bps, mode, abbreviate=abbreviate)
         plt.savefig("result_grafics/" + "All" + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
         plt.show()
+
+    def export_all_as_csv(self, no_auc=False):
+        exps: List[Experiment] = self.exp_man.experiments
+        cols = ["dataset_name", "N", "L", "generator", "metamodel", "SD", "WRacc_box", "WRAcc_box_resdims", "precision_box", "precision_box_resdim",
+                "WRacc", "Precision", "AUC"]
+        all_exps = []
+        for e in exps:
+            fragments = []
+            for f_res in e.result:
+                data = [
+                    e.ex_data.name,
+                    e.ex_data.fragment_size,
+                    e.new_sample_size,
+                    e.name.split("_")[0],
+                    e.name.split("_")[1],
+                    e.name.split("_")[2],
+                    f_res.highest_wracc_box[0],
+                    f_res.restricted_dims[f_res.highest_wracc_idx],
+                    f_res.highest_mean_box[0],
+                    f_res.restricted_dims[f_res.highest_mean_idx],
+                    f_res.highest_wracc_box[1],
+                    f_res.highest_mean_box[1],
+                    0
+                ]
+                fragments.append(data)
+            if e.name.split("_")[2] == "prim" and not no_auc:
+                aucs = self.peeling_trajectory_auc_metric(e)
+                for i in range(len(fragments)):
+                    fragments[i][-1] = aucs[i]
+            all_exps += fragments
+        pd.DataFrame(all_exps, columns=cols).to_csv("output/results.csv", sep=";")
 
     def boxplot_selected_methods(self, metric, selected_methods: List[str], name: str, colors=None, title=None, abbreviate=False, vert=True, legend=True,
                                  legend_above=False):
