@@ -19,8 +19,8 @@ cv = 5
 generators = {
     "random-unif": UniformRandomSamplesGenerator(),
     "random-norm": NormalRandomSampleGenerator(),
-    "gaussian-mixtures": GaussianMixtureCV(list(range(1,30))),
-    "kde": KernelDensityCV(np.linspace(0.1, 1.0, 30)),
+    "gaussian-mixtures": GaussianMixtureCV(list(range(1, 30)), cv=cv),
+    "kde": KernelDensityCV(np.linspace(0.1, 1.0, 30), cv=cv),
     "munge1": Munge(local_var=1),
     "munge0.2": Munge(local_var=0.2)
 }
@@ -32,7 +32,6 @@ cv_svc = GridSearchCV(estimator=SVC(), param_grid=svc_cv_params, cv=cv)
 metamodels = {
     "classRF": RandomForestCV(cv=cv),
     "kriging": GaussianProcessClassifier(),
-    #"neural-net": MLPClassifier(),
     "SVC-calibrated": CalibratedClassifierCV(base_estimator=cv_svc),
     "nb-calibrated": CalibratedClassifierCV(base_estimator=GaussianNB())
 }
