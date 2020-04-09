@@ -262,7 +262,8 @@ class ExperimentManager:
     def _add_double_dummies(self, datasets, discovery_algs, fragment_limit=None):
         for dataset in datasets:
             for discovery_alg in discovery_algs:
-                self.add_experiment(dataset, DummyGenerator(), DummyMetaModel(), discovery_algs[discovery_alg], name="dummy_dummy", new_samples=0,
+                self.add_experiment(dataset, DummyGenerator(), DummyMetaModel(), discovery_algs[discovery_alg],
+                                    name="dummy_dummy_" + discovery_alg + "_" + dataset.name, new_samples=0,
                                     enable_probabilities=False, fragment_limit=fragment_limit)
 
     def get_method_dict(self):
