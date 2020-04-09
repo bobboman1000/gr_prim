@@ -14,16 +14,18 @@ exp_man = u.ExperimentManager()
 
 np.random.seed(1)
 
+ds_a = {"prim": c.discovery_algs["prim"]}
+
 for d_list in large_datasets:
     exp_man.build_cartesian_experiments(
         datasets=d_list,
         generators=c.generators,
         metamodels=c.metamodels,
-        discovery_algs=c.discovery_algs,
+        discovery_algs=ds_a,
         new_samples=10000,
         fragment_limit=30
     )
-    exp_man.add_dummies(datasets=d_list, metamodels=c.metamodels, discovery_algs=c.discovery_algs, fragment_limit=30)
+    exp_man.add_dummies(datasets=d_list, metamodels=c.metamodels, discovery_algs=ds_a, fragment_limit=30)
     for d in d_list:
         exp_man.add_experiment(dataset=d, generator=PerfectGenerator(), metamodel=PerfectMetamodel(), discovery_alg=c.discovery_algs["prim"],
                            name="perfect_perfect_prim_" + d.name, fragment_limit=30, new_samples=10000, enable_probabilities=False)
