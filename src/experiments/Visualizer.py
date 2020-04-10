@@ -266,8 +266,8 @@ class Visualizer:
                + str(ex0.fragment_limit) + "; generated points = " + str(ex0.new_sample_size)
         plt.ylabel(self.get_metric_name(metric))
         plt.xlabel("Number of points for fragment size |d| \n\n" + desc)
-        plt.savefig("result_grafics/" + name + "_" + self.get_metric_name(metric, short=True)
-                    + "f_lim" + str(ex0.fragment_limit) + "gen_pt" + str(ex0.new_sample_size) + ".pdf", bbox_inches='tight')
+        plt.savefig("result_grafics/" + name + "_" + self.get_metric_name(metric, short=True) + "_"
+                    + "f_lim" + str(ex0.fragment_limit) + "_gen_pt" + str(ex0.new_sample_size) + ".pdf", bbox_inches='tight')
         plt.show()
 
     def points_needed_ratio(self, metric, selected_methods: List[str], steps_range, median=False, epsilon=0.05):
