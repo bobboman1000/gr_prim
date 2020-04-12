@@ -19,6 +19,7 @@ sylvas.append(ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=400))
 sylvas.append(ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=800))
 sylvas.append(ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=1600))
 
+'''
 for d in sylvas:
     exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy_BI_" + d.name, new_samples=10000, fragment_limit=30, enable_probabilities=True)
     exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["best-interval"], name="dummy_classRF-prob_BI_" + d.name, new_samples=10000, fragment_limit=30, enable_probabilities=True)
@@ -26,6 +27,14 @@ for d in sylvas:
 
 res = exp_man.run_all_parallel(15)
 exp_man.export_experiments("sylva_bi")
+'''
+
+for d in sylvas:
+    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["bid20"], name="dummy_dummy_bid20_" + d.name, new_samples=5000, fragment_limit=30, enable_probabilities=True)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["bid20"], name="kde_classRF-prob_bid20_" + d.name, new_samples=5000, fragment_limit=30, enable_probabilities=True)
+
+res = exp_man.run_all_parallel(8)
+exp_man.export_experiments("sylva_bid20")
 
 
 

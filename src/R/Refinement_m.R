@@ -1,3 +1,6 @@
+# outputs multiple (min(depth, ncol(dx))) boxes
+# sort of peeling trajectory analogy
+
 # as compared to the latest version, I allow the box to be 
 # expanded and made default depth equal 20
 
@@ -6,7 +9,7 @@
 #' beam.size is the parameter for the beam search
 #' depth is the maximal number of restricted dimensions
 
-beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
+beam.refine.m <- function(dx, dy, beam.size = 1, depth = 20){
   
   #### functions ####
   
@@ -84,12 +87,15 @@ beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
   dims <- 1:ncol(box.init)
   res.box <- list()
   res.tab <- as.data.frame(matrix(ncol = 3, nrow = 0))
+  res.list <- list(box.init)
   
   for(i in 1:ncol(box.init)){
     tmp <- refine(dx, dy, box.init, i, 0)
     res.box <- c(res.box, list(tmp[[1]]))
     res.tab <- rbind(res.tab, c(tmp[[2]], tmp[[3]], i))
   }
+  winner <- which(res.tab[, 1] == max(res.tab[, 1]))[1]
+  res.list <- c(res.list, res.box[winner])
   
   if(depth > 1){
     for(j in 1:(depth - 1)){
@@ -109,14 +115,12 @@ beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
           }
         }
       }
+      winner <- which(res.tab[, 1] == max(res.tab[, 1]))[1]
+      res.list <- c(res.list, res.box[winner])
     }
   }
   
-  winner <- which(res.tab[, 1] == max(res.tab[, 1]))[1]
-  res <- res.box[[winner]]
-  #res[1, res[1, ] == box.init[1, ]] <- -10^8
-  #res[2, res[2, ] == box.init[2, ]] <- 10^8
-  res
+  res.list
 }
 
 
@@ -181,10 +185,13 @@ beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
 
 #### SAAC2 experiment
 
-# d <- read.csv("C:\\Projects\\6_PRIM_RF_real\\gr_prim\\resources\\data\\tmp_saac2.csv", header = TRUE)
-# d <- d[, -1]
-# dx <- d[, -1]
-# dy <- d[, 1]
-# a <- Sys.time()
-# beam.refine(dx, dy, 1, 10)
-# Sys.time() - a 
+d <- read.csv("C:\\Projects\\6_PRIM_RF_real\\gr_prim\\resources\\data\\tmp_saac2.csv", header = TRUE)
+d <- d[, -1]
+dx <- d[, -1]
+dy <- d[, 1]
+a <- Sys.time()
+beam.refine.m(dx, dy, 1, 10)
+Sys.time() - a
+a <- Sys.time()
+beam.refine(dx, dy, 1, 10)
+Sys.time() - a
