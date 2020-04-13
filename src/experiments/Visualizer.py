@@ -50,6 +50,8 @@ abbreviations_dict = {
     "gaussian-mixtures": "gmm",
     "kde": "kde",
     "munge": "munge",
+    "munge1": "munge1",
+    "munge0.2": "munge0.2",
     "classRF": "classRF",
     "bNN": "bNN",
     "kriging": "kriging",
@@ -200,9 +202,9 @@ class Visualizer:
         plt.savefig("result_grafics/" + "All" + "_" + self.get_metric_name(metric, short=True) + ".pdf", bbox_inches='tight')
         plt.show()
 
-    def export_all_as_csv(self, no_auc=False):
+    def export_all_as_csv(self, name="results", no_auc=False):
         exps: List[Experiment] = self.exp_man.experiments
-        cols = ["dataset_name", "N", "L", "generator", "metamodel", "SD", "WRacc_box", "WRAcc_box_resdims", "precision_box", "precision_box_resdim",
+        cols = ["dataset-name", "N", "L", "generator", "metamodel", "SD", "fragment-id", "WRacc_box", "WRAcc_box_resdims", "precision_box", "precision_box_resdim",
                 "WRacc", "Precision", "AUC"]
         all_exps = []
         for e in exps:
@@ -215,6 +217,7 @@ class Visualizer:
                     e.name.split("_")[0],
                     e.name.split("_")[1],
                     e.name.split("_")[2],
+                    f_res.fragment_idx,
                     f_res.highest_wracc_box[0],
                     f_res.restricted_dims[f_res.highest_wracc_idx],
                     f_res.highest_mean_box[0],
@@ -229,7 +232,7 @@ class Visualizer:
                 for i in range(len(fragments)):
                     fragments[i][-1] = aucs[i]
             all_exps += fragments
-        pd.DataFrame(all_exps, columns=cols).to_csv("output/results.csv", sep=";")
+        pd.DataFrame(all_exps, columns=cols).to_csv("output/" + name + ".csv", sep=";", index=False)
 
     def boxplot_selected_methods(self, metric, selected_methods: List[str], name: str, colors=None, title=None, abbreviate=False, vert=True, legend=True,
                                  legend_above=False):
@@ -572,10 +575,10 @@ class Visualizer:
             if abbreviate:
                 names = list(map(lambda name: abbreviations_dict[name], names))
         else:
-            if not abbreviate:
-                names = list(map(lambda e: e.name.split("_")[0] + " & " + e.name.split("_")[1], grouped_e_list))
-            else:
+            if abbreviate:
                 names = list(map(lambda e: abbreviations_dict[e.name.split("_")[0]] + " & " + abbreviations_dict[e.name.split("_")[1]], grouped_e_list))
+            else:
+                names = list(map(lambda e: e.name.split("_")[0] + " & " + e.name.split("_")[1], grouped_e_list))
         mode = 1 - mode  # Colorize the opposite
         bps = [bps[-1]["boxes"][i] for i in range(len(names))]
         # Place a legend to the right of this smaller subplot.
