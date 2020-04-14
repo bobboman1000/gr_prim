@@ -318,22 +318,23 @@ class Visualizer:
         a_diff, b_diff = abs(value - a), abs(value - b)
         return 0 if a_diff > b_diff else 1
 
-    def _trajectory_from_fragment(self, fragment_result, color, linestyle, alpha):
+    def _trajectory_from_fragment(self, fragment_result, color, linestyle, alpha, marker=None):
         cov = list(map(lambda kpis: kpis[coverage_key], fragment_result.kpis))
         density = list(map(lambda kpis: kpis[density_key], fragment_result.kpis))
-        plt.plot(cov, density, color=color, linestyle=linestyle, alpha=alpha)
+        plt.plot(cov, density, color=color, linestyle=linestyle, alpha=alpha, marker=marker)
         plt.xlim(0, 1)
         plt.ylim(0, 1)
         plt.xlabel("coverage")
         plt.ylabel("denisty")
 
-    def plot_trajectory_from_fragment(self, fragment_result, color, linestyle, alpha):
-        self._trajectory_from_fragment(fragment_result, color, linestyle, alpha)
+    def plot_trajectory_from_fragment(self, fragment_result, color, linestyle, alpha, marker=None):
+        self._trajectory_from_fragment(fragment_result, color, linestyle, alpha, marker=marker)
         plt.show()
 
-    def plot_trajectories_from_experiment(self, experiment, color, linestyle, alpha):
+    def plot_trajectories_from_experiment(self, experiment, color, linestyle, alpha, marker=None):
         for f_res in experiment.result:
-            self._trajectory_from_fragment(f_res, color, linestyle, alpha)
+            self._trajectory_from_fragment(f_res, color, linestyle, alpha, marker=marker)
+        print("Trajectory plot created for " + experiment.name + "; fsize: " + str(experiment.ex_data.fragment_size)) + "\n Use plt.show() to display"
 
     def export_avg_metrics_to_csv(self, metric, abbreviate=True, filename=None, median=False, relative=True):
         qs = self.exp_man.get_grouped_by(1)
