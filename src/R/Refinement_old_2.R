@@ -1,12 +1,12 @@
-# as compared to the latest version, I allow the box to be 
-# expanded and made default depth equal 20
+# as compared to the latest version, I remove the restriction on
+# never returning to the attribute once refined
 
 #' dx - a matrix/data frame of attribute values
 #' dy - a vector with 0 and 1
 #' beam.size is the parameter for the beam search
 #' depth is the maximal number of restricted dimensions
 
-beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
+beam.refine <- function(dx, dy, beam.size = 1, depth = 4){
   
   #### functions ####
   
@@ -19,16 +19,14 @@ beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
   }
   
   # refine a single dimension of the box
-  refine <- function(dx, dy, box, ind, start.q){
+  refine <- function(dx, dy, box, ind){
     
     N <- length(dy)
     Np <- sum(dy)
     
     ind.in.box <- rep(TRUE, N)                    
     for(i in 1:ncol(dx)){
-      if(!(i == ind)){
-        ind.in.box <- ind.in.box & (dx[, i] >= box[1, i] & dx[, i] <= box[2, i])
-      }
+      ind.in.box <- ind.in.box & (dx[, i] >= box[1, i] & dx[, i] <= box[2, i])
     }
     in.box <- cbind(dx[ind.in.box, ind], dy[ind.in.box])
     in.box <- data.table(in.box[order(in.box[,1]),])
@@ -39,8 +37,7 @@ beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
     r <- box[2, ind]                              # 1
     n <- in.box[,.N]
     np <- in.box[, sum(y)]
-    wracc.m = start.q                             # 2
-    # start.q <- wracc.m <- wracc(n, np, N, Np)     # 2 
+    start.q <- wracc.m <- wracc(n, np, N, Np)     # 2 
     
     t <- sort(unique(in.box[, x]))                # define T
     for(i in 2:length(t)){                        # 5
@@ -86,7 +83,7 @@ beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
   res.tab <- as.data.frame(matrix(ncol = 3, nrow = 0))
   
   for(i in 1:ncol(box.init)){
-    tmp <- refine(dx, dy, box.init, i, 0)
+    tmp <- refine(dx, dy, box.init, i)
     res.box <- c(res.box, list(tmp[[1]]))
     res.tab <- rbind(res.tab, c(tmp[[2]], tmp[[3]], i))
   }
@@ -103,7 +100,7 @@ beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
           res.tab[k, 2] <- 0
           inds.r <- dims[!(dims %in% res.tab[k, 3])]
           for(i in inds.r){
-            tmp <- refine(dx, dy, res.box[[k]], i, res.tab[k, 1])
+            tmp <- refine(dx, dy, res.box[[k]], i)
             res.box <- c(res.box, list(tmp[[1]]))
             res.tab <- rbind(res.tab, c(tmp[[2]], tmp[[3]], i))
           }
@@ -122,7 +119,7 @@ beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
 
 
 #### TEST ####
-# 
+
 # full.data <- read.table("banknote.txt", sep = ",")
 # for(i in 1:4){
 # full.data[, i] <- (full.data[, i] - min(full.data[, i]))/(max(full.data[, i]) - min(full.data[, i]))
@@ -134,7 +131,7 @@ beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
 # 
 # a <- Sys.time()
 # beam.refine(tmpx, tmpy, 4, 4)
-# a <- Sys.time() - a # 25 s
+# a <- Sys.time() - a
 # 
 # tmpx <- full.data[selector == 0, 1:4]
 # tmpy <- full.data[selector == 0, 5]
@@ -179,12 +176,3 @@ beam.refine <- function(dx, dy, beam.size = 1, depth = 20){
 # beam.refine(tmpx, tmpy)
 # Sys.time() - a
 
-#### SAAC2 experiment
-
-# d <- read.csv("C:\\Projects\\6_PRIM_RF_real\\gr_prim\\resources\\data\\tmp_saac2.csv", header = TRUE)
-# d <- d[, -1]
-# dx <- d[, -1]
-# dy <- d[, 1]
-# a <- Sys.time()
-# beam.refine(dx, dy, 1, 10)
-# Sys.time() - a 

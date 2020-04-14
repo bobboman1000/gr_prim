@@ -160,6 +160,10 @@ d <- read.csv("SAAC2.csv", stringsAsFactors = FALSE)
 res <- data.summary(d)
 print(paste0(which(res[[1]] < 50 | res[[2]] > 0.25), "/", length(res[[1]])))
 
+for(i in 1:ncol(d)){
+  d[, i] <- as.numeric(d[, i])
+}
+
 head(d)
 keep <- c(1, (1:ncol(d))[!((1:ncol(d))%in%(which(res[[1]] < 50 | res[[2]] > 0.25)))])
 write.csv(d[, keep], "cleaned\\SAAC2.csv", row.names = FALSE)
