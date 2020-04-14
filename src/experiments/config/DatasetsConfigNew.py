@@ -46,7 +46,8 @@ logger.info("mozilla is loaded")
 # # occupancy 6
 occupancy = pd.read_csv("resources/data/cleaned/occupancy.csv", na_values=['?'])
 occupancy_yname = "Occupancy"
-occupancy = occupancy.drop(columns=["date", ])
+occupancy = occupancy.dropna()
+occupancy = map_target(occupancy, occupancy_yname, 1)
 occupancies = []
 occupancies.append(ExperimentDataset("occupancy", occupancy, occupancy_yname, fragment_size=200))
 occupancies.append(ExperimentDataset("occupancy", occupancy, occupancy_yname, fragment_size=400))
