@@ -5,7 +5,7 @@ from typing import List, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from src.experiments.model.Exceptions import MalformedExperimentError
 from src.experiments.model.ExperimentDataset import ExperimentDataset
@@ -31,12 +31,15 @@ m_pred = "metamodel_predict"
 sub = "subgroup discovery"
 result_y_key = "y"
 
+Z_SCORE_SCALING = "z_score"
+ZERO_ONE_SCALING = "zero_one"
+
 
 class Experiment:
     executed: bool = False
 
     def __init__(self, ex_data: ExperimentDataset, generator, metamodel, discovery_alg, name, new_sample_size: int,
-                 enable_probabilities=True, fragment_limit: int = None, scale=True, min_support=20):
+                 enable_probabilities=True, fragment_limit: int = None, scaling="zero_one", min_support=20):
         self.ex_data: ExperimentDataset = ex_data
         self.generator = generator
         self.metamodel = metamodel
@@ -48,7 +51,7 @@ class Experiment:
         self.debug_logger = logging.getLogger('DEBUG')
         self.failed = 0
         self.fragment_limit = fragment_limit
-        self.do_scale = scale
+        self.scaling_type = scaling
         self.perfect = type(generator) == PerfectGenerator
         self.min_support = min_support
 
@@ -120,11 +123,11 @@ class Experiment:
 
     def _exec(self, subset_compound: ExperimentSubsetCompound):
         execution_times = {}
-        scaler = MinMaxScaler()
+        scaler = self._get_scaler(self.scaling_type)
         perfect_gen = type(self.generator) == PerfectGenerator
         perfect_meta = type(self.metamodel) == PerfectMetamodel
 
-        if self.do_scale:
+        if self.scaling_type is not None:
             scaler.fit(subset_compound.fragment)
             x_training = self._scale(subset_compound.fragment, scaler)
             x_complement = self._scale(subset_compound.complement, scaler) if perfect_gen \
@@ -151,7 +154,7 @@ class Experiment:
 
         start = time.time()
 
-        if self.do_scale:  # Revert scaling before starting SD
+        if self.scaling_type is not None:  # Revert scaling before starting SD
             g_data = self._scale_inverse(g_data, scaler)
 
         result = self.discovery_alg.find(g_data, g_data_y, regression=self.enable_probabilities)
@@ -242,6 +245,15 @@ class Experiment:
         else:
             test_data = self.ex_data.data.drop(index=original_data_idx)
         return test_data
+
+    def _get_scaler(self, scaling: str):
+        if scaling == Z_SCORE_SCALING:
+            scaler = StandardScaler()
+        elif scaling == ZERO_ONE_SCALING:
+            scaler = MinMaxScaler()
+        else:
+            scaler = None
+        return scaler
 
 
 def assert_subset_equality(df1: pd.DataFrame, df2: pd.DataFrame, df2_subset_idx: pd.Index, ignore_idx: bool):
