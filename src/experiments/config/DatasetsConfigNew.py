@@ -5,7 +5,6 @@ from src.experiments.config.DataUtils import map_target, clean, generate_names
 from src.experiments.model.ExperimentDataset import ExperimentDataset
 
 
-standard_f_size = 200
 logger = logging.getLogger("DATA")
 logger.setLevel("INFO")
 
@@ -21,11 +20,7 @@ ch.setFormatter(formatter)
 
 # add ch to logger
 logger.addHandler(ch)
-
-
 large_datasets = []
-
-
 # ====
 
 
@@ -120,10 +115,10 @@ gamma_telescope_yname = "class"
 gamma_telescope = gamma_telescope.dropna()
 bank_marketing = map_target(gamma_telescope, gamma_telescope_yname, "g")
 gammas = []
-gammas.append(ExperimentDataset("gamma_telescope", bank_marketing, gamma_telescope_yname, fragment_size=200))
-gammas.append(ExperimentDataset("gamma_telescope", bank_marketing, gamma_telescope_yname, fragment_size=400))
-gammas.append(ExperimentDataset("gamma_telescope", bank_marketing, gamma_telescope_yname, fragment_size=800))
-gammas.append(ExperimentDataset("gamma_telescope", bank_marketing, gamma_telescope_yname, fragment_size=1600))
+gammas.append(ExperimentDataset("gamma-telescope", bank_marketing, gamma_telescope_yname, fragment_size=200))
+gammas.append(ExperimentDataset("gamma-telescope", bank_marketing, gamma_telescope_yname, fragment_size=400))
+gammas.append(ExperimentDataset("gamma-telescope", bank_marketing, gamma_telescope_yname, fragment_size=800))
+gammas.append(ExperimentDataset("gamma-telescope", bank_marketing, gamma_telescope_yname, fragment_size=1600))
 large_datasets.append(gammas)
 logger.info("gamma_telescope is loaded")
 
@@ -150,10 +145,10 @@ cc_yname = "y"
 cc.rename(columns={'default': 'y'}, inplace=True)
 # nomapping
 ccs = []
-ccs.append(ExperimentDataset("credit_cards", cc, cc_yname, fragment_size=200))
-ccs.append(ExperimentDataset("credit_cards", cc, cc_yname, fragment_size=400))
-ccs.append(ExperimentDataset("credit_cards", cc, cc_yname, fragment_size=800))
-ccs.append(ExperimentDataset("credit_cards", cc, cc_yname, fragment_size=1600))
+ccs.append(ExperimentDataset("credit-cards", cc, cc_yname, fragment_size=200))
+ccs.append(ExperimentDataset("credit-cards", cc, cc_yname, fragment_size=400))
+ccs.append(ExperimentDataset("credit-cards", cc, cc_yname, fragment_size=800))
+ccs.append(ExperimentDataset("credit-cards", cc, cc_yname, fragment_size=1600))
 large_datasets.append(ccs)
 logger.info("credit cards is loaded")
 
@@ -196,7 +191,7 @@ sylvas.append(ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=200))
 sylvas.append(ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=400))
 sylvas.append(ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=800))
 sylvas.append(ExperimentDataset("sylva", sylva, sylva_yname, fragment_size=1600))
-large_datasets.append(sylva)
+large_datasets.append(sylvas)
 logger.info("sylva is loaded")
 
 
@@ -308,10 +303,10 @@ seizure: pd.DataFrame = pd.read_csv('resources/data/seizure.csv', header=0, inde
 seizure_yname = "y"
 seizure = map_target(seizure, seizure_yname, 1)
 seizrues = []
-seizrues.append(ExperimentDataset("seizures_mapped_50", seizure, seizure_yname, fragment_size=200))
-seizrues.append(ExperimentDataset("seizures_mapped_50", seizure, seizure_yname, fragment_size=400))
-seizrues.append(ExperimentDataset("seizures_mapped_50", seizure, seizure_yname, fragment_size=800))
-seizrues.append(ExperimentDataset("seizures_mapped_50", seizure, seizure_yname, fragment_size=1600))
+seizrues.append(ExperimentDataset("seizures-mapped", seizure, seizure_yname, fragment_size=200))
+seizrues.append(ExperimentDataset("seizures-mapped", seizure, seizure_yname, fragment_size=400))
+seizrues.append(ExperimentDataset("seizures-mapped", seizure, seizure_yname, fragment_size=800))
+seizrues.append(ExperimentDataset("seizures-mapped", seizure, seizure_yname, fragment_size=1600))
 large_datasets.append(seizrues)
 logger.info("seizure is loaded")
 

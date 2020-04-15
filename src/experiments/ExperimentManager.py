@@ -9,53 +9,61 @@ from typing import List
 
 from src.experiments.model.Experiment import Experiment, ExperimentDataset
 from src.generators.DummyGenerator import DummyGenerator
+from src.generators.PerfectGenerator import PerfectGenerator
 from src.metamodels.DummyMetamodel import DummyMetaModel
+from src.metamodels.PerfectMetamodel import PerfectMetamodel
 
 
 class ExperimentManager:
     debug_logger_key = "DEBUG"
-    prod_logger = "PROD"
+    prod_logger = "EXEC"
 
     def __init__(self, out='app.log'):
         self.experiments = []
         self.experiment_datasets = []
-
-        ensure_folder_in_root("output")
-        logging.basicConfig(filename='output/' + out, filemode='w', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        logger = logging.getLogger(self.prod_logger)
-        logger.setLevel('INFO')
-
-        # create console handler and set level to debug
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
-
-        # create formatter
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-        # add formatter to ch
-        ch.setFormatter(formatter)
-
-        # add ch to logger
-        logger.addHandler(ch)
-        self.logger = logger
-        self.debug_logger = logging.getLogger('EXEC-INFO')
-        self.debug_logger.setLevel(self.debug_logger_key)
-        self.debug_logger.debug("EXEC-INFO connected")
         self.queues = {}
 
-    def add_experiment(self, dataset: ExperimentDataset, generator, metamodel, discovery_alg, name, new_samples, enable_probabilities=True,
-                       fragment_limit=None, min_support=20, scale=True):
+        ensure_folder_in_root("output")
+        self.ex_logger = logging.getLogger(self.prod_logger)
+        self.ex_logger.setLevel('INFO')
+
+        self.time_logger = logging.getLogger('DEBUG')
+        self.time_logger.setLevel("DEBUG")
+
+        default_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        ch.setFormatter(default_format)
+
+        debug_fh = logging.FileHandler("output/debug.log")
+        debug_fh.setLevel("DEBUG")
+        debug_fh.setFormatter(default_format)
+
+        fh = logging.FileHandler("output/info.log")
+        fh.setLevel("INFO")
+        fh.setFormatter(default_format)
+
+        # add ch to logger
+        self.ex_logger.addHandler(ch)
+        self.ex_logger.addHandler(fh)
+        self.ex_logger.addHandler(debug_fh)
+        self.time_logger.addHandler(debug_fh)
+        self.ex_logger.info("------------------------------    Startup   ------------------------------")
+
+    def add_experiment(self, dataset: ExperimentDataset, generator, metamodel, discovery_alg, name, new_samples, scaling, enable_probabilities=True,
+                       fragment_limit=None, min_support: float = 20):
         if not self.experiment_datasets.__contains__(dataset):
             self.experiment_datasets.append(dataset)
         experiment = Experiment(dataset, copy.deepcopy(generator), copy.deepcopy(metamodel), copy.deepcopy(discovery_alg),
                                 name, new_sample_size=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit,
-                                min_support=min_support, scale=scale)
+                                min_support=min_support, scaling=scaling)
         self.experiments.append(experiment)
         self._enqueue(experiment)
-        self.logger.info("Added experiment " + experiment.name)
+        self.ex_logger.info("Added experiment " + experiment.name)
 
-    def build_cartesian_experiments(self, datasets: List[ExperimentDataset], generators, metamodels, discovery_algs, new_samples, enable_probabilities=True,
-                                    fragment_limit: int = None):
+    def build_cartesian_experiments(self, datasets: List[ExperimentDataset], generators, metamodels, discovery_algs, new_samples, scaling,
+                                    enable_probabilities=True, fragment_limit: int = None, min_support=20):
         """ Structure
             generators need fit() and sample()
             metamodels need fit(), predict() and predict_proba()
@@ -67,11 +75,12 @@ class ExperimentManager:
                     for discovery_alg in discovery_algs:
                         experiment = Experiment(dataset, copy.deepcopy(generators[generator]), copy.deepcopy(metamodels[metamodel]),
                                                 copy.deepcopy(discovery_algs[discovery_alg]), self._build_name(generator, metamodel, discovery_alg, dataset),
-                                                new_sample_size=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit)
+                                                new_sample_size=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit,
+                                                scaling=scaling, min_support=min_support)
                         self._enqueue(experiment)
                         self._update_experiments()
                         self._update_experiment_datasets()
-        self.logger.info("Cartesian experiments built")
+        self.ex_logger.info("Cartesian experiments built")
 
     def _update_experiments(self):
         self.experiments = [exp for q in list(self.queues.values()) for exp in q]
@@ -97,19 +106,19 @@ class ExperimentManager:
 
     def run_all(self):
         """Run all experiments sequentially"""
-        self.logger.info("Start Experiments sequentially")
-        self.run_list(self.experiments)
-        self.logger.info("Finished experiments")
+        self.ex_logger.info("Start Experiments sequentially")
+        self._run_list(self.experiments)
+        self.ex_logger.info("Finished experiments")
 
     def run_fragments_parallel(self, threads: int):
         """Run experiments sequentially, but parallelize the execution of the fragments"""
         i = 1
-        self.logger.info("Start Experiments parallel with " + str(threads) + " threads")
+        self.ex_logger.info("Start Experiments parallel with " + str(threads) + " threads")
         for experiment in self.experiments:
             experiment.run_parallel(threads)
-            self.logger.info(str(i) + "th experiment complete. " + str(len(self.experiments)) + " left")
+            self.ex_logger.info(str(i) + "th experiment complete. " + str(len(self.experiments)) + " left")
             i += 1
-        self.logger.info("Finished Experiments")
+        self.ex_logger.info("Finished Experiments")
 
     def run_all_parallel_datasetwise(self, threads: int):
         """
@@ -131,9 +140,9 @@ class ExperimentManager:
                     exps.remove(e)
             pool = Pool(threads)
             batch_length = len(batch)
-            self.logger.info("Start batch " + str(batch_count) + " with " + str(batch_length) + " elements and " + str(threads) + " threads")
+            self.ex_logger.info("Start batch " + str(batch_count) + " with " + str(batch_length) + " elements and " + str(threads) + " threads")
             batch_result1 = pool.map(self.run, batch)
-            self.logger.info("Finish batch " + str(batch_count) + " " + str(len(exps)) + " experiments left")
+            self.ex_logger.info("Finish batch " + str(batch_count) + " " + str(len(exps)) + " experiments left")
             pool.close()
             pool.join()
             overall_result = overall_result + batch_result1
@@ -150,11 +159,11 @@ class ExperimentManager:
         failed_queues = list(map(lambda q: list(filter(lambda exp: not exp.executed, q)), q_list))
         failed_queues = list(filter(lambda q: len(q) > 0, failed_queues))
         pool = Pool(threads)
-        self.logger.info("Start experiments with " + str(threads) + " threads")
-        new_queues: List[List[Experiment]] = pool.map(self.run_list, failed_queues)
+        self.ex_logger.info("Start experiments with " + str(threads) + " threads")
+        new_queues: List[List[Experiment]] = pool.map(self._run_list, failed_queues)
         self._set_queues(new_queues)
         self._update_experiments()
-        self.logger.info("FINISHED")
+        self.ex_logger.info("FINISHED")
 
     def run_thread_per_dataset(self):
         """
@@ -164,23 +173,21 @@ class ExperimentManager:
         """
         threads = len(self.queues)
         pool = Pool(threads)
-        self.logger.info("Start experiments with " + str(threads) + " threads")
-        new_queues: List[List[Experiment]] = pool.map(self.run_list, list(self.queues.values()))
+        self.ex_logger.info("Start experiments with " + str(threads) + " threads")
+        new_queues: List[List[Experiment]] = pool.map(self._run_list, list(self.queues.values()))
         pool.close()
         self._set_queues(new_queues)
         self._update_experiments()
-        self.logger.info("FINISHED")
+        self.ex_logger.info("FINISHED")
 
     def run_all_parallel(self, threads):
-        """
-        """
         pool = Pool(threads)
-        self.logger.info("Start experiments with " + str(threads) + " threads")
+        self.ex_logger.info("Start experiments with " + str(threads) + " threads")
         new_experiments: List[Experiment] = pool.map(self.run, list(self.experiments))
         pool.close()
         self.experiments = new_experiments
         self._update_queues()
-        self.logger.info("FINISHED")
+        self.ex_logger.info("FINISHED")
 
     def _set_queues(self, queues: List[List[Experiment]]):
         for q in queues:
@@ -188,7 +195,7 @@ class ExperimentManager:
             exp_name = q[0].ex_data.name
             self.queues[exp_name] = q
 
-    def run_list(self, experiments: List[Experiment]):
+    def _run_list(self, experiments: List[Experiment]):
         """
         Run a list of experiments
         :param experiments: A list of Experiments
@@ -201,29 +208,31 @@ class ExperimentManager:
         return experiments
 
     def run_and_log(self, experiment, count) -> Experiment:
-        self.logger.info("Experiment " + experiment.ex_data.name + " " + str(count) + "/" + str(len(self.queues[experiment.ex_data.name]))
+        self.ex_logger.info("Experiment " + experiment.ex_data.name + " " + str(count) + "/" + str(len(self.queues[experiment.ex_data.name]))
                          + " started (" + experiment.name + ")")
         try:
             experiment = experiment.run()
-            self.logger.info("Experiment " + experiment.ex_data.name + " " + str(count) + "/" + str(len(self.queues[experiment.ex_data.name])) + " complete")
+            self.ex_logger.info("Experiment " + experiment.ex_data.name + " " + str(count) + "/" + str(len(self.queues[experiment.ex_data.name])) + " complete")
         except Exception as e:
-            self.logger.error("Experiment " + experiment.ex_data.name + " " + str(count) + "/" + str(len(self.queues[experiment.ex_data.name])) + " failed")
-            self.logger.error(traceback._cause_message)
+            self.ex_logger.info("Experiment " + experiment.ex_data.name + " " + str(count) + "/" + str(len(self.queues[experiment.ex_data.name])) + " failed")
+            self.time_logger.exception(str(e))
+            self.ex_logger.error(traceback._cause_message)
             traceback.print_exc()
 
         return experiment
 
     def run(self, experiment) -> Experiment:
-        self.logger.info("Experiment " + str(self.experiments.index(experiment)) + " started (" + experiment.name + ")")
+        self.ex_logger.info("Experiment " + str(self.experiments.index(experiment)) + " started (" + experiment.name + ")")
         try:
             experiment = experiment.run()
-            self.logger.info("Experiment " + str(self.experiments.index(experiment)) + " complete")
+            self.ex_logger.info("Experiment " + str(self.experiments.index(experiment)) + " complete")
         except Exception as e:
-            self.logger.error("Experiment " + str(self.experiments.index(experiment)) + " failed")
-            self.debug_logger.debug(str(e.__traceback__) + str(e))
+            self.ex_logger.info("Experiment " + str(self.experiments.index(experiment)) + " failed")
+            self.ex_logger.error(str(e.__traceback__))
+            self.ex_logger.exception(str(e))
         return experiment
 
-    def import_experiments(self, filename, add=False):
+    def import_experiments(self, filename: str, add=False):
         new_exps = self.load_from_file(filename)
         if not add:
             self.reset_experiments()
@@ -232,7 +241,7 @@ class ExperimentManager:
             self.experiments = self.experiments + new_exps
         self._update_queues()
 
-    def load_from_file(self, filename):
+    def load_from_file(self, filename: str):
         if filename is None:
             f = "results"
         else:
@@ -254,17 +263,24 @@ class ExperimentManager:
     def _build_name(self, generator: str, metamodel: str, discovery_alg: str, dataset: ExperimentDataset):
         return generator + "_" + metamodel + "_" + discovery_alg + "_" + dataset.name
 
-    def add_dummies(self, datasets, metamodels, discovery_algs, fragment_limit=None, enable_probabilities=True):
-        self.build_cartesian_experiments(datasets, {"dummy": DummyGenerator()}, metamodels, discovery_algs, new_samples=0,
-                                         enable_probabilities=enable_probabilities, fragment_limit=fragment_limit)
-        self._add_double_dummies(datasets, discovery_algs, fragment_limit=fragment_limit)
+    def add_perfects(self, datasets: List[ExperimentDataset], metamodels: dict, discovery_algs: dict, new_samples: int, scaling: str, fragment_limit=None,
+                     enable_probabilities=True, min_support=20):
+        perfect_gen_dict = {"perfect": PerfectGenerator()}
+        perfect_meta_dict = {"perfect": PerfectMetamodel()}
+        self.build_cartesian_experiments(datasets=datasets, generators=perfect_gen_dict, metamodels=metamodels, discovery_algs=discovery_algs,
+                                         new_samples=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit, scaling=scaling,
+                                         min_support=min_support)
+        self.build_cartesian_experiments(datasets=datasets, generators=perfect_gen_dict, metamodels=perfect_meta_dict, discovery_algs=discovery_algs,
+                                         new_samples=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit, scaling=scaling,
+                                         min_support=min_support)
 
-    def _add_double_dummies(self, datasets, discovery_algs, fragment_limit=None):
-        for dataset in datasets:
-            for discovery_alg in discovery_algs:
-                self.add_experiment(dataset, DummyGenerator(), DummyMetaModel(), discovery_algs[discovery_alg],
-                                    name="dummy_dummy_" + discovery_alg + "_" + dataset.name, new_samples=0,
-                                    enable_probabilities=False, fragment_limit=fragment_limit)
+    def add_dummies(self, datasets, metamodels, discovery_algs, scaling, fragment_limit=None, enable_probabilities=True, min_support=20):
+        dummy_gen_dict = {"dummy": DummyGenerator()}
+        dummy_meta_dict = {"dummy": DummyMetaModel()}
+        self.build_cartesian_experiments(datasets, dummy_gen_dict, metamodels, discovery_algs, new_samples=0,
+                                         enable_probabilities=enable_probabilities, fragment_limit=fragment_limit, scaling=scaling, min_support=min_support)
+        self.build_cartesian_experiments(datasets, dummy_gen_dict, dummy_meta_dict, discovery_algs, new_samples=0,
+                                         enable_probabilities=enable_probabilities, fragment_limit=fragment_limit, scaling=scaling, min_support=min_support)
 
     def get_method_dict(self):
         """
