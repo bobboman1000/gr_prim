@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class DummyGenerator:
     def __init__(self):
         self.data = None

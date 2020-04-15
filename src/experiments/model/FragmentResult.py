@@ -115,21 +115,20 @@ class BoxResult:
 
 class FragmentResult:
 
-    def __init__(self, restrictions: List[pd.DataFrame], training_data: pd.DataFrame, experiment_dataset: ExperimentDataset,
+    def __init__(self, restrictions: List[pd.DataFrame], training_data: pd.DataFrame, original_data_idx: pd.Index, test_data: pd.DataFrame, y_name: str,
                  fragment_idx: int, execution_times, min_support=20):
         self.min_support = min_support
         self.fragment_idx = fragment_idx
         self.execution_times = execution_times
-        self.initial_restrictions_train = get_initial_restrictions(training_data.drop(columns=[experiment_dataset.y_name]))
-        self.initial_restrictions_test = get_initial_restrictions(experiment_dataset.get_subset_compound(fragment_idx).complement)
+        self.initial_restrictions_train = get_initial_restrictions(training_data.drop(columns=[y_name]))
+        self.initial_restrictions_test = get_initial_restrictions(test_data.drop(columns=[y_name]))
         self.restricted_dims: List[List[bool]] = _get_restricted_dims_indices(restrictions, self.initial_restrictions_train)
 
         self.boxes = list(map(lambda restriction: restriction.to_dict(orient='list'), restrictions))
-        min_support_idx_original = self.__min_support_on_original(experiment_dataset, fragment_idx, restrictions)
-        self.box_results_train = self.get_box_results(training_data, restrictions, self.restricted_dims, experiment_dataset.y_name,
+        min_support_idx_original = self.__min_support_on_original(training_data, original_data_idx, restrictions, y_name)
+        self.box_results_train = self.get_box_results(training_data, restrictions, self.restricted_dims, y_name,
                                                       max_box_idx=min_support_idx_original)
-        test_data = experiment_dataset.get_subset_compound(fragment_idx).get_complete_complement()
-        self.box_results_test = self.get_box_results(test_data, restrictions, self.restricted_dims, experiment_dataset.y_name,
+        self.box_results_test = self.get_box_results(test_data, restrictions, self.restricted_dims, y_name,
                                                      min_box_idx=len(self.box_results_train), max_box_idx=min_support_idx_original)
 
         self.leftmost_box_idx = -1
@@ -187,7 +186,7 @@ class FragmentResult:
             mass = relative_box_mass
         return mass >= min_support and mass > 0
 
-    def __min_support_on_original(self, experiment_dataset: ExperimentDataset, fragment_idx: int, restrictions: List[pd.DataFrame]):
-        box_results_original = self.get_box_results(experiment_dataset.get_subset_compound(fragment_idx).get_complete_fragment(),
-                                                    restrictions, self.restricted_dims, experiment_dataset.y_name)
+    def __min_support_on_original(self, training_data: pd.DataFrame, original_data_index: pd.Index, restrictions: List[pd.DataFrame], y_name: str):
+        original_data = training_data.loc[original_data_index]
+        box_results_original = self.get_box_results(original_data, restrictions, self.restricted_dims, y_name)
         return len(box_results_original) - 1

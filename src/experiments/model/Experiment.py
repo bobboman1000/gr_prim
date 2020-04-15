@@ -49,7 +49,7 @@ class Experiment:
         self.failed = 0
         self.fragment_limit = fragment_limit
         self.do_scale = scale
-        self.perfect = type(generator) == PerfectGenerator and type(metamodel) == PerfectMetamodel
+        self.perfect = type(generator) == PerfectGenerator
         self.min_support = min_support
 
     def run(self):
@@ -80,31 +80,32 @@ class Experiment:
     def _run_fragments(self, indices):
         results: List[FragmentResult] = []
         for idx in indices:
-            box, g_data, execution_times = self._run_fragment(idx)
+            box, g_data, execution_times, original_idx = self._run_fragment(idx)
             if box is not None:
-                results.append(self._build_result(box, g_data, idx, execution_times))
+                results.append(self._build_result(box, g_data, idx, execution_times, original_idx))
             else:
                 self.failed += 1
         return results
 
     def _run_fragment(self, idx):
         subset_compound: ExperimentSubsetCompound = self.ex_data.get_subset_compound(idx)
-        box, g_data, execution_times = self._exec(subset_compound)
+        box, g_data, execution_times, original_idx = self._exec(subset_compound)
         self.debug_logger.debug(self.name + " " + str(idx) + " " + str(execution_times))
-        return box, g_data, execution_times
+        return box, g_data, execution_times, original_idx
 
-    def _build_result(self, box, g_data, idx, execution_times):
+    def _build_result(self, box, g_data, idx, execution_times, original_idx):
         start = time.time()
-        fragment_result = FragmentResult(restrictions=box, experiment_dataset=self.ex_data, fragment_idx=idx, training_data=g_data,
-                                         execution_times=execution_times, min_support=self.min_support)
+        test_data = self._get_test_data(training_data=g_data, original_data_idx=original_idx)
+        fragment_result = FragmentResult(restrictions=box, fragment_idx=idx, training_data=g_data, test_data=test_data, y_name=self.ex_data.y_name,
+                                         execution_times=execution_times, min_support=self.min_support, original_data_idx=original_idx)
         self.debug_logger.debug("fragment_eval " + str(time.time() - start))
         return fragment_result
 
     def _run_fragments_to_q(self, indices, q):
         for idx in indices:
-            box, g_data, execution_times = self._run_fragment(idx)
+            box, g_data, execution_times, original_idx = self._run_fragment(idx)
             if box is not None:
-                q.put(self._build_result(box, g_data, idx, execution_times))
+                q.put(self._build_result(box, g_data, idx, execution_times, original_idx))
             else:
                 self.failed += 1
 
@@ -145,7 +146,7 @@ class Experiment:
         else:
             fitted_metamodel, execution_times[m_fit] = self._fit_metamodel(x_training, y_training)
 
-        g_data, execution_times[g_sam] = self._generate_data(x_training, fitted_generator, perfect_gen)
+        g_data, execution_times[g_sam], original_idx = self._generate_data(x_training, fitted_generator, perfect_gen)
         g_data_y, execution_times[m_pred] = self._label_data(g_data, fitted_metamodel)
 
         start = time.time()
@@ -157,7 +158,7 @@ class Experiment:
         execution_times[sub] = time.time() - start
         g_data.insert(loc=0, column=subset_compound.y_name, value=g_data_y)
 
-        return result, g_data, execution_times
+        return result, g_data, execution_times, original_idx
 
     def _fit_generator(self, x_training: pd.DataFrame) -> Tuple:  # TODO Add interface
         start = time.time()
@@ -195,12 +196,14 @@ class Experiment:
         duration = time.time() - start
         return fitted_classifier, duration
 
-    def _generate_data(self, scaled_fragment: pd.DataFrame, fitted_generator, perfect_gen):
+    def _generate_data(self, scaled_fragment: pd.DataFrame, fitted_generator, perfect_gen: bool):
         start = time.time()
         g_data = pd.DataFrame(fitted_generator.sample(self.new_sample_size), columns=scaled_fragment.columns)
         g_data = g_data.append(scaled_fragment, ignore_index=not perfect_gen)
+        original_idx = g_data.tail(scaled_fragment.shape[0]).index
+        assert_subset_equality(scaled_fragment, g_data.loc[original_idx], original_idx, not perfect_gen)
         duration = time.time() - start
-        return g_data, duration
+        return g_data, duration, original_idx
 
     def _label_data(self, gerenated_data: pd.DataFrame, fitted_classifier):
         start = time.time()
@@ -233,8 +236,17 @@ class Experiment:
     def get_metamodel_name(self):
         return self._get_method_name_by_idx(1)
 
-    def _asssert_perfect(self):
-        if not (type(self.generator) == PerfectGenerator) ^ (type(self.metamodel) == PerfectMetamodel):
-            raise MalformedExperimentError("Please only use Perfect generator with PerfectMetamodel")
+    def _get_test_data(self, training_data: pd.DataFrame, original_data_idx) -> pd.DataFrame:
+        if self.perfect:
+            test_data = self.ex_data.data.drop(index=training_data.index)
+        else:
+            test_data = self.ex_data.data.drop(index=original_data_idx)
+        return test_data
 
 
+def assert_subset_equality(df1: pd.DataFrame, df2: pd.DataFrame, df2_subset_idx: pd.Index, ignore_idx: bool):
+    df2_subset: pd.DataFrame = df2.loc[df2_subset_idx]
+    if not ignore_idx:
+        assert df1.equals(df2_subset)
+    else:
+        assert df1.reset_index(drop=True).equals(df2.reset_index(drop=True))
