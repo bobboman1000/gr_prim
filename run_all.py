@@ -1,42 +1,30 @@
-import src.experiments.config.Config as c
-import pandas as pd
 import src.experiments.ExperimentManager as u
-from src.experiments.model.ExperimentDataset import ExperimentDataset
-from src.generators.DummyGenerator import DummyGenerator
-from src.generators.PerfectGenerator import PerfectGenerator
-from src.metamodels.DummyMetamodel import DummyMetaModel
-from src.metamodels.PerfectMetamodel import PerfectMetamodel
 import numpy as np
 from src.experiments.config.Config import generators, metamodels, discovery_algs
 from src.experiments.config.DatasetsConfigNew import large_datasets
+from src.experiments.model.Experiment import ZERO_ONE_SCALING, Z_SCORE_SCALING
 
 exp_man = u.ExperimentManager()
 
 np.random.seed(1)
 
-ds_a = {"prim": c.discovery_algs["prim"]}
+ds_a = {"prim": discovery_algs["prim"]}
 
+
+# Choose between ZERO_ONE_SCALING, Z_SCORE_SCALING
+#
 for d_list in large_datasets:
     exp_man.build_cartesian_experiments(
         datasets=d_list,
-        generators=c.generators,
-        metamodels=c.metamodels,
+        generators=generators,
+        metamodels=metamodels,
         discovery_algs=ds_a,
         new_samples=10000,
-        fragment_limit=30
+        fragment_limit=30,
+        scaling=ZERO_ONE_SCALING
     )
-    exp_man.add_dummies(datasets=d_list, metamodels=c.metamodels, discovery_algs=ds_a, fragment_limit=30)
-    for d in d_list:
-        exp_man.add_experiment(dataset=d, generator=PerfectGenerator(), metamodel=PerfectMetamodel(), discovery_alg=c.discovery_algs["prim"],
-                           name="perfect_perfect_prim_" + d.name, fragment_limit=30, new_samples=10000, enable_probabilities=False)
-        for metamodel in metamodels:
-            exp_man.add_experiment(dataset=d, generator=PerfectGenerator(), metamodel=metamodels[metamodel], discovery_alg=c.discovery_algs["prim"],
-                                   name="perfect_" + metamodel + "_prim_" + d.name, fragment_limit=30, new_samples=10000, enable_probabilities=False)
+
+    exp_man.add_dummies(datasets=d_list, metamodels=metamodels, discovery_algs=ds_a, fragment_limit=30, scaling=ZERO_ONE_SCALING)
+    exp_man.add_perfects(datasets=d_list, metamodels=metamodels, discovery_algs=ds_a, fragment_limit=30, new_samples=2500, scaling=ZERO_ONE_SCALING)
     res = exp_man.run_all_parallel(32)
-    exp_man.export_experiments(d_list[0].name)
     exp_man.reset_experiments()
-
-
-
-
-

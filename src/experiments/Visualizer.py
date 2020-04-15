@@ -688,8 +688,8 @@ class Visualizer:
 
             x = pd.Series(x)
             y = pd.Series(y)
-
-            aocs.append(auc(x, y))
+            traj_auc = auc(x, y) - y[0]
+            aocs.append(traj_auc)
         return aocs
 
     def get_metric_name(self, metric, short=False) -> str:
@@ -717,14 +717,3 @@ class Visualizer:
             return "WRAcc"
         else:
             return "F2-score" if not short else "F2"
-
-    # Legacy code below. Wont delete yet - could be useful
-
-    def area_under_curve(self, x: pd.Series, y: pd.Series) -> float:
-        area = 0
-        for a in range(len(x) - 1):
-            b = a + 1
-            x_diff = np.abs(x[a] - x[b])
-            y_diff = y[b] - y[a]
-            area += (y[a] * x_diff) + ((y_diff * x_diff) / 2)
-        return area
