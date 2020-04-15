@@ -130,7 +130,7 @@ class FragmentResult:
                                                       max_box_idx=min_support_idx_original)
         test_data = experiment_dataset.get_subset_compound(fragment_idx).get_complete_complement()
         self.box_results_test = self.get_box_results(test_data, restrictions, self.restricted_dims, experiment_dataset.y_name,
-                                                     min_box_idx=len(self.box_results_train))
+                                                     min_box_idx=len(self.box_results_train), max_box_idx=min_support_idx_original)
 
         self.leftmost_box_idx = -1
         self.highest_mean_idx = self._get_box_max_box_idx(self.box_results_train, DENSITY_KEY)
@@ -170,9 +170,9 @@ class FragmentResult:
         r = min_box_idx if min_box_idx > 0 else len(restrictions)
         for idx in range(r):
             br = BoxResult(data, restrictions[idx][restricted_dims[idx]], y_name)
-            box_set.append(br)
             if (not self.__has_min_box_mass(br.get_box_mass(), data.shape[0], self.min_support) and min_box_idx <= idx) or idx >= max_box_idx:
                 break
+            box_set.append(br)
         return box_set
 
     def _get_box_max_box_idx(self, box_results_list: List[BoxResult], metric_key: str) -> int:
