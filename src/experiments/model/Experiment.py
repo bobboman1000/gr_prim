@@ -45,7 +45,7 @@ class Experiment:
         self.name: str = name
         self.new_sample_size = new_sample_size
         self.enable_probabilities = enable_probabilities
-        self.debug_logger = logging.getLogger('EXEC-INFO')
+        self.debug_logger = logging.getLogger('DEBUG')
         self.failed = 0
         self.fragment_limit = fragment_limit
         self.do_scale = scale
