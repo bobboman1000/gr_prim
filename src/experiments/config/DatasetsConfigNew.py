@@ -29,7 +29,7 @@ large_datasets = []
 # ====
 
 
-# # mozilla 4
+# # mozilla 4. do not use: no description
 mozilla = pd.read_csv("resources/data/cleaned/mozilla.csv", na_values=['?'])
 mozilla_yname = "state"
 mozilla = mozilla.dropna()
@@ -43,7 +43,7 @@ large_datasets.append(mozillas)
 logger.info("mozilla is loaded")
 
 
-# # occupancy 6
+# # occupancy 6. Check if light deletion is necessary
 occupancy = pd.read_csv("resources/data/cleaned/occupancy.csv", na_values=['?'])
 occupancy_yname = "Occupancy"
 occupancy = occupancy.dropna()
@@ -57,7 +57,7 @@ large_datasets.append(occupancies)
 logger.info("occupancy is loaded")
 
 
-# # shuttle 6
+# # shuttle 6. check if filtering is necessary
 shuttle = pd.read_csv("resources/data/cleaned/shuttle.csv", na_values=['?'])
 shuttle_yname = "target"
 shuttle = map_target(shuttle, shuttle_yname, 4)
@@ -71,7 +71,7 @@ large_datasets.append(shuttles)
 logger.info("shuttle is loaded")
 
 
-# # htru 9
+# # htru 9. good one
 htru = pd.read_csv("resources/data/HTRU_2.csv", header=-1, names=generate_names(8))
 htru_yname = "y"
 htru = htru.dropna()
@@ -84,7 +84,7 @@ large_datasets.append(htrus)
 logger.info("htru is loaded")
 
 
-# # click 9
+# # click 9. do not use: time series?
 click = pd.read_csv("resources/data/cleaned/click.csv", na_values=['?'])
 click_yname = "click"
 click = click.dropna()
@@ -98,7 +98,7 @@ large_datasets.append(clicks)
 logger.info("click is loaded")
 
 
-# # avila 10
+# # avila 10. check if filtering is necessary
 avila = pd.read_csv("resources/data/cleaned/avila.csv", na_values=['?'])
 avila_yname = "V11"
 avila = avila.dropna()
@@ -112,7 +112,7 @@ large_datasets.append(avilas)
 logger.info("avila is loaded")
 
 
-# # gamma telescope 11
+# # gamma telescope 11. good one. Maybe z-score is better?
 gamma_telescope_names = ["fLength", "fWidth", "fSize", "fConc", "fConc1", "fAsym", "fM3Long", "fM3Trans", "fAlpha",
                          "fDist", "class"]
 gamma_telescope = pd.read_csv("resources/data/gammatelescope/magic04.data", names=gamma_telescope_names)

@@ -10,7 +10,7 @@ setwd(paste0(parent, "/resources/data"))
 
 dir.create("cleaned", showWarnings = FALSE)
 
-
+setwd("C:\\Projects\\6_PRIM_RF_real\\gr_prim\\resources\\data\\")
 
 data.summary <- function(d){
   for(i in 1:ncol(d)){
@@ -181,7 +181,7 @@ write.csv(d[, keep], "cleaned\\mozilla.csv", row.names = FALSE)
 ncol(d[, keep])
 
 
-# ok. change date to number. 6 col
+# ok. change date to number. 6 col - don't use
 library(anytime)
 d <- read.table("occupancy_data\\datatest.txt", sep = ",")
 d <- rbind(d, read.table("occupancy_data\\datatest2.txt", sep = ","))
@@ -194,7 +194,7 @@ head(d)
 keep <- c((1:ncol(d))[!((1:ncol(d))%in%(which(res[[1]] < 50 | res[[2]] > 0.25)))], ncol(d))
 write.csv(d[, keep], "cleaned\\occupancy.csv", row.names = FALSE)
 ncol(d[, keep])
-
+write.csv(d, "cleaned\\occupancy_all.csv", row.names = FALSE)
 
 # # ok. keep all! 9 cols
 # d <- read.csv("HTRU_2.csv", stringsAsFactors = FALSE, header = FALSE)
