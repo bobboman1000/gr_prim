@@ -25,6 +25,6 @@ rows = []
 for e in exp_man.experiments:
     rows.append([e.ex_data.name, e.ex_data.fragment_size, e.generator.kde.bandwidth])
 df = pd.DataFrame(rows, columns=["name", "f_size", "bandwidth"])
-df.to_csv("output/bandwidths")
+df.to_csv("output/bandwidths.csv")
 
 
