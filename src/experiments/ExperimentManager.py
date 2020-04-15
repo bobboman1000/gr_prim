@@ -11,6 +11,7 @@ from src.experiments.model.Experiment import Experiment, ExperimentDataset
 from src.generators.DummyGenerator import DummyGenerator
 from src.generators.PerfectGenerator import PerfectGenerator
 from src.metamodels.DummyMetamodel import DummyMetaModel
+from src.metamodels.PerfectMetamodel import PerfectMetamodel
 
 
 class ExperimentManager:
@@ -263,24 +264,20 @@ class ExperimentManager:
 
     def add_perfects(self, datasets: List[ExperimentDataset], metamodels: dict, discovery_algs: dict, new_samples: int, fragment_limit=None,
                      enable_probabilities=True, min_support: float = 20, scale=True):
-        for d in datasets:
-            for m_key in metamodels:
-                for d_key in discovery_algs:
-                    self.add_experiment(d, PerfectGenerator(), metamodels[m_key], discovery_algs[d_key],
-                                        new_samples=new_samples, fragment_limit=fragment_limit, name=self._build_name("perfect", m_key, d_key, d),
-                                        enable_probabilities=enable_probabilities, min_support=min_support, scale=scale)
+        perfect_gen_dict = {"perfect": PerfectGenerator()}
+        perfect_meta_dict = {"perfect": PerfectMetamodel()}
+        self.build_cartesian_experiments(datasets=datasets, generators=perfect_gen_dict, metamodels=metamodels, discovery_algs=discovery_algs,
+                                         new_samples=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit)
+        self.build_cartesian_experiments(datasets=datasets, generators=perfect_gen_dict, metamodels=perfect_meta_dict, discovery_algs=discovery_algs,
+                                         new_samples=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit)
 
     def add_dummies(self, datasets, metamodels, discovery_algs, fragment_limit=None, enable_probabilities=True):
-        self.build_cartesian_experiments(datasets, {"dummy": DummyGenerator()}, metamodels, discovery_algs, new_samples=0,
+        dummy_gen_dict = {"dummy": DummyGenerator()}
+        dummy_meta_dict = {"dummy": DummyMetaModel()}
+        self.build_cartesian_experiments(datasets, dummy_gen_dict, metamodels, discovery_algs, new_samples=0,
                                          enable_probabilities=enable_probabilities, fragment_limit=fragment_limit)
-        self._add_double_dummies(datasets, discovery_algs, fragment_limit=fragment_limit)
-
-    def _add_double_dummies(self, datasets, discovery_algs, fragment_limit=None):
-        for dataset in datasets:
-            for discovery_alg in discovery_algs:
-                self.add_experiment(dataset, DummyGenerator(), DummyMetaModel(), discovery_algs[discovery_alg],
-                                    name="dummy_dummy_" + discovery_alg + "_" + dataset.name, new_samples=0,
-                                    enable_probabilities=False, fragment_limit=fragment_limit)
+        self.build_cartesian_experiments(datasets, dummy_gen_dict, dummy_meta_dict, discovery_algs, new_samples=0,
+                                         enable_probabilities=enable_probabilities, fragment_limit=fragment_limit)
 
     def get_method_dict(self):
         """
