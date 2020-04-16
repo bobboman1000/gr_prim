@@ -3,7 +3,7 @@ from sklearn.calibration import CalibratedClassifierCV
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import GaussianNB
-from src.generators.KernelDensityCV import KernelDensityCV
+from src.generators.KernelDensityCV import *
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 
@@ -14,6 +14,7 @@ from src.metamodels.RandomForestCV import RandomForestCV
 from src.subgroup_discovery.BI import BestInterval
 from src.subgroup_discovery.PRIM import PRIM
 
+
 cv = 5
 
 generators = {
@@ -21,8 +22,11 @@ generators = {
     "random-norm": NormalRandomSampleGenerator(),
     "gaussian-mixtures": GaussianMixtureCV(list(range(1, 30)), cv=cv),
     "kde": KernelDensityCV(np.linspace(0.1, 1.0, 30), cv=cv),
+    "kde-sg": KernelDensityCV(np.linspace(0.02, 0.5, 50), cv=cv),
     "munge1": Munge(local_var=1),
-    "munge0.2": Munge(local_var=0.2)
+    "munge0.2": Munge(local_var=0.2),
+    "kde-scott": KernelDensityBW(bw_method_scott),
+    "kde-si": KernelDensityBW(bw_method_silverman)
 }
 
 # Metamodel Configuration

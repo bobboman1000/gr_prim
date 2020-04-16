@@ -52,7 +52,7 @@ class ExperimentManager:
         self.ex_logger.info("------------------------------    Startup   ------------------------------")
 
     def add_experiment(self, dataset: ExperimentDataset, generator, metamodel, discovery_alg, name, new_samples, scaling, enable_probabilities=True,
-                       fragment_limit=None, min_support: float = 20):
+                       fragment_limit=None, min_support=0):
         if not self.experiment_datasets.__contains__(dataset):
             self.experiment_datasets.append(dataset)
         experiment = Experiment(dataset, copy.deepcopy(generator), copy.deepcopy(metamodel), copy.deepcopy(discovery_alg),
@@ -63,7 +63,7 @@ class ExperimentManager:
         self.ex_logger.info("Added experiment " + experiment.name)
 
     def build_cartesian_experiments(self, datasets: List[ExperimentDataset], generators, metamodels, discovery_algs, new_samples, scaling,
-                                    enable_probabilities=True, fragment_limit: int = None, min_support=20):
+                                    enable_probabilities=True, fragment_limit: int = None, min_support=0):
         """ Structure
             generators need fit() and sample()
             metamodels need fit(), predict() and predict_proba()
@@ -264,7 +264,7 @@ class ExperimentManager:
         return generator + "_" + metamodel + "_" + discovery_alg + "_" + dataset.name
 
     def add_perfects(self, datasets: List[ExperimentDataset], metamodels: dict, discovery_algs: dict, new_samples: int, scaling: str, fragment_limit=None,
-                     enable_probabilities=True, min_support=20):
+                     enable_probabilities=True, min_support=0):
         perfect_gen_dict = {"perfect": PerfectGenerator()}
         perfect_meta_dict = {"perfect": PerfectMetamodel()}
         self.build_cartesian_experiments(datasets=datasets, generators=perfect_gen_dict, metamodels=metamodels, discovery_algs=discovery_algs,
@@ -274,7 +274,7 @@ class ExperimentManager:
                                          new_samples=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit, scaling=scaling,
                                          min_support=min_support)
 
-    def add_dummies(self, datasets, metamodels, discovery_algs, scaling, fragment_limit=None, enable_probabilities=True, min_support=20):
+    def add_dummies(self, datasets, metamodels, discovery_algs, scaling, fragment_limit=None, enable_probabilities=True, min_support=0):
         dummy_gen_dict = {"dummy": DummyGenerator()}
         dummy_meta_dict = {"dummy": DummyMetaModel()}
         self.build_cartesian_experiments(datasets, dummy_gen_dict, metamodels, discovery_algs, new_samples=0,

@@ -116,7 +116,7 @@ class BoxResult:
 class FragmentResult:
 
     def __init__(self, restrictions: List[pd.DataFrame], training_data: pd.DataFrame, original_data_idx: pd.Index, test_data: pd.DataFrame, y_name: str,
-                 fragment_idx: int, execution_times, min_support=20):
+                 fragment_idx: int, execution_times, min_support=0):
         self.min_support = min_support
         self.fragment_idx = fragment_idx
         self.execution_times = execution_times
@@ -169,9 +169,11 @@ class FragmentResult:
         r = min_box_idx if min_box_idx > 0 else len(restrictions)
         for idx in range(r):
             br = BoxResult(data, restrictions[idx][restricted_dims[idx]], y_name)
-            if (not self.__has_min_box_mass(br.get_box_mass(), data.shape[0], self.min_support) and min_box_idx <= idx) or idx >= max_box_idx:
-                break
             box_set.append(br)
+            if (not self.__has_min_box_mass(br.get_box_mass(), data.shape[0], self.min_support) and min_box_idx <= idx) or idx >= max_box_idx:
+                if self.min_support != 0:
+                    box_set.pop()
+                break
         return box_set
 
     def _get_box_max_box_idx(self, box_results_list: List[BoxResult], metric_key: str) -> int:

@@ -39,7 +39,7 @@ class Experiment:
     executed: bool = False
 
     def __init__(self, ex_data: ExperimentDataset, generator, metamodel, discovery_alg, name, new_sample_size: int,
-                 enable_probabilities=True, fragment_limit: int = None, scaling="zero_one", min_support=20):
+                 enable_probabilities=True, fragment_limit: int = None, scaling="zero_one", min_support=0):
         self.ex_data: ExperimentDataset = ex_data
         self.generator = generator
         self.metamodel = metamodel
