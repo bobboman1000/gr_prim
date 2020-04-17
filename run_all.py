@@ -19,7 +19,7 @@ for d_list in large_datasets:
         generators=generators,
         metamodels=metamodels,
         discovery_algs=ds_a,
-        new_samples=10000,
+        new_samples=2500,
         fragment_limit=30,
         scaling=ZERO_ONE_SCALING
     )
