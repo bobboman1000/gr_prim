@@ -21,11 +21,11 @@ generators = {
     "random-unif": UniformRandomSamplesGenerator(),
     "random-norm": NormalRandomSampleGenerator(),
     "gaussian-mixtures": GaussianMixtureCV(list(range(1, 30)), cv=cv),
-    "kde": KernelDensityCV(np.linspace(0.1, 1.0, 30), cv=cv),
+ #   "kde": KernelDensityCV(np.linspace(0.1, 1.0, 30), cv=cv),
     "kde-sg": KernelDensityCV(np.linspace(0.02, 0.5, 50), cv=cv),
     "munge1": Munge(local_var=1),
     "munge0.2": Munge(local_var=0.2),
-    "kde-scott": KernelDensityBW(bw_method_scott),
+ #   "kde-scott": KernelDensityBW(bw_method_scott),
     "kde-si": KernelDensityBW(bw_method_silverman)
 }
 
