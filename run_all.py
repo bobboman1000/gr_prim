@@ -27,4 +27,5 @@ for d_list in large_datasets:
     exp_man.add_dummies(datasets=d_list, metamodels=metamodels, discovery_algs=ds_a, fragment_limit=30, scaling=ZERO_ONE_SCALING)
     exp_man.add_perfects(datasets=d_list, metamodels=metamodels, discovery_algs=ds_a, fragment_limit=30, new_samples=2500, scaling=ZERO_ONE_SCALING)
     res = exp_man.run_all_parallel(32)
+    exp_man.export_experiments(d_list[0].name)
     exp_man.reset_experiments()
