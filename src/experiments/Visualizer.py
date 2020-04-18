@@ -243,7 +243,7 @@ class Visualizer:
         self._plot_datasets_together(qs, metric, selected_methods, name, vert=True, title=title, abbreviate=abbreviate, legend=legend, colors=colors,
                                      legend_above=legend_above)
 
-    def plot_detailed_curve(self, metric, selected_methods: List[str], colors: List[str], steps_range, name: str = None, title=None, w_variance=False, median=False,
+    def plot_detailed_curve(self, metric, selected_methods: List[str], colors: List[str], steps_range, name: str, title=None, w_variance=False, median=False,
                             legend=False):
         assert self.detailed_mode
         qs: Dict[str, Any] = self.exp_man.queues
