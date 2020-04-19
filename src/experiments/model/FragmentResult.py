@@ -146,7 +146,7 @@ class FragmentResult:
 
     def to_restriction(self, box_idx: int, train=True) -> pd.DataFrame:
         new_restriction = self.initial_restrictions_test if train else self.initial_restrictions_test
-        box = self.boxes[box_idx][0] if train else self.boxes[box_idx][0]
+        box = self.boxes[box_idx] if train else self.boxes[box_idx]
         for key in box:
             new_restriction.loc[0, key] = box[key][0]
             new_restriction.loc[1, key] = box[key][1]
