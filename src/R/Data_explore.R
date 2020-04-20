@@ -36,6 +36,11 @@ head(d)
 # keep <- c((1:ncol(d))[!((1:ncol(d))%in%(which(res[[1]] < 50 | res[[2]] > 0.25)))], ncol(d))
 write.csv(d, "cleaned\\occupancy.csv", row.names = FALSE)
 
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$Occupancy)[2]/nrow(d)
+
 
 # credit cards
 library("xlsx")
@@ -48,7 +53,10 @@ keep <- c((2:ncol(d))[!((2:ncol(d))%in%(which(res[[1]] < 20)))], ncol(d))
 d <- d[, keep]
 colnames(d)[ncol(d)] <- "default"
 write.csv(d, "cleaned\\credit_cards.csv", row.names = FALSE)
+
 ncol(d)
+nrow(d)
+table(d$default)[2]/nrow(d)
 
 
 # sylva
@@ -60,13 +68,16 @@ head(d)
 keep <- c((1:ncol(d))[!((1:ncol(d))%in%(which(res[[1]] < 20)))], ncol(d))
 d <- d[,keep]
 write.csv(d, "cleaned\\sylva.csv", row.names = FALSE)
+
+d <- na.omit(d)
 ncol(d)
+nrow(d)
+table(d$label)[2]/nrow(d)
 
 
 # higgs
 d <- read.csv("higgs.csv", stringsAsFactors = FALSE)
 res <- data.summary(d)
-
 
 head(d)
 keep <- c(1, (ncol(d) - 6):ncol(d))
@@ -76,7 +87,10 @@ for(i in 2:ncol(d)){
 }
 d <- na.omit(d)
 write.csv(d, "cleaned\\higgs.csv", row.names = FALSE)
+
 ncol(d)
+nrow(d)
+table(d$class)[2]/nrow(d)
 
 
 
@@ -94,7 +108,10 @@ for(i in 2:ncol(d)){
 }
 d <- na.omit(d)
 write.csv(d, "cleaned\\higgs_o.csv", row.names = FALSE)
+
 ncol(d)
+nrow(d)
+table(d$class)[2]/nrow(d)
 
 
 # sensorless
@@ -102,24 +119,138 @@ d <- read.table("Sensorless_drive_diagnosis.txt")
 res <- data.summary(d)
 print(paste0(which(res[[1]] < 20), "/", length(res[[1]])))
 write.csv(d, "cleaned\\sensorless.csv", row.names = FALSE)
+
+d <- na.omit(d)
 ncol(d)
+nrow(d)
+table(d$V49)[1]/nrow(d)
+
+
+# jm1
+d <- read.csv("jm1.csv", stringsAsFactors = FALSE)
+for(i in 1:(ncol(d) - 1)){
+  d[, i] <- as.numeric(d[, i])
+}
+d <- na.omit(d)
+res <- data.summary(d)
+for(i in 1:(ncol(d) - 1)){
+  d[, i] <- log(d[, i] + 1)
+  plot(density(d[, i]))
+}
+d$defects <- ifelse(d$defects == "true", 1, 0)
+write.csv(d, "cleaned\\jm1l.csv", row.names = FALSE)
+ncol(d)
+nrow(d)
+table(d$defects)[2]/nrow(d)
+
+
+
+
+################
+################
+################
+
+d <- read.csv("numerai.csv", stringsAsFactors = FALSE)
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$attribute_21)[2]/nrow(d)
+
+
+d <- read.table(file = 'ring.tsv', sep = '\t', header = TRUE)
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$target)[2]/nrow(d)
+
+
+d <- read.table(file = 'shuttle.tsv', sep = '\t', header = TRUE)
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$target)[1]/nrow
+
+
+d <- read.csv("eeg-eye-state.csv", stringsAsFactors = FALSE)
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$Class)[1]/nrow(d)
+
+
+d <- read.csv("jm1.csv", stringsAsFactors = FALSE)
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$defects)[2]/nrow(d)
+
+
+library("farff")
+d <- readARFF("bankruptcy\\3year.arff")
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$class)[2]/nrow(d)
+
+
+d <- read.csv("gammatelescope\\magic04.data", stringsAsFactors = FALSE, header = FALSE)
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$V11)[1]/nrow(d)
+
+
+d <- read.table("avila\\avila.txt", sep = ",")
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$V11)[1]/nrow(d)
+
+
+d <- read.csv("HTRU_2.csv", stringsAsFactors = FALSE, header = FALSE)
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$V9)[2]/nrow(d)
+
+
+d <- read.table(file = 'clean2.tsv', sep = '\t', header = TRUE)
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$target)[2]/nrow(d)
+
+
+d <- read.csv("gas_sensors.csv", stringsAsFactors = FALSE, header = TRUE)
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$y)[1]/nrow(d)
+
+
+d <- read.csv("seizure.csv", stringsAsFactors = FALSE, header = TRUE)
+res <- data.summary(d)
+d <- na.omit(d)
+ncol(d)
+nrow(d)
+table(d$y)[1]/nrow(d)
 
 
 
 
 
 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
 # 
 # 
 # # # no
