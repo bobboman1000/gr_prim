@@ -98,7 +98,7 @@ class Experiment:
 
     def _build_result(self, box, g_data, idx, execution_times, original_idx):
         start = time.time()
-        test_data = self._get_test_data(training_data=g_data, original_data_idx=original_idx)
+        test_data = self._get_test_data(training_data=g_data, fragment_idx=idx)
         fragment_result = FragmentResult(restrictions=box, fragment_idx=idx, training_data=g_data, test_data=test_data, y_name=self.ex_data.y_name,
                                          execution_times=execution_times, min_support=self.min_support, original_data_idx=original_idx)
         self.debug_logger.debug("fragment_eval " + str(time.time() - start))
@@ -239,11 +239,10 @@ class Experiment:
     def get_metamodel_name(self):
         return self._get_method_name_by_idx(1)
 
-    def _get_test_data(self, training_data: pd.DataFrame, original_data_idx) -> pd.DataFrame:
+    def _get_test_data(self, training_data: pd.DataFrame, fragment_idx: int) -> pd.DataFrame:
+        test_data = self.ex_data.get_subset_compound(fragment_idx).get_complete_complement()
         if self.perfect:
             test_data = self.ex_data.data.drop(index=training_data.index)
-        else:
-            test_data = self.ex_data.data.drop(index=original_data_idx)
         return test_data
 
     def _get_scaler(self, scaling: str):

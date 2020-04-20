@@ -129,7 +129,7 @@ class FragmentResult:
         self.box_results_train = self.get_box_results(training_data, restrictions, self.restricted_dims, y_name,
                                                       max_box_idx=min_support_idx_original)
         self.box_results_test = self.get_box_results(test_data, restrictions, self.restricted_dims, y_name,
-                                                     min_box_idx=len(self.box_results_train), max_box_idx=min_support_idx_original)
+                                                     min_box_idx=len(self.box_results_train) - 1, max_box_idx=min_support_idx_original)
 
         self.leftmost_box_idx = -1
         self.highest_mean_idx = self._get_box_max_box_idx(self.box_results_train, DENSITY_KEY)
@@ -146,7 +146,7 @@ class FragmentResult:
 
     def to_restriction(self, box_idx: int, train=True) -> pd.DataFrame:
         new_restriction = self.initial_restrictions_test if train else self.initial_restrictions_test
-        box = self.boxes[box_idx][0] if train else self.boxes[box_idx][0]
+        box = self.boxes[box_idx] if train else self.boxes[box_idx]
         for key in box:
             new_restriction.loc[0, key] = box[key][0]
             new_restriction.loc[1, key] = box[key][1]
@@ -166,14 +166,12 @@ class FragmentResult:
         :return:
         """
         box_set = []
-        r = min_box_idx if min_box_idx > 0 else len(restrictions)
+        r = max_box_idx + 1 if np.inf > max_box_idx > 0 else len(restrictions)
         for idx in range(r):
             br = BoxResult(data, restrictions[idx][restricted_dims[idx]], y_name)
-            box_set.append(br)
-            if (not self.__has_min_box_mass(br.get_box_mass(), data.shape[0], self.min_support) and min_box_idx <= idx) or idx >= max_box_idx:
-                if self.min_support != 0:
-                    box_set.pop()
+            if (not self.__has_min_box_mass(br.get_box_mass(), data.shape[0], self.min_support) and idx > min_box_idx) or idx > max_box_idx:
                 break
+            box_set.append(br)
         return box_set
 
     def _get_box_max_box_idx(self, box_results_list: List[BoxResult], metric_key: str) -> int:
