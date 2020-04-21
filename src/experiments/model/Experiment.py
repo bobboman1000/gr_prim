@@ -240,9 +240,12 @@ class Experiment:
         return self._get_method_name_by_idx(1)
 
     def _get_test_data(self, training_data: pd.DataFrame, fragment_idx: int) -> pd.DataFrame:
-        test_data = self.ex_data.get_subset_compound(fragment_idx).get_complete_complement()
+        s_compound = self.ex_data.get_subset_compound(fragment_idx)
+        test_data = s_compound.get_complete_complement()
         if self.perfect:
-            test_data = self.ex_data.data.drop(index=training_data.index)
+            f_data = s_compound.get_complete_fragment()
+            test_data = test_data.append(f_data)
+            test_data = test_data.drop(index=training_data.index)
         return test_data
 
     def _get_scaler(self, scaling: str):
