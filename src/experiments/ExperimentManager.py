@@ -271,7 +271,7 @@ class ExperimentManager:
                                          new_samples=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit, scaling=scaling,
                                          min_support=min_support)
         self.build_cartesian_experiments(datasets=datasets, generators=perfect_gen_dict, metamodels=perfect_meta_dict, discovery_algs=discovery_algs,
-                                         new_samples=new_samples, enable_probabilities=enable_probabilities, fragment_limit=fragment_limit, scaling=scaling,
+                                         new_samples=new_samples, enable_probabilities=False, fragment_limit=fragment_limit, scaling=scaling,
                                          min_support=min_support)
 
     def add_dummies(self, datasets, metamodels, discovery_algs, scaling, fragment_limit=None, enable_probabilities=True, min_support=0):
