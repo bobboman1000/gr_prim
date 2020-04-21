@@ -8,6 +8,7 @@ from src.generators.DummyGenerator import DummyGenerator
 from src.generators.PerfectGenerator import PerfectGenerator
 from src.metamodels.DummyMetamodel import DummyMetaModel
 from src.metamodels.PerfectMetamodel import PerfectMetamodel
+from src.experiments.model.Experiment import ZERO_ONE_SCALING
 
 os.chdir("../../")
 
@@ -93,9 +94,9 @@ d2 = [electricity200, electricity400, electricity800, electricity1600, electrici
 d3 = [sylva200, sylva400, sylva800, sylva1600, sylva2400]
 
 for d in d2:
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, scale=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, min_support=0, scale=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob-unscaled" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, min_support=0, scale=False)
+    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, min_support=0, scaling=ZERO_ONE_SCALING)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob-unscaled" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, min_support=0, scaling=None)
 
 #exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"], name="perfect_perfect_" + "avila200", new_samples=5000, fragment_limit=2, enable_probabilities=False)
 
