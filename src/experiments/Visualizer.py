@@ -49,6 +49,8 @@ abbreviations_dict = {
     "random-normal": "rand-norm",
     "gaussian-mixtures": "gmm",
     "kde": "kde",
+    "perfect": "perfect",
+    "kde-si": "kde",
     "munge": "munge",
     "munge1": "munge1",
     "munge0.2": "munge0.2",
@@ -204,8 +206,8 @@ class Visualizer:
 
     def export_all_as_csv(self, name="results", no_auc=False):
         exps: List[Experiment] = self.exp_man.experiments
-        cols = ["dataset-name", "N", "L", "generator", "metamodel", "SD", "fragment-id", "WRacc_box", "WRAcc_box_resdims", "precision_box", "precision_box_resdim",
-                "WRacc", "Precision", "AUC"]
+        cols = ["dataset-name", "N", "L", "generator", "metamodel", "SD", "t_generator-fit", "t_generator-sample", "t_metamodel-fit", "t_mentamodel-predict",
+                "t_sd", "fragment-id", "WRacc_box", "WRAcc_box_resdims", "precision_box", "precision_box_resdim", "WRacc", "Precision", "AUC"]
         all_exps = []
         for e in exps:
             fragments = []
@@ -217,6 +219,11 @@ class Visualizer:
                     e.name.split("_")[0],
                     e.name.split("_")[1],
                     e.name.split("_")[2],
+                    f_res.execution_times["fitting_generator"],
+                    f_res.execution_times['metamodel_fit'],
+                    f_res.execution_times['sampling'],
+                    f_res.execution_times['metamodel_predict'],
+                    f_res.execution_times['subgroup discovery'],
                     f_res.fragment_idx,
                     f_res.highest_wracc_box[0],
                     f_res.restricted_dims[f_res.highest_wracc_idx],
