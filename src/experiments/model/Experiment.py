@@ -130,8 +130,7 @@ class Experiment:
         if self.scaling_type is not None:
             scaler.fit(subset_compound.fragment)
             x_training = self._scale(subset_compound.fragment, scaler)
-            x_complement = self._scale(subset_compound.complement, scaler) if perfect_gen \
-                else None  # Don't waste time scaling if it's not a perfect metamodel
+            x_complement = self._scale(subset_compound.complement, scaler) if perfect_gen else None  # Don't waste time scaling if it's not a perfect metamodel
         else:
             x_training = subset_compound.fragment
             x_complement = subset_compound.complement

@@ -262,8 +262,14 @@ class Visualizer:
                 means = self._aggregate(methods_list[i], np.median)
             plt.plot(list(steps_range), means, color=colors[i], label=selected_methods[i])
             if w_variance:
-                stds = np.array(list(map(lambda e_list: np.std(e_list), methods_list[i])))
-                plt.fill_between(list(steps_range), means + stds, means - stds,
+                if not median:
+                    stds = np.array(list(map(lambda e_list: np.std(e_list), methods_list[i])))
+                    deviation_lower = means - stds
+                    deviation_upper = means + stds
+                else:
+                    deviation_lower = np.array(list(map(lambda e_list: np.quantile(e_list, 0.25), methods_list[i])))
+                    deviation_upper = np.array(list(map(lambda e_list: np.quantile(e_list, 0.75), methods_list[i])))
+                plt.fill_between(list(steps_range), deviation_lower, deviation_upper,
                                  alpha=0.2, edgecolor=colors[i], facecolor=colors[i], linewidth=2, antialiased=True)
         ex0: Experiment = list(qs.values())[0][0]  # take the first experiment to read general parameters
         if title is not None:
@@ -275,7 +281,7 @@ class Visualizer:
         desc = "SD algorithm:" + ex0.name.split("_")[2] + "; fragment limit = " \
                + str(ex0.fragment_limit) + "; generated points = " + str(ex0.new_sample_size)
         plt.ylabel(self.get_metric_name(metric))
-        plt.xlabel("Number of points for fragment size |d| \n\n" + desc)
+        plt.xlabel("Number of points for fragment size |d| \n" + desc)
         plt.savefig("result_grafics/" + name + "_" + self.get_metric_name(metric, short=True) + "_"
                     + "f_lim" + str(ex0.fragment_limit) + "_gen_pt" + str(ex0.new_sample_size) + ".pdf", bbox_inches='tight')
         plt.show()
@@ -332,7 +338,7 @@ class Visualizer:
         plt.xlim(0, 1)
         plt.ylim(0, 1)
         plt.xlabel("coverage")
-        plt.ylabel("denisty")
+        plt.ylabel("density")
 
     def plot_trajectory_from_fragment(self, fragment_result, color, linestyle, alpha, marker=None):
         self._trajectory_from_fragment(fragment_result, color, linestyle, alpha, marker=marker)
@@ -341,7 +347,7 @@ class Visualizer:
     def plot_trajectories_from_experiment(self, experiment, color, linestyle, alpha, marker=None):
         for f_res in experiment.result:
             self._trajectory_from_fragment(f_res, color, linestyle, alpha, marker=marker)
-        print("Trajectory plot created for " + experiment.name + "; fsize: " + str(experiment.ex_data.fragment_size)) + "\n Use plt.show() to display"
+        print("Trajectory for " + experiment.name + "; fsize: " + str(experiment.ex_data.fragment_size)) + " added to plot"
 
     def export_avg_metrics_to_csv(self, metric, abbreviate=True, filename=None, median=False, relative=True):
         qs = self.exp_man.get_grouped_by(1)
@@ -355,7 +361,6 @@ class Visualizer:
             for e_list in qs[q_name]:
                 for e in e_list:
                     generator_name, metamodel_name = e.name.split("_")[0], e.name.split("_")[1]
-
                     if not median:
                         performance = np.mean(metric(e))
                     else:

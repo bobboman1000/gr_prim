@@ -32,7 +32,7 @@ class ExperimentDataset:
         result: List[pd.DataFrame] = []
         while data.shape[0] >= fragment_size:
             sample: pd.DataFrame = data.sample(n=fragment_size, replace=False)
-            data = data.drop(sample.index)
+            data = data.drop(index=sample.index)
             result.append(sample)
         return result
 
