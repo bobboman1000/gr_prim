@@ -2,13 +2,13 @@ import warnings
 
 from sklearn.exceptions import ConvergenceWarning
 
-import src.experiments.ExperimentManager as u
-from src.experiments.config.Config import generators, metamodels, discovery_algs
+import src.main.experiments.ExperimentManager as u
+from src.main.experiments.config.Config import generators, metamodels, discovery_algs
 import pandas as pd
 
-from src.experiments.model.ExperimentDataset import ExperimentDataset
-from src.generators.DummyGenerator import DummyGenerator
-from src.metamodels.DummyMetamodel import DummyMetaModel
+from src.main.experiments.model.ExperimentDataset import ExperimentDataset
+from src.main.generators.DummyGenerator import DummyGenerator
+from src.main.metamodels.DummyMetamodel import DummyMetaModel
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=ConvergenceWarning)

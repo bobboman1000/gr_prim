@@ -1,10 +1,8 @@
 import warnings
 
 from sklearn.exceptions import ConvergenceWarning
-import src.experiments.Util as u
-#from src.experiments.DatasetsConfig import datasets
-from src.experiments.Config import metamodels, discovery_algs
-from src.experiments.Visualizer import Visualizer
+import src.main.experiments.ExperimentManager as u
+from src.main.experiments.Visualizer import Visualizer
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=ConvergenceWarning)

@@ -1,8 +1,8 @@
-import src.experiments.ExperimentManager as u
+import src.main.experiments.ExperimentManager as u
 import numpy as np
-from src.experiments.config.Config import generators, metamodels, discovery_algs
-from src.experiments.config.DatasetsConfigNew import large_datasets
-from src.experiments.model.Experiment import ZERO_ONE_SCALING, Z_SCORE_SCALING
+from src.main.experiments.config.Config import generators, metamodels, discovery_algs
+from src.main.experiments.config.DatasetsConfigNew import large_datasets
+from src.main.experiments.model.Experiment import ZERO_ONE_SCALING
 
 exp_man = u.ExperimentManager()
 

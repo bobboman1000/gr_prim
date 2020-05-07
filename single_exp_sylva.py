@@ -1,11 +1,11 @@
-import src.experiments.ConfigTest as c
-import src.experiments.BaselineConfig as bc
+import src.main.experiments.config.Config as c
 import pandas as pd
-import src.experiments.Util as u
-from src.experiments.model.ExperimentDataset import ExperimentDataset
-from src.generators.DummyGenerator import DummyGenerator
-from src.metamodels.DummyMetamodel import DummyMetaModel
-from src.subgroup_discovery.dssd import DSSD
+import src.main.experiments.ExperimentManager as u
+from src.main.experiments.model.Experiment import ZERO_ONE_SCALING
+from src.main.experiments.model.ExperimentDataset import ExperimentDataset
+from src.main.generators.DummyGenerator import DummyGenerator
+from src.main.metamodels.DummyMetamodel import DummyMetaModel
+from src.main.subgroup_discovery.dssd import DSSD
 
 exp_man = u.ExperimentManager()
 
@@ -54,10 +54,10 @@ var_sylva = DSSD("dssd")
 sizes = [200]
 
 for d in datasets:
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], var_sylva, name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], var_sylva, name="kde_classRF_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
-    exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], var_sylva, name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), var_sylva, name="dummy_dummy_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], var_sylva, name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], var_sylva, name="kde_classRF_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False, scaling=ZERO_ONE_SCALING)
+    exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], var_sylva, name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
+    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), var_sylva, name="dummy_dummy_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False, scaling=ZERO_ONE_SCALING)
 
 res = exp_man.run_all()
 exp_man.export_experiments("prelim_dssd_sylva")

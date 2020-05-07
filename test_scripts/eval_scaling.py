@@ -1,12 +1,17 @@
+import os
+
 import src.main.experiments.config.Config as c
 import pandas as pd
 import src.main.experiments.ExperimentManager as u
 from src.main.experiments.model.ExperimentDataset import ExperimentDataset
 from src.main.generators.DummyGenerator import DummyGenerator
 from src.main.metamodels.DummyMetamodel import DummyMetaModel
-from src.main.subgroup_discovery.dssd import DSSD
+from src.main.experiments.model.Experiment import ZERO_ONE_SCALING
+
+os.chdir("../../")
 
 exp_man = u.ExperimentManager()
+
 
 def map_target(data: pd.DataFrame, y_col_name: str, to_ones):
     data.loc[:, y_col_name] = data.loc[:, y_col_name].map(lambda e: 1 if e == to_ones else 0)
@@ -27,9 +32,7 @@ def generate_names(number):
     return x_names
 
 
-
-
-sylva = pd.read_csv("resources/data/sylva_prior.csv", header=0)
+sylva = pd.read_csv("../resources/data/sylva_prior.csv", header=0)
 sylva_yname = "label"
 sylva = sylva.dropna()
 sylva = sylva.drop(columns=["Rawah_Wilderness_Area","Neota_Wilderness_Area","Comanche_Peak_Wilderness_Area","Cache_la_Poudre_Wilderness_Area",
@@ -54,33 +57,52 @@ sylva1600 = ExperimentDataset("sylva1600", sylva, sylva_yname, fragment_size=160
 sylva2400 = ExperimentDataset("sylva2400", sylva, sylva_yname, fragment_size=2400)
 
 
-avila = pd.read_csv("resources/data/avila/avila.txt", header=0, names=generate_names(10))
+avila = pd.read_csv("../resources/data/avila/avila.txt", header=0, names=generate_names(10))
 avila_yname = "y"
 avila = avila.dropna()
 avila = map_target(avila, avila_yname, "A")
-avila200 = ExperimentDataset("avila200", avila, avila_yname, fragment_size=200)
-avila400 = ExperimentDataset("avila400", avila, avila_yname, fragment_size=400)
-avila800 = ExperimentDataset("avil800", avila, avila_yname, fragment_size=800)
-avila1600 = ExperimentDataset("avila1600", avila, avila_yname, fragment_size=1600)
-avila2400 = ExperimentDataset("avila2400", avila, avila_yname, fragment_size=2400)
+avila200 = ExperimentDataset("avila", avila, avila_yname, fragment_size=200)
+avila400 = ExperimentDataset("avila", avila, avila_yname, fragment_size=400)
+avila800 = ExperimentDataset("avila", avila, avila_yname, fragment_size=800)
+avila1600 = ExperimentDataset("avila", avila, avila_yname, fragment_size=1600)
+avila2400 = ExperimentDataset("avila", avila, avila_yname, fragment_size=2400)
 
-datasets = [sylva200, sylva400]
-var_sylva = DSSD("dssd")
+SAAC2 = pd.read_csv("../resources/data/SAAC2.csv", na_values=['?'])
+SAAC2_yname = "class"
+SAAC2 = SAAC2.dropna()
+SAAC2 = map_target(SAAC2, SAAC2_yname, 2)
+SAAC2200 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=200)
+SAAC2400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=400)
+SAAC2800 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=800)
+SAAC21600 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=1600)
+SAAC22400 = ExperimentDataset("SAAC2", SAAC2, SAAC2_yname, fragment_size=2400)
 
-sizes = [200, 400]
+electricity = pd.read_csv("../resources/data/electricity-normalized.csv")
+electricity_yname = "class"
+electricity = electricity.dropna()
+map_target(electricity, electricity_yname, "UP")
+electricity200 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=200)
+electricity400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=400)
+electricity800 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=800)
+electricity1600 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=1600)
+electricity2400 = ExperimentDataset("electricity", electricity, electricity_yname, fragment_size=2400)
 
-for d in datasets:
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], var_sylva, name="kde_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], var_sylva, name="kde_classRF_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
-    exp_man.add_experiment(d, DummyGenerator(), c.metamodels["classRF"], var_sylva, name="dummy_classRF-prob_" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=True)
-    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), var_sylva, name="dummy_dummy_avila400" + d.name, new_samples=10000, fragment_limit=50, enable_probabilities=False)
+d1 = [SAAC2200, SAAC2400, SAAC2800, SAAC21600, SAAC22400]
+d2 = [electricity200, electricity400, electricity800, electricity1600, electricity2400]
+d3 = [sylva200, sylva400, sylva800, sylva1600, sylva2400]
 
-# res = exp_man.run_all_parallel(4)
-res = exp_man.run_all()
-exp_man.export_experiments("prelim_dssd_sylva")
+for d in d2:
+    exp_man.add_experiment(d, DummyGenerator(), DummyMetaModel(), c.discovery_algs["best-interval"], name="dummy_dummy" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, min_support=0, scaling=ZERO_ONE_SCALING)
+    exp_man.add_experiment(d, c.generators["kde"], c.metamodels["classRF"], c.discovery_algs["best-interval"], name="kde_classRF-prob-unscaled" + d.name, new_samples=5000, fragment_limit=20, enable_probabilities=True, min_support=0, scaling=None)
+
+#exp_man.add_experiment(avila200, PerfectGenerator(), PerfectMetamodel(), c.discovery_algs["best-interval"], name="perfect_perfect_" + "avila200", new_samples=5000, fragment_limit=2, enable_probabilities=False)
+
+res = exp_man.run_all_parallel(15)
+exp_man.export_experiments("scaling_test")
 
 
-# The configuration files (src/experiments/XXXXConfig.py) contain configured generators and metamodels.
+# The configuration files (src.main.experiments/XXXXConfig.py) contain configured generators and metamodels.
 # New samples is the amount of samples added, enable_probabilities specifies wheter the classification should be done
 # using probabilities, the fragment_limit specifies the maximum number of fragments (small datasets).
 

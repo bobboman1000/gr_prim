@@ -1,10 +1,9 @@
 from typing import List
 
-import src.experiments.ExperimentManager as u
-from src.experiments.Visualizer import Visualizer
-import pandas as pd
+import src.main.experiments.ExperimentManager as u
+from src.main.experiments.Visualizer import Visualizer
 
-from src.experiments.model.Experiment import Experiment
+from src.main.experiments.model.Experiment import Experiment
 
 # these files are read from /ouptut
 names = ["avila", "credit-cards", "eeg-eye-state", "gamma-telescope", "htru", "jm1", "mozilla", "occupancy", "ring", "shuttle"]

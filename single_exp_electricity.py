@@ -1,11 +1,10 @@
-import src.experiments.ConfigTest as c
-import src.experiments.BaselineConfig as bc
+import src.main.experiments.config.Config as c
 import pandas as pd
-import src.experiments.Util as u
-from src.experiments.model.ExperimentDataset import ExperimentDataset
-from src.generators.DummyGenerator import DummyGenerator
-from src.metamodels.DummyMetamodel import DummyMetaModel
-from src.subgroup_discovery.dssd import DSSD
+import src.main.experiments.ExperimentManager as u
+from src.main.experiments.model.ExperimentDataset import ExperimentDataset
+from src.main.generators.DummyGenerator import DummyGenerator
+from src.main.metamodels.DummyMetamodel import DummyMetaModel
+from src.main.subgroup_discovery.dssd import DSSD
 
 exp_man = u.ExperimentManager()
 
