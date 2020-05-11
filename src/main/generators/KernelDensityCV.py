@@ -71,7 +71,6 @@ class KernelDensityCV:
             p = p_needed if p_needed <= p_available else p_available
             result = np.append(result, additional[:p], axis=0)
             assert result.shape[0] <= n
-            print(result.shape[0])
         return result
 
     def _cleaned_sample(self, n: int) -> np.ndarray:
