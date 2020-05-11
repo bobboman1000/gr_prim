@@ -36,12 +36,14 @@ class KernelDensityBW:
 
 class KernelDensityCV:
 
-    def __init__(self, bandwidth_list: Union[np.ndarray, List[float]], cv=5, hard_limits=False):
+    def __init__(self, bandwidth_list: Union[np.ndarray, List[float]], cv=5, hard_limits=False, sampling_multiplier: int = None):
         self.kde: KernelDensity = KernelDensity()
         self.bandwidth_list: List[float] = bandwidth_list
         self.cv = cv
         self.hard_limits = hard_limits
         self._limits = ()
+        assert not (hard_limits and sampling_multiplier is None)
+        self.sampling_multiplier = sampling_multiplier
 
     def fit(self, X: pd.DataFrame, **kwargs):
         kde_params = {"bandwidth": self.bandwidth_list}
@@ -68,10 +70,12 @@ class KernelDensityCV:
             p_available = len(additional)
             p = p_needed if p_needed <= p_available else p_available
             result = np.append(result, additional[:p], axis=0)
+            assert result.shape[0] <= n
+            print(result.shape[0])
         return result
 
     def _cleaned_sample(self, n: int) -> np.ndarray:
-        new_samples = self.kde.sample(10 * n)
+        new_samples = self.kde.sample(self.sampling_multiplier * n)
         new_samples = _in_bounds(new_samples, self._limits[0], self._limits[1])
         return new_samples
 
