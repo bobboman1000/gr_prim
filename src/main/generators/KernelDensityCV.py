@@ -65,7 +65,7 @@ class KernelDensityCV:
     def _generate_w_hard_limits(self, n: int) -> np.ndarray:
         result: np.ndarray = self._cleaned_sample(n)
         while result.shape[0] != n:
-            additional = self._cleaned_sample(n)
+            additional = self._cleaned_sample(self.sampling_multiplier * n)
             p_needed = n - result.shape[0]
             p_available = len(additional)
             p = p_needed if p_needed <= p_available else p_available
@@ -75,7 +75,7 @@ class KernelDensityCV:
         return result
 
     def _cleaned_sample(self, n: int) -> np.ndarray:
-        new_samples = self.kde.sample(self.sampling_multiplier * n)
+        new_samples = self.kde.sample(n)
         new_samples = _in_bounds(new_samples, self._limits[0], self._limits[1])
         return new_samples
 
