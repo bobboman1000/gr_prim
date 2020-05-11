@@ -114,6 +114,22 @@ nrow(d)
 table(d$class)[2]/nrow(d)
 
 
+# higgs_of
+d <- read.csv("higgs.csv", stringsAsFactors = FALSE)
+d <- d[, -((ncol(d) - 6):ncol(d))]
+res <- data.summary(d)
+
+for(i in 2:ncol(d)){
+  d[, i] <- as.numeric(d[, i])
+}
+d <- na.omit(d)
+write.csv(d, "cleaned\\higgs_of.csv", row.names = FALSE)
+
+ncol(d)
+nrow(d)
+table(d$class)[2]/nrow(d)
+
+
 # sensorless
 d <- read.table("Sensorless_drive_diagnosis.txt")
 res <- data.summary(d)
@@ -132,16 +148,32 @@ for(i in 1:(ncol(d) - 1)){
   d[, i] <- as.numeric(d[, i])
 }
 d <- na.omit(d)
-res <- data.summary(d)
+# res <- data.summary(d)
 for(i in 1:(ncol(d) - 1)){
-  d[, i] <- log(d[, i] + 1)
-  plot(density(d[, i]))
+   d[, i] <- log(d[, i] + 1)
+#   plot(density(d[, i]))
 }
 d$defects <- ifelse(d$defects == "true", 1, 0)
 write.csv(d, "cleaned\\jm1l.csv", row.names = FALSE)
 ncol(d)
 nrow(d)
 table(d$defects)[2]/nrow(d)
+
+
+# library(FNN)
+# d <- read.table("avila\\avila.txt", sep = ",")
+# for(i in 1:10){
+#   l <- min(knn.dist(unique(d[, i]), 1)/3)
+#   d[, i] <- d[, i] + runif(nrow(d), 0, l)
+# }
+# res <- data.summary(d)
+# d <- na.omit(d)
+# ncol(d)
+# nrow(d)
+# table(d$V11)[1]/nrow(d)
+
+
+
 
 
 

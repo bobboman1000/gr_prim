@@ -40,11 +40,13 @@ metamodels = {
 
 discovery_algs = {
     "prim": PRIM(threshold=1, mass_min=20),
-    "best-interval": BestInterval(),
-    "bi2": BestInterval(beam_size=2),
-    "bi4": BestInterval(beam_size=4),
-    "bi8": BestInterval(beam_size=8),
-    "bi12": BestInterval(beam_size=12),
-    "bi20": BestInterval(beam_size=20),
+    "best-interval": BestInterval(depth=5),
+    "bi2d20": BestInterval(beam_size=2, depth=20),
+    "bi4d20": BestInterval(beam_size=4, depth=20),
+    "bi6d20": BestInterval(beam_size=6, depth=20),
+    "bi8d20": BestInterval(beam_size=8, depth=20),
+    "bi9d20": BestInterval(beam_size=9, depth=20),
+    "bi10d20": BestInterval(beam_size=10, depth=20),    
+    "bi20d20": BestInterval(beam_size=20, depth=20),
     "bid20": BestInterval(depth=20)
 }
