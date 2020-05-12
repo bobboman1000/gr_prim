@@ -1,5 +1,5 @@
 import src.main.experiments.ExperimentManager as u
-from generators.RandomSamples import NoiseGenerator
+from src.main.generators.RandomSamples import NoiseGenerator
 from src.main.experiments.config.DataUtils import map_target, generate_names
 from src.main.generators.KernelDensityCV import KernelDensityCV, KernelDensityBW, bw_method_silverman
 from src.main.experiments.model.ExperimentDataset import ExperimentDataset
