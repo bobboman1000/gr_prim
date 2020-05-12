@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
+from src.main.generators.RandomSamples import NoiseGenerator
 from src.main.experiments.model.ExperimentDataset import ExperimentDataset
 from src.main.experiments.model.ExperimentSubsetCompound import ExperimentSubsetCompound
 from src.main.experiments.model.FragmentResult import FragmentResult
@@ -200,9 +201,11 @@ class Experiment:
     def _generate_data(self, scaled_fragment: pd.DataFrame, fitted_generator, perfect_gen: bool):
         start = time.time()
         g_data = pd.DataFrame(fitted_generator.sample(self.new_sample_size), columns=scaled_fragment.columns)
-        g_data = g_data.append(scaled_fragment, ignore_index=not perfect_gen)
+        if type(self.generator) != NoiseGenerator:
+            g_data = g_data.append(scaled_fragment, ignore_index=not perfect_gen)
         original_idx = g_data.tail(scaled_fragment.shape[0]).index
-        assert_subset_equality(scaled_fragment, g_data.loc[original_idx], original_idx, not perfect_gen)
+        # assert_subset_equality(scaled_fragment, g_data.loc[original_idx], original_idx, not perfect_gen)
+        # TODO Move this to a test
         duration = time.time() - start
         return g_data, duration, original_idx
 

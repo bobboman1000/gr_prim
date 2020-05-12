@@ -65,7 +65,7 @@ class NoiseGenerator:
             col_values_unique = np.unique(col_values)
             div_mind_dist = min([a - b for a in col_values_unique for b in col_values_unique if b != a])
             div_mind_dist /= self.divisor
-            col_values = np.add(col_values, np.random.uniform(0, div_mind_dist))
+            col_values = np.add(col_values, np.random.uniform(0, div_mind_dist, len(col_values)))
             mod_data[col] = col_values
         return mod_data
 

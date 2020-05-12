@@ -12,3 +12,6 @@ def test_noise_limits():
     """
     gen = NoiseGenerator()
     gen.fit(test_data)
+    sample = gen.sample(0)
+    assert sample.shape == (500, 100)
+
