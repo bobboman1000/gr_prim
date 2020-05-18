@@ -9,6 +9,8 @@ from src.main.metamodels.DummyMetamodel import DummyMetaModel
 from src.main.experiments.model.Experiment import ZERO_ONE_SCALING, Z_SCORE_SCALING
 import pandas as pd
 
+from subgroup_discovery.PRIM import PRIM
+
 exp_man = u.ExperimentManager()
 
 # # jm1 21 attribute
@@ -60,14 +62,14 @@ cleans.append(ExperimentDataset("clean2", clean2, clean2_yname, fragment_size=40
 cleans.append(ExperimentDataset("clean2", clean2, clean2_yname, fragment_size=800))
 cleans.append(ExperimentDataset("clean2", clean2, clean2_yname, fragment_size=1600))
 
+
 datasets = [occupancies, jm1s, cleans, avilas]
-kde = KernelDensityBW(bw_method_silverman, hard_limits=True, sampling_multiplier=100)
-kde_base = KernelDensityBW(bw_method_silverman, hard_limits=False)
+kde = KernelDensityBW(bw_method_silverman)
 
 for d in datasets:
     for sd in d:
         exp_man.add_experiment(sd, DummyGenerator(), DummyMetaModel(), c.discovery_algs["prim"], name="dummy_dummy_prim_" + sd.name, new_samples=2500, fragment_limit=30, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
-        exp_man.add_experiment(sd, NoiseGenerator(), DummyMetaModel(), c.discovery_algs["prim"], name="kde-cv_classRF_prim_" + sd.name, new_samples=2500, fragment_limit=30, enable_probabilities=True, scaling=Z_SCORE_SCALING)
-exp_man.run_all_parallel(32)
-exp_man.export_experiments("noise")
-exp_man.reset_experiments()
+        exp_man.add_experiment(sd, DummyGenerator(), c.metamodels["classRF"], c.discovery_algs["prim"], name="dummy_dummy_prim_" + sd.name, new_samples=2500, fragment_limit=30, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
+        exp_man.add_experiment(sd, kde, c.metamodels["classRF"], c.discovery_algs["prim"], name="kde-cv-hard_classRF_prim_" + sd.name, new_samples=2500, fragment_limit=30, enable_probabilities=True, scaling=Z_SCORE_SCALING)
+exp_man.run_all_parallel(20)
+exp_man.export_experiments("test_wracc_prim")
