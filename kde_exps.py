@@ -36,8 +36,31 @@ occupancies.append(ExperimentDataset("occupancy", occupancy, occupancy_yname, fr
 occupancies.append(ExperimentDataset("occupancy", occupancy, occupancy_yname, fragment_size=800))
 occupancies.append(ExperimentDataset("occupancy", occupancy, occupancy_yname, fragment_size=1600))
 
+# # avila 10 attributes
+avila = pd.read_csv("resources/data/avila/avila.txt", header=0, names=generate_names(10))
+avila_yname = "y"
+avila = avila.dropna()
+avila = map_target(avila, avila_yname, "A")
+avilas = []
+avilas.append(ExperimentDataset("avila", avila, avila_yname, fragment_size=200))
+avilas.append(ExperimentDataset("avila", avila, avila_yname, fragment_size=400))
+avilas.append(ExperimentDataset("avila", avila, avila_yname, fragment_size=800))
+avilas.append(ExperimentDataset("avila", avila, avila_yname, fragment_size=1600))
 
-datasets = [occupancies, jm1s]
+# # clean 2 168
+clean2 = pd.read_csv("resources/data/clean2.tsv", sep="\t")
+clean2_yname = "target"
+clean2 = clean2.dropna()
+#clean2 = clean2.drop(columns=["molecule_name", "conformation_name"])
+# nomapping
+cleans = []
+cleans.append(ExperimentDataset("clean2", clean2, clean2_yname, fragment_size=200))
+cleans.append(ExperimentDataset("clean2", clean2, clean2_yname, fragment_size=400))
+cleans.append(ExperimentDataset("clean2", clean2, clean2_yname, fragment_size=800))
+cleans.append(ExperimentDataset("clean2", clean2, clean2_yname, fragment_size=1600))
+
+
+datasets = [cleans, avilas]
 kde = KernelDensityBW(bw_method_silverman, hard_limits=True, sampling_multiplier=100)
 kde_base = KernelDensityBW(bw_method_silverman, hard_limits=False)
 

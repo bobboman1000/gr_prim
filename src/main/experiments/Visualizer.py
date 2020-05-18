@@ -347,7 +347,7 @@ class Visualizer:
     def plot_trajectories_from_experiment(self, experiment, color, linestyle, alpha, marker=None):
         for f_res in experiment.result:
             self._trajectory_from_fragment(f_res, color, linestyle, alpha, marker=marker)
-        print("Trajectory for " + experiment.name + "; fsize: " + str(experiment.ex_data.fragment_size)) + " added to plot"
+        print("Trajectory for " + experiment.name + "; fsize: " + str(experiment.ex_data.fragment_size) + " added to plot")
 
     def export_avg_metrics_to_csv(self, metric, abbreviate=True, filename=None, median=False, relative=True):
         qs = self.exp_man.get_grouped_by(1)
