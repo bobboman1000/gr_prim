@@ -30,6 +30,8 @@ gen_c = {
     "gaussian-mixtures": "darkgreen",
     "kde": "blue",
     "munge": "red",
+    "kde-si-hard": "blue",
+    "kde-si": "blue"
 }
 
 metamodels_c = {
@@ -50,7 +52,7 @@ abbreviations_dict = {
     "gaussian-mixtures": "gmm",
     "kde": "kde",
     "perfect": "perfect",
-    "kde-si": "kde",
+    "kde-si-hard": "kde",
     "munge": "munge",
     "munge1": "munge1",
     "munge0.2": "munge0.2",

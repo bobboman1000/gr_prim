@@ -99,7 +99,7 @@ class Experiment:
     def _build_result(self, box, g_data, idx, execution_times, original_idx):
         start = time.time()
         test_data = self._get_test_data(training_data=g_data, fragment_idx=idx)
-        fragment_result = FragmentResult(restrictions=box, fragment_idx=idx, training_data=g_data, test_data=test_data, y_name=self.ex_data.y_name,
+        fragment_result = FragmentResult(restrictions=box, training_data=g_data, test_data=test_data, y_name=self.ex_data.y_name,
                                          execution_times=execution_times, min_support=self.min_support, original_data_idx=original_idx)
         self.debug_logger.debug("fragment_eval " + str(time.time() - start))
         return fragment_result
@@ -124,13 +124,13 @@ class Experiment:
     def _exec(self, subset_compound: ExperimentSubsetCompound):
         execution_times = {}
         scaler = self._get_scaler(self.scaling_type)
-        perfect_gen = type(self.generator) == PerfectGenerator
+        is_perfect_gen = type(self.generator) == PerfectGenerator
         perfect_meta = type(self.metamodel) == PerfectMetamodel
 
         if self.scaling_type is not None:
             scaler.fit(subset_compound.fragment)
             x_training = self._scale(subset_compound.fragment, scaler)
-            x_complement = self._scale(subset_compound.complement, scaler) if perfect_gen else None  # Don't waste time scaling if it's not a perfect metamodel
+            x_complement = self._scale(subset_compound.complement, scaler) if is_perfect_gen else None  # Don't waste time scaling if it's not a perfect metamodel
         else:
             x_training = subset_compound.fragment
             x_complement = subset_compound.complement
@@ -138,7 +138,7 @@ class Experiment:
         y_training = subset_compound.fragment_y
         y_complement = subset_compound.complement_y
 
-        if perfect_gen:
+        if is_perfect_gen:
             fitted_generator, execution_times[g_fit] = self._fit_perfect_generator(x_training, x_complement)
         else:
             fitted_generator, execution_times[g_fit] = self._fit_generator(x_training)
@@ -148,7 +148,7 @@ class Experiment:
         else:
             fitted_metamodel, execution_times[m_fit] = self._fit_metamodel(x_training, y_training)
 
-        g_data, execution_times[g_sam], original_idx = self._generate_data(x_training, fitted_generator, perfect_gen)
+        g_data, execution_times[g_sam], original_idx = self._generate_data(x_training, fitted_generator, is_perfect_gen)
         g_data_y, execution_times[m_pred] = self._label_data(g_data, fitted_metamodel)
 
         start = time.time()
