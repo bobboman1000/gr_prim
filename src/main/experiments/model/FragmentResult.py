@@ -114,9 +114,8 @@ class BoxResult:
 class FragmentResult:
 
     def __init__(self, restrictions: List[pd.DataFrame], training_data: pd.DataFrame, original_data_idx: pd.Index, test_data: pd.DataFrame, y_name: str,
-                 fragment_idx: int, execution_times, min_support=0):
+                 execution_times, min_support=0):
         self.min_support = min_support
-        self.fragment_idx = fragment_idx
         self.execution_times = execution_times
         self.initial_restrictions_train = get_initial_restrictions(training_data.drop(columns=[y_name]))
         self.initial_restrictions_test = get_initial_restrictions(test_data.drop(columns=[y_name]))
