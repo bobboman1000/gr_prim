@@ -8,7 +8,7 @@ from src.main.metamodels.DummyMetamodel import DummyMetaModel
 from src.main.experiments.model.Experiment import ZERO_ONE_SCALING, Z_SCORE_SCALING
 import pandas as pd
 
-from subgroup_discovery.PRIM import PRIM
+from src.main.subgroup_discovery.PRIM import PRIM
 
 exp_man = u.ExperimentManager()
 
