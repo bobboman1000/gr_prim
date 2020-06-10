@@ -8,6 +8,8 @@ from src.main.metamodels.DummyMetamodel import DummyMetaModel
 from src.main.experiments.model.Experiment import ZERO_ONE_SCALING, Z_SCORE_SCALING
 import pandas as pd
 
+from subgroup_discovery.PRIM import PRIM
+
 exp_man = u.ExperimentManager()
 
 # # jm1 21 attribute
@@ -60,15 +62,16 @@ cleans.append(ExperimentDataset("clean2", clean2, clean2_yname, fragment_size=80
 cleans.append(ExperimentDataset("clean2", clean2, clean2_yname, fragment_size=1600))
 
 
+prim = PRIM(threshold=20, wracc=True)
 datasets = [cleans, avilas]
 kde = KernelDensityBW(bw_method_silverman, hard_limits=True, sampling_multiplier=100)
 kde_base = KernelDensityBW(bw_method_silverman, hard_limits=False)
 
 for d in datasets:
     for sd in d:
-        exp_man.add_experiment(sd, DummyGenerator(), DummyMetaModel(), c.discovery_algs["prim"], name="dummy_dummy_prim_" + sd.name, new_samples=2500, fragment_limit=30, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
-        exp_man.add_experiment(sd, kde_base, c.metamodels["classRF"], c.discovery_algs["prim"], name="kde-cv_classRF_prim_" + sd.name, new_samples=2500, fragment_limit=30, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
-        exp_man.add_experiment(sd, kde, c.metamodels["classRF"], c.discovery_algs["prim"], name="kde-cv-hard_classRF_prim_" + sd.name, new_samples=2500, fragment_limit=30, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
+        exp_man.add_experiment(sd, DummyGenerator(), DummyMetaModel(), prim, name="dummy_dummy_prim_" + sd.name, new_samples=2500, fragment_limit=30, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
+        exp_man.add_experiment(sd, kde_base, c.metamodels["classRF"], prim, name="kde-cv_classRF_prim_" + sd.name, new_samples=2500, fragment_limit=30, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
+        exp_man.add_experiment(sd, kde, c.metamodels["classRF"], prim, name="kde-cv-hard_classRF_prim_" + sd.name, new_samples=2500, fragment_limit=30, enable_probabilities=True, scaling=ZERO_ONE_SCALING)
     exp_man.run_all()
     exp_man.export_experiments(d[0].name)
     exp_man.reset_experiments()

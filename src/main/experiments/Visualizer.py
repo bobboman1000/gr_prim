@@ -31,7 +31,9 @@ gen_c = {
     "kde": "blue",
     "munge": "red",
     "kde-si-hard": "blue",
-    "kde-si": "blue"
+    "kde-si": "blue",
+    "kde-cv": "slateblue",
+    "kde-cv-hard": "darkslateblue",
 }
 
 metamodels_c = {
