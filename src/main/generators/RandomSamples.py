@@ -13,14 +13,34 @@ class NormalRandomSampleGenerator:
 
     def sample(self, size: int) -> pd.DataFrame:
         sample = pd.DataFrame()
-        i = 0
         for attr in self.data:
-            mu = pd.Series.mean(self.data[attr])
-            sigma = pd.Series.std(self.data[attr])
-            sample.insert(i, attr, np.random.normal(mu, sigma, size), allow_duplicates=True)
-            i += 1
+            mu, sigma = pd.Series.mean(self.data[attr]), pd.Series.std(self.data[attr])
+            sample[attr] = np.random.normal(mu, sigma, size)
         return sample
+    
 
+# =============================================================================
+# This generator creates a dataset with independently generated attributes
+# from nornal distribution with the same mean values and standard deviations
+# as in original data
+# 
+# df = pd.read_csv("testdata.csv")
+# x = NormalRandomSampleGenerator()
+# x.fit(df)
+# df1 = x.sample(size=201)
+# 
+# df.mean(axis = 0)
+# df1.mean(axis = 0)
+# df.std(axis = 0)
+# df1.std(axis = 0)
+# 
+# import matplotlib.pyplot as plt
+# df['color'] = np.zeros(len(df))
+# df1['color'] = np.ones(len(df1))
+# df = pd.concat([df, df1])
+# plt.scatter(df.iloc[:, 3], df.iloc[:, 4], c = df['color'])
+# =============================================================================
+    
 
 class UniformRandomSamplesGenerator:
 
@@ -33,24 +53,35 @@ class UniformRandomSamplesGenerator:
 
     def sample(self, size: int) -> pd.DataFrame:
         sample = pd.DataFrame()
-        i = 0
-        for col in self.data:
-            col_min, col_max = self.__min_max_of_column(self.data, i)
-            sample.insert(i, col, self.__random_uniform_series(col_min, col_max, size))
-            i += 1
+        for attr in self.data:
+            attr_min, attr_max = self.data[attr].min(), self.data[attr].max()
+            sample[attr] = np.random.uniform(attr_min, attr_max, size)
         return sample
 
-    def __random_uniform_series(self, low, high, size):
-        return pd.Series(np.random.uniform(low, high, size))
 
-    def __min_max_of_column(self, df: pd.DataFrame, col_idx: int):
-        return df.iloc[:, col_idx].min(), df.iloc[:, col_idx].max()
-
+# =============================================================================
+# This generator creates a dataset with independently generated attributes
+# from uniform distribution with the same ranges as in original data
+#
+# df = pd.read_csv("testdata.csv")
+# x = UniformRandomSamplesGenerator()
+# x.fit(df)
+# df1 = x.sample(size=201)
+# 
+# df.max(axis = 0)-df1.max(axis = 0)
+# df1.min(axis = 0)-df.min(axis = 0)
+# 
+# import matplotlib.pyplot as plt
+# df['color'] = np.zeros(len(df))
+# df1['color'] = np.ones(len(df1))
+# df = pd.concat([df, df1])
+# plt.scatter(df.iloc[:, 3], df.iloc[:, 4], c = df['color'])
+# =============================================================================
 
 
 class NoiseGenerator:
 
-    def __init__(self, divisor: float = 100):
+    def __init__(self, divisor: float = 3):
         self.data = None
         self.divisor = divisor
 
@@ -62,15 +93,27 @@ class NoiseGenerator:
         mod_data: pd.DataFrame = self.data.copy()
         for col in mod_data:
             col_values = mod_data[col].to_numpy()
-            col_values_unique = np.unique(col_values)
-            div_mind_dist = min([a - b for a in col_values_unique for b in col_values_unique if b != a])
-            div_mind_dist /= self.divisor
-            col_values = np.add(col_values, np.random.uniform(0, div_mind_dist, len(col_values)))
+            div_mind_dist = min(np.diff(np.unique(col_values)))/self.divisor
+            col_values = np.add(col_values, np.random.uniform(-div_mind_dist, div_mind_dist, len(col_values)))
             mod_data[col] = col_values
         return mod_data
+    
 
-    def __random_uniform_series(self, low, high, size):
-        return pd.Series(np.random.uniform(low, high, size))
-
-    def __min_max_of_column(self, df: pd.DataFrame, col_idx: int):
-        return df.iloc[:, col_idx].min(), df.iloc[:, col_idx].max()
+# =============================================================================
+# df = pd.read_csv("testdata.csv")
+# x = NoiseGenerator()
+# x.fit(df)
+# df1 = x.sample(size=1000)
+# 
+# dfn = df.to_numpy()
+# df1n = df1.to_numpy()
+# np.unique(dfn).size
+# np.unique(df1n).size
+# # so there are still several duplicated values, althogh much less than in original data.
+# 
+# import matplotlib.pyplot as plt
+# df['color'] = np.zeros(len(df))
+# df1['color'] = np.ones(len(df1))
+# df = pd.concat([df, df1])
+# plt.scatter(df.iloc[:, 3], df.iloc[:, 4], c = df['color'])
+# =============================================================================
