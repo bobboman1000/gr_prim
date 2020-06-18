@@ -1,14 +1,10 @@
-rpy2
-statsmodels
-cython
-pomegranate
-annoy
-prim
-pysubgroup
-seaborn
-matplotlib
-scipy
-pandas
-sklearn
-numpy
-liac-arff
+rpy2            # R-bindings for MUNGE, and BI
+statsmodels     # Computing bw_silverman and bw_scott
+annoy           # NNs in python Munge
+pysubgroup      # Additional subgroup method
+seaborn         # Plots in Visualizer (mostly heatmaps)
+matplotlib      # All other plotting
+scipy           # Reading .arff files
+pandas          # Dataframes, Series
+sklearn         # Learning models, generators
+numpy           # Numpy arrays
