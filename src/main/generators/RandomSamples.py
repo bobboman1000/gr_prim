@@ -11,11 +11,11 @@ class NormalRandomSampleGenerator:
         self.data = X
         return self
 
-    def sample(self, size: int) -> pd.DataFrame:
+    def sample(self, n_samples = 1) -> pd.DataFrame:
         sample = pd.DataFrame()
         for attr in self.data:
             mu, sigma = pd.Series.mean(self.data[attr]), pd.Series.std(self.data[attr])
-            sample[attr] = np.random.normal(mu, sigma, size)
+            sample[attr] = np.random.normal(mu, sigma, n_samples)
         return sample
     
 
@@ -27,7 +27,7 @@ class NormalRandomSampleGenerator:
 # df = pd.read_csv("testdata.csv")
 # x = NormalRandomSampleGenerator()
 # x.fit(df)
-# df1 = x.sample(size=201)
+# df1 = x.sample(n_samples = 201)
 # 
 # df.mean(axis = 0)
 # df1.mean(axis = 0)
@@ -47,15 +47,15 @@ class UniformRandomSamplesGenerator:
     def __init__(self):
         self.data = None
 
-    def fit(self, X: pd.DataFrame, **kwargs):
+    def fit(self, X: pd.DataFrame):
         self.data = X
         return self
 
-    def sample(self, size: int) -> pd.DataFrame:
+    def sample(self, n_samples = 1) -> pd.DataFrame:
         sample = pd.DataFrame()
         for attr in self.data:
             attr_min, attr_max = self.data[attr].min(), self.data[attr].max()
-            sample[attr] = np.random.uniform(attr_min, attr_max, size)
+            sample[attr] = np.random.uniform(attr_min, attr_max, n_samples)
         return sample
 
 
@@ -66,7 +66,7 @@ class UniformRandomSamplesGenerator:
 # df = pd.read_csv("testdata.csv")
 # x = UniformRandomSamplesGenerator()
 # x.fit(df)
-# df1 = x.sample(size=201)
+# df1 = x.sample(n_samples = 201)
 # 
 # df.max(axis = 0)-df1.max(axis = 0)
 # df1.min(axis = 0)-df.min(axis = 0)
@@ -85,11 +85,11 @@ class NoiseGenerator:
         self.data = None
         self.divisor = divisor
 
-    def fit(self, X: pd.DataFrame, **kwargs):
+    def fit(self, X: pd.DataFrame):
         self.data: pd.DataFrame = X
         return self
 
-    def sample(self, size: int) -> pd.DataFrame:
+    def sample(self, n_samples = 1) -> pd.DataFrame:
         mod_data: pd.DataFrame = self.data.copy()
         for col in mod_data:
             col_values = mod_data[col].to_numpy()
@@ -103,7 +103,7 @@ class NoiseGenerator:
 # df = pd.read_csv("testdata.csv")
 # x = NoiseGenerator()
 # x.fit(df)
-# df1 = x.sample(size=1000)
+# df1 = x.sample(n_samples = 1000)
 # 
 # dfn = df.to_numpy()
 # df1n = df1.to_numpy()

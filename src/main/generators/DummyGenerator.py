@@ -5,7 +5,7 @@ class DummyGenerator:
     def __init__(self):
         self.data = None
 
-    def fit(self, X, **kwargs):
+    def fit(self, X):
         self.data = X
         return self
 
