@@ -8,7 +8,7 @@ class NormalRandomSampleGenerator:
         self.data = None
 
     def fit(self, X: pd.DataFrame):
-        self.data = X
+        self.data = X.copy()
         return self
 
     def sample(self, n_samples = 1) -> pd.DataFrame:
@@ -48,7 +48,7 @@ class UniformRandomSamplesGenerator:
         self.data = None
 
     def fit(self, X: pd.DataFrame):
-        self.data = X
+        self.data = X.copy()
         return self
 
     def sample(self, n_samples = 1) -> pd.DataFrame:
@@ -86,7 +86,7 @@ class NoiseGenerator:
         self.divisor = divisor
 
     def fit(self, X: pd.DataFrame):
-        self.data: pd.DataFrame = X
+        self.data = X.copy()
         return self
 
     def sample(self, n_samples = 1) -> pd.DataFrame:

@@ -1,3 +1,83 @@
+
+import sys
+import pandas as pd
+import numpy as np
+from sklearn.neighbors import NearestNeighbors
+
+
+class Munge:
+    
+    def __init__(self, local_var = 5, p_swap = 0.5):
+        if p_swap < 0.01:
+            sys.exit("p_swap parameter is too small")
+        self.data = None
+        self.p_swap = p_swap
+        self.local_var = local_var
+        self.cnames = None
+
+    def fit(self, X):
+        self.data = X.copy()
+        self.cnames = X.columns
+        return self
+
+    def sample(self, n_samples):
+        index = NearestNeighbors(n_neighbors = 1).fit(self.data).kneighbors()[1]
+        reps = int(n_samples/(self.data.shape[0]*(1 - (1 - self.p_swap)**self.data.shape[1])) + 1)
+        dlist = []
+
+        for i in range(0, reps):
+            dtemp = self.data.copy().to_numpy()
+            for j in range(0, dtemp.shape[0]):
+                nn = self.data.to_numpy()[index[j],:].flatten()
+                for k in range(0,dtemp.shape[1]):
+                    swap = np.random.uniform(0, 1, 1)
+                    if swap <= self.p_swap:
+                        dtemp[j, k] = np.random.normal(nn[k], abs(nn[k] - dtemp[j, k])/self.local_var, 1)
+            dlist.append(dtemp)
+
+        new_data = np.concatenate(dlist, axis = 0)
+        sort_ind = sorted(np.unique(new_data, axis = 0, return_index = True)[1])
+        new_data = new_data[sort_ind,:]
+
+        while new_data.shape[0] < n_samples:
+            dtemp = self.data.to_numpy()
+            for j in range(0, dtemp.shape[0]):
+                nn = self.data.to_numpy()[index[j,:]].flatten()
+                for k in range(0,dtemp.shape[1]):
+                    swap = np.random.uniform(0, 1, 1)
+                    if swap <= self.p_swap:
+                        dtemp[j, k] = np.random.normal(nn[k], abs(nn[k] - dtemp[j, k])/self.local_var, 1)
+            new_data = np.concatenate([new_data, dtemp], axis = 0)
+            sort_ind = sorted(np.unique(new_data, axis = 0, return_index = True)[1])
+            new_data = new_data[sort_ind,:]
+        
+        return pd.DataFrame(new_data[:n_samples,:], columns = self.cnames)
+
+
+
+# =============================================================================
+# TODO: maybe also compare to R implementation?
+#
+# df = pd.read_csv("testdata.csv")
+# df = df.iloc[:,[0,1]]
+# x = Munge(p_swap = 0.5, local_var = 0.5)
+# x.fit(df)
+# df1 = x.sample(n_samples = 201)
+# 
+# import matplotlib.pyplot as plt
+# fig = plt.figure()
+# ax1 = fig.add_subplot(111)
+# ax1.scatter(df.iloc[:,0], df.iloc[:,1], s=10, c='b', marker="s", label='original')
+# ax1.scatter(df1.iloc[:,0], df1.iloc[:,1], s=10, c='r', marker="o", label='generated')
+# plt.legend(loc='upper right');
+# plt.show()
+# =============================================================================
+
+
+
+
+
+'''
 import math
 
 import annoy as ann
@@ -92,3 +172,4 @@ class MUNGE:
             t.add_item(row_idx, data.iloc[row_idx, :])
         t.build(n_trees)
         return t
+'''

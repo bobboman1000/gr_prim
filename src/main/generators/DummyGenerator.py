@@ -6,7 +6,7 @@ class DummyGenerator:
         self.data = None
 
     def fit(self, X):
-        self.data = X
+        self.data = X.copy()
         return self
 
     def sample(self, n_samples=1) -> pd.DataFrame:
