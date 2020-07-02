@@ -1,6 +1,5 @@
 
 import numpy as np
-import pandas as pd
 import warnings
 
 
@@ -11,7 +10,7 @@ class BestInterval:
         self.depth = depth
         
     def find(self, dx, dy):
-        if np.logical_or(min(dy) < 0, max(dy) > 1):
+        if np.logical_or(dy.min() < 0, dy.max() > 1):
             warnings.warn("The target variable takes values from outside [0,1]")
         dim = dx.shape[1]
         if self.depth > dim:
@@ -49,66 +48,94 @@ class BestInterval:
         # below numbers correspond to the row numbers in the pseudo-code description
         # from "Efficient algorithms for finding richer subgroup descriptions in 
         # numeric and nominal data" (Algorithm 3)
-        N = len(dx)
+        N = len(dy)
         Np = sum(dy)
         
         ind_in_box = np.ones(N, dtype = bool)
-        for i in range(0,dx.shape[1]):
+        for i in range(0, dx.shape[1]):
             if not i == ind:
-                ind_in_box = np.logical_and(ind_in_box, np.logical_and(dx.iloc[:,i] >= box.iloc[0,i], dx.iloc[:,i] <= box.iloc[1,i]))
-        in_box = pd.concat([dx[ind_in_box].iloc[:,ind], dy[ind_in_box]], axis=1)
-        in_box.columns = ['x', 'y']
-        in_box = in_box.sort_values(by = 'x')
-        
+                ind_in_box = np.logical_and(ind_in_box, np.logical_and(dx[:,i] >= box[0,i], dx[:,i] <= box[1,i]))
+        in_box = np.vstack((dx[ind_in_box,ind], dy[ind_in_box])).T
+        in_box = in_box[in_box[:,1].argsort()]
+
         t_m, h_m = float("-inf"), float("-inf") # 3-4
-        l, r = box.iloc[0,ind], box.iloc[1,ind] # 1
-        n = len(in_box)
-        npos = sum(in_box['y'])
+        l, r = box[0,ind], box[1,ind]           # 1
+        n = in_box.shape[0]
+        npos = in_box[:,1].sum()
         wracc_m = start_q                       # 2
         
-        t = in_box['x'].unique()                # define T 
-        for i in range(1,len(t)):               # 5
-            tmp = in_box[in_box['x'] == t[i-1]]
-            n = n - len(tmp)                    # 6
-            npos = npos - sum(tmp['y'])         # 6
+        t = np.unique(in_box[:,0])              # define T 
+        for i in range(0,len(t)):               # 5
+            if i != 0:
+                tmp = in_box[in_box[:,0] == t[i-1]]
+                n = n - tmp.shape[0]            # 6
+                npos = npos - tmp[:,1].sum()    # 6
             h = self._wracc(n, npos, N, Np)     # 7
             if h > h_m:                         # 8
                 h_m = h                         # 9
                 t_m = t[i]                      # 10 
-            tmp = in_box[np.logical_and(in_box['x'] >= t_m, in_box['x'] <= t[i])]
-            n_i = len(tmp)
-            npos_i = sum(tmp['y'])
+            tmp = in_box[np.logical_and(in_box[:,0] >= t_m, in_box[:,0] <= t[i])]
+            n_i = tmp.shape[0]
+            npos_i = tmp[:,1].sum()
             wracc_i = self._wracc(n_i, npos_i, N, Np)
             if wracc_i > wracc_m:               # 11 
                 l = t_m                         # 12 
                 r = t[i]                        # 12 
                 wracc_m = wracc_i               # 13 
         box_new = box.copy()
-        box_new.iloc[:,ind] = [l,r]    
+        box_new[:,ind] = [l,r]    
         return [box_new, wracc_m, int(not wracc_m == start_q)]   
     
     def _wracc(self, n, npos, N, Np):
         return (n/N)*(npos/n - Np/N)
     
-    def _get_initial_restrictions(self, data) -> pd.DataFrame:
+    def _get_initial_restrictions(self, data):
         maximum = data.max(axis=0)
         minimum = data.min(axis=0)
-        return pd.DataFrame(data = [minimum, maximum], columns = data.columns)
+        return np.vstack((minimum, maximum))
 
 
-
-
-df = pd.read_csv("src\\main\\generators\\testdata.csv")
-dx = df.iloc[:,[0]]
-dy = df.iloc[:,6]
-
-bi = BestInterval()
-bi.find(dx, dy)
-
-box = bi._get_initial_restrictions(dx)
-start_q = 0
-bi._refine(dx, dy, box, 0, start_q)
-bi._refine(dx, dy, box, 1, start_q)
+# =============================================================================
+# # Test
+# 
+# import pandas as pd
+# df = pd.read_csv("src\\main\\generators\\testdata.csv")
+# dx = df.iloc[:,[0]].copy().to_numpy()
+# dy = df.iloc[:,6].copy().to_numpy()
+# 
+# bi = BestInterval()
+# bi.find(dx, dy)
+# 
+# dy[0] = 0
+# bi.find(dx, dy)
+# 
+# dy = 1 - dy
+# bi.find(dx, dy)
+# 
+# dy[1:5] = 1
+# bi.find(dx, dy)
+# 
+# import time
+# dx = df.iloc[:,0:6].copy().to_numpy()
+# dy = df.iloc[:,6].copy().to_numpy()
+# bi = BestInterval(depth = 3)
+# start = time.time()
+# bi.find(dx, dy)
+# end = time.time()
+# print(end - start) # 20-21 s
+#     
+# box = bi._get_initial_restrictions(dx)
+# start_q = 0
+# bi._refine(dx, dy, box, 0, start_q)
+# bi._refine(dx, dy, box, 1, start_q)
+# 
+# np.random.seed(seed=1)
+# dx = np.random.random((1000,4)) 
+# dy = ((dx > 0.3).sum(axis = 1) == 4) - 0
+# dx[:,1] = dx[:,1]*2
+# bi = BestInterval(depth = 4, beam_size = 1)
+# bi.find(dx, dy)
+# =============================================================================
 
 
 
