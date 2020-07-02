@@ -25,6 +25,7 @@ class NormalRandomSampleGenerator:
 # as in original data
 # 
 # df = pd.read_csv("testdata.csv")
+# df = df.iloc[:,0:6]
 # x = NormalRandomSampleGenerator()
 # x.fit(df)
 # df1 = x.sample(n_samples = 201)
@@ -64,6 +65,7 @@ class UniformRandomSamplesGenerator:
 # from uniform distribution with the same ranges as in original data
 #
 # df = pd.read_csv("testdata.csv")
+# df = df.iloc[:,0:6]
 # x = UniformRandomSamplesGenerator()
 # x.fit(df)
 # df1 = x.sample(n_samples = 201)
@@ -101,6 +103,7 @@ class NoiseGenerator:
 
 # =============================================================================
 # df = pd.read_csv("testdata.csv")
+# df = df.iloc[:,1:3]
 # x = NoiseGenerator()
 # x.fit(df)
 # df1 = x.sample(n_samples = 1000)
@@ -109,7 +112,6 @@ class NoiseGenerator:
 # df1n = df1.to_numpy()
 # np.unique(dfn).size
 # np.unique(df1n).size
-# # so there are still several duplicated values, althogh much less than in original data.
 # 
 # import matplotlib.pyplot as plt
 # df['color'] = np.zeros(len(df))

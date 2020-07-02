@@ -75,15 +75,17 @@ class KernelDensityBW:
 # plt.scatter(df.iloc[:, 0], df.iloc[:, 1], c = df['color'])
 # 
 # # hard limits (1)
-# # Here it is likely that too points are inside the limits
+# # Here it is likely that too points are outside the limits
 # # since the attribute's scales are very different. Should output an exception
 # 
 # df = pd.read_csv("testdata.csv")
+# df = df.iloc[:,0:6]
 # x = KernelDensityBW(method = 'silverman', hard_limits = True)
 # x.fit(df)
 # df1 = x.sample(n_samples = 201)
 # 
 # # hard limits (2)
+# # This should work as the relative scales are similar
 # 
 # df = pd.read_csv("testdata.csv")
 # df = df.iloc[:,[1,2]]

@@ -27,6 +27,7 @@ class GaussianMixtureCV:
 
 # =============================================================================
 # df = pd.read_csv("testdata.csv")
+# df = df.iloc[:,0:6]
 # x = GaussianMixtureCV()
 # x.fit(df)
 # df1 = x.sample(n_samples = 201)
@@ -71,6 +72,7 @@ class GaussianMixtureBIC:
     
 # =============================================================================
 # df = pd.read_csv("testdata.csv")
+# df = df.iloc[:,0:6]
 # x = GaussianMixtureBIC()
 # x.fit(df)
 # df1 = x.sample(n_samples = 201)

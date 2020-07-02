@@ -19,6 +19,7 @@ class DummyGenerator:
 # original dataset
 # 
 # df = pd.read_csv("testdata.csv")
+# df = df.iloc[:,0:6]
 # x = DummyGenerator()
 # x.fit(df)
 # df1 = x.sample()

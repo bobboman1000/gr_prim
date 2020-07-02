@@ -38,7 +38,8 @@ class Munge:
         new_data = np.concatenate(dlist, axis = 0)
         sort_ind = sorted(np.unique(new_data, axis = 0, return_index = True)[1])
         new_data = new_data[sort_ind,:]
-
+        
+        # if the number of generated points is still lower than the required, generate more
         while new_data.shape[0] < n_samples:
             dtemp = self.data.to_numpy()
             for j in range(0, dtemp.shape[0]):
