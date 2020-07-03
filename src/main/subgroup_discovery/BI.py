@@ -5,9 +5,10 @@ import warnings
 
 class BestInterval:
 
-    def __init__(self, beam_size=1, depth=5):
+    def __init__(self, depth=5, beam_size=1, add_iter=0):
         self.beam_size = beam_size
         self.depth = depth
+        self.add_iter = add_iter
         
     def find(self, dx, dy):
         if np.logical_or(dy.min() < 0, dy.max() > 1):
@@ -29,17 +30,39 @@ class BestInterval:
         if depth > 1:
             for _ in range(0, depth - 1):
                 if res_tab.shape[0] > self.beam_size:
-                    retain = res_tab[:,0] >= np.sort(res_tab)[::-1][self.beam_size - 1,0]
+                    retain = res_tab[:,0] >= np.sort(res_tab[:,0])[::-1][self.beam_size - 1]
                     res_tab = res_tab[retain]
                     res_box = [res_box[i] for i in np.where(retain)[0]]
                 for k in range(0, len(res_tab)):
                     if res_tab[k, 1] == 1:
-                        res_tab[k, 1] == 0
+                        res_tab[k, 1] = 0
                         inds_r = np.arange(0, dim, 1)[np.arange(0, dim, 1) != res_tab[k, 2]]
                         for i in inds_r:
                             tmp = self._refine(dx, dy, res_box[k], i, res_tab[k, 0])
                             res_box.append(tmp[0])
                             res_tab = np.concatenate((res_tab, np.array([[tmp[1], tmp[2], i]])), axis = 0)
+                             
+            # additional iterations (refining dimensions which have been formerly refined)
+            if res_tab.shape[0] > self.beam_size:
+                retain = res_tab[:,0] >= np.sort(res_tab[:,0])[::-1][self.beam_size - 1]
+                res_tab = res_tab[retain]
+                res_box = [res_box[i] for i in np.where(retain)[0]]
+                
+            while res_tab[:,1].sum() != 0 and self.add_iter > 0:
+                self.add_iter = self.add_iter - 1
+                for k in range(0, len(res_tab)):
+                    if res_tab[k, 1] == 1:
+                        res_tab[k, 1] = 0
+                        inds_r = np.where((box_init - res_box[k]).sum(axis = 0) != 0)[0]
+                        inds_r = inds_r[inds_r != res_tab[k, 2]]
+                        for i in inds_r:
+                            tmp = self._refine(dx, dy, res_box[k], i, res_tab[k, 0])
+                            res_box.append(tmp[0])
+                            res_tab = np.concatenate((res_tab, np.array([[tmp[1], tmp[2], i]])), axis = 0)
+                if res_tab.shape[0] > self.beam_size:
+                    retain = res_tab[:,0] >= np.sort(res_tab[:,0])[::-1][self.beam_size - 1]
+                    res_tab = res_tab[retain]
+                    res_box = [res_box[i] for i in np.where(retain)[0]]
         
         winner = np.where(res_tab[:,0] == max(res_tab[:,0]))[0][0]
         return res_box[winner]
@@ -122,12 +145,14 @@ class BestInterval:
 # start = time.time()
 # bi.find(dx, dy)
 # end = time.time()
-# print(end - start) # 20-21 s
+# print(end - start) # 0.12s
 #     
 # box = bi._get_initial_restrictions(dx)
 # start_q = 0
 # bi._refine(dx, dy, box, 0, start_q)
 # bi._refine(dx, dy, box, 1, start_q)
+# 
+# # generated data 
 # 
 # np.random.seed(seed=1)
 # dx = np.random.random((1000,4)) 
@@ -135,8 +160,19 @@ class BestInterval:
 # dx[:,1] = dx[:,1]*2
 # bi = BestInterval(depth = 4, beam_size = 1)
 # bi.find(dx, dy)
+# bi = BestInterval(depth = 4, beam_size = 4)
+# bi.find(dx, dy)
+# bi = BestInterval(depth = 4, beam_size = 1, add_iter = 4)
+# bi.find(dx, dy)
+# 
+# dx = dx[:,[3,1,2,0]]
+# bi = BestInterval(depth = 3, beam_size = 1)
+# bi.find(dx, dy)
+# bi = BestInterval(depth = 3, beam_size = 4)
+# bi.find(dx, dy)
+# bi = BestInterval(depth = 3, beam_size = 1, add_iter = 3)
+# bi.find(dx, dy)
 # =============================================================================
-
 
 
 '''
