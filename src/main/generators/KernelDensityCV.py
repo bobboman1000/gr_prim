@@ -1,5 +1,6 @@
 
 import sys
+import warnings
 import pandas as pd
 import numpy as np
 from sklearn.neighbors import KernelDensity
@@ -8,13 +9,13 @@ from statsmodels.nonparametric.bandwidths import bw_silverman, bw_scott
 
 class KernelDensityBW:
 
-    def __init__(self, method, hard_limits = False):
+    def __init__(self, method = 'silverman', hard_limits = False):
         if method == 'silverman':
             self.bw_method = bw_silverman
         elif method == 'scott':
             self.bw_method = bw_scott
         else:
-            print("This is not right: method must be scott or silverman")
+            sys.exit("This is not right: method must be scott or silverman")
         
         self.model = None
         self.cnames = None
@@ -24,7 +25,7 @@ class KernelDensityBW:
     def fit(self, X: pd.DataFrame):
         bw = pd.Series(self.bw_method(X))
         if bw.max()/bw.min() > 10:
-            print("Bandwidths for different dimensions differ by order of magnitude. Consider using z-score scaling")
+            warnings.warn("Bandwidths for different dimensions differ by order of magnitude. Consider using z-score scaling")
         bw = bw[0]
         self.model = KernelDensity(bandwidth = bw)
         self.model.fit(X)

@@ -1,21 +1,27 @@
 import numpy as np
+import sys
 
 class Prim:
 
-    def __init__(self, alpha = 0.05, mass_min = 20):
+    def __init__(self, alpha = 0.05, mass_min = 20, target = 'precision'):
         self.alpha = alpha
         self.mass_min = mass_min
+        self.target = target
         
         self.dx = None
         self.dy = None
         self.box = None
+        self.N = None
+        self.Np = None
 
     def find(self, X, Y):
         self.dx = X.copy()
         self.dy = Y.copy()
         self.box = self._get_initial_restrictions(self.dx)
+        self.N = len(self.dy)
+        self.Np = sum(self.dy)
         
-        highest = sum(self.dy)/len(self.dy)
+        highest = self._target_fun(sum(self.dy), len(self.dy))
         ret_ind = 0        
         boxes = [self.box.copy()]
         i = 1
@@ -30,6 +36,8 @@ class Prim:
         self.dx = None
         self.dy = None
         self.box = None
+        self.N = None
+        self.Np = None
         
         return boxes[0:ret_ind]
     
@@ -41,7 +49,7 @@ class Prim:
             for i in range(0, self.dx.shape[1]):
                 bound = np.sort(self.dx[:,i])[(ndel-1):(ndel+1)].sum()/2
                 retain = self.dx[:,i] > bound
-                tar = sum(self.dy[retain])/sum(retain)
+                tar = self._target_fun(sum(self.dy[retain]), sum(retain))
                 if tar > hgh:
                     hgh = tar
                     inds = retain
@@ -50,7 +58,7 @@ class Prim:
                     bnd = bound
                 bound = np.sort(self.dx[:,i])[::-1][(ndel-1):(ndel+1)].sum()/2
                 retain = self.dx[:,i] < bound
-                tar = sum(self.dy[retain])/sum(retain)
+                tar = self._target_fun(sum(self.dy[retain]), sum(retain))
                 if tar > hgh:
                     hgh = tar
                     inds = retain
@@ -68,6 +76,15 @@ class Prim:
         maximum = data.max(axis=0)
         minimum = data.min(axis=0)
         return np.vstack((minimum, maximum))
+    
+    def _target_fun(self, npos, n):
+        if self.target == 'precision':
+            tar = npos/n
+        elif self.target == 'wracc':
+            tar = (n/self.N)*(npos/n - self.Np/self.N)
+        else:
+            sys.exit("The target function is unknown. It should be either wracc or precision")
+        return tar
 
 
 # =============================================================================
@@ -103,7 +120,7 @@ class Prim:
 # dy = 1 - dy
 # bp_new = pr_new.find(dx,dy)
 # 
-# dy[1:5] = 1
+# dy[1:6] = 1
 # bp_new = pr_new.find(dx,dy)
 # 
 # dx = df.iloc[:,0:6].copy().to_numpy()
@@ -111,14 +128,26 @@ class Prim:
 # start = time.time()
 # bp_new = pr_new.find(dx,dy)
 # end = time.time()
-# print(end - start) # ~0.2s
+# print(end - start) # ~0.3s
 # # the boxes are again bit different from inplementation in "ema_workbench".
 # # The source of difference here is that for some reason reference implementation
 # # does not take bounds average "np.sort(self.dx[:,i])[::-1][(ndel-1):(ndel+1)].sum()/2"
 # # ¯\_(ツ)_/¯
+# 
+# 
+# # compare different target functions
+# 
+# import pandas as pd
+# df = pd.read_csv("src\\main\\generators\\testdata.csv")
+# dx = df.iloc[:,[0]].copy().to_numpy()
+# dy = np.linspace(0, 1, num = dx.shape[0])
+# 
+# pr_prec = Prim()
+# pr_wracc = Prim(target = 'wracc')
+# 
+# bp_prec = pr_prec.find(dx,dy)
+# bp_wracc = pr_wracc.find(dx,dy)
 # =============================================================================
-
-
 
 '''
 import pandas as pd
