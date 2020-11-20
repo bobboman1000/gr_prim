@@ -3,38 +3,43 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 
 
-class RandomForestCV:
-    def __init__(self, cv = 5):
-        self.rf = None
-        self.cv = cv
+class RF:
+    def __init__(self, params = {"max_features": [2, "sqrt", None]}, cv = 5):
+        self.params_ = params
+        self.cv_ = cv
 
     def fit(self, X, y):
-        m = X.shape[1]
-        params = {"max_features": [min(2, m), "sqrt", m]}
-        grid = GridSearchCV(RandomForestClassifier(), params, cv = self.cv)
-        self.rf = grid.fit(X, y).best_estimator_
+        self.model_ = GridSearchCV(RandomForestClassifier(), self.params_, cv = self.cv_).fit(X, y).best_estimator_
         return self
 
     def predict(self, X):
-        return self.rf.predict(X)
+        return self.model_.predict(X)
 
     def predict_proba(self, X):
-        return self.rf.predict_proba(X)[:, int(np.where(self.rf.classes_ == 1)[0])]
+        return self.model_.predict_proba(X)[:, int(np.where(self.model_.classes_ == 1)[0])]
 
 
-# generated data 
+# TEST 
 
-np.random.seed(seed=1)
-dx = np.random.random((1000,4))
-dy = ((dx > 0.3).sum(axis = 1) == 4) - 0
+import matplotlib.pyplot as plt
+mean = [0, 0]
+cov = [[1, 0], [0, 1]]
+x = np.random.multivariate_normal(mean, cov, 500)
+mean = [0, 0]
+x = np.vstack((x,np.random.multivariate_normal(mean, cov, 500)))
+y = np.hstack((np.zeros(500), np.ones(500)))
+plt.scatter(x[:,0], x[:,1], c = y)
+ 
+# tmp = GridSearchCV(RandomForestClassifier(), {"max_features": [2, "sqrt", None]}, cv = 5).fit(x, y)
+# tmp.cv_results_
 
-import time
-model = RandomForestCV()
-start = time.time()
-model.fit(dx,dy)  
-end = time.time()
-print(end - start)   
+rf = RF()
+rf.fit(x, y)
 
-sum(model.predict(dx) - dy)
-sum(model.predict_proba(dx) - dy)
+sum(abs(rf.predict(x) - y)) # this is strange. Rf overfits?
+sum(abs(rf.predict_proba(x) - y)) # one would expect this to be around 5000...
+
+
+
+
 
