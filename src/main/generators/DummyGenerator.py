@@ -1,27 +1,29 @@
-import pandas as pd
-
 
 class DummyGenerator:
     def __init__(self):
-        self.data = None
+        self.X_ = None
 
     def fit(self, X):
-        self.data = X.copy()
+        self.X_ = X.copy()
         return self
 
-    def sample(self, n_samples=1) -> pd.DataFrame:
-        return pd.DataFrame(columns=self.data.columns)
+    def sample(self, n_samples = 1):
+        return self.X_.copy()
+
 
 
 # =============================================================================
-# This generator creates an empty dataset.
-# That is, a dataset augmenter with DummyGenerator coincides with 
-# original dataset
+# # This generator always returns the same dataset
 # 
-# df = pd.read_csv("testdata.csv")
-# df = df.iloc[:,0:6]
-# x = DummyGenerator()
-# x.fit(df)
-# df1 = x.sample()
+# import numpy as np
+# 
+# mean = [0, 0]
+# cov = [[1, 0], [0, 1]]
+# x = np.random.multivariate_normal(mean, cov, 500)
+# mean = [5, 5]
+# x = np.vstack((x,np.random.multivariate_normal(mean, cov, 500)))
+# 
+# dg = DummyGenerator()
+# dg.fit(x)
+# dg.sample(n_samples = 201) - x
 # =============================================================================
-

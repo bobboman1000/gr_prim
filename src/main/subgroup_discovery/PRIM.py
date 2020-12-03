@@ -51,7 +51,7 @@ class Prim:
         X, y = check_X_y(X, y)
         # Check is fit had been called
         check_is_fitted(self)
-        
+        if sum(y) == 0: return 0
         if score_fun is None: score_fun = self.target
         if score_fun == 'pr_auc':
             prec, rec = np.empty(0), np.empty(0)
@@ -60,8 +60,9 @@ class Prim:
                 ind_in_box = np.ones(len(y), dtype = bool)
                 for i in range(0, box.shape[1]):
                     ind_in_box = np.logical_and(ind_in_box, np.logical_and(X[:,i] >= box[0,i], X[:,i] <= box[1,i]))
-                prec = np.append(prec, sum(y[ind_in_box])/sum(ind_in_box))
-                rec = np.append(rec, sum(y[ind_in_box])/sum(y))
+                if sum(ind_in_box) != 0:
+                    prec = np.append(prec, sum(y[ind_in_box])/sum(ind_in_box))
+                    rec = np.append(rec, sum(y[ind_in_box])/sum(y))
             res = -prec[0] - np.trapz(np.append(prec, prec[-1]), np.append(rec, 0))
         else:
             box = self.boxes_[-1]

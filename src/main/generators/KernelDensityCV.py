@@ -1,108 +1,80 @@
 
 import sys
 import warnings
-import pandas as pd
 import numpy as np
 from sklearn.neighbors import KernelDensity
 from statsmodels.nonparametric.bandwidths import bw_silverman, bw_scott
 
+# to choose bandwidth via CV, see, for instance, 
+# https://scikit-learn.org/stable/auto_examples/neighbors/plot_digits_kde_sampling.html#sphx-glr-auto-examples-neighbors-plot-digits-kde-sampling-py
 
-class KernelDensityBW:
+class KernelDensityBW:          
 
-    def __init__(self, method = 'silverman', hard_limits = False):
+    def __init__(self, method = 'silverman'):
         if method == 'silverman':
-            self.bw_method = bw_silverman
+            self.bw_method_ = bw_silverman
         elif method == 'scott':
-            self.bw_method = bw_scott
+            self.bw_method_ = bw_scott
         else:
-            sys.exit("This is not right: method must be scott or silverman")
-        
-        self.model = None
-        self.cnames = None
-        self.hard_limits = hard_limits
-        self._limits = ()
+            sys.exit("The method must be either scott or silverman")
 
-    def fit(self, X: pd.DataFrame):
-        bw = pd.Series(self.bw_method(X))
+    def fit(self, X):
+        bw = self.bw_method_(X)
         if bw.max()/bw.min() > 10:
-            warnings.warn("Bandwidths for different dimensions differ by order of magnitude. Consider using z-score scaling")
-        bw = bw[0]
-        self.model = KernelDensity(bandwidth = bw)
-        self.model.fit(X)
-        self._limits = (X.min(axis = 0).to_numpy(), X.max(axis = 0).to_numpy())
-        self.cnames = X.columns
+            warnings.warn("Bandwidths for different dimensions differ by more than order of magnitude. Consider using z-score scaling")
+        bw = bw.mean()
+        self.model_ = KernelDensity(bandwidth = bw).fit(X)
+        self.limits_ = (X.min(axis = 0), X.max(axis = 0))
         return self
 
-    def sample(self, n_samples = 1) -> pd.DataFrame:
-        if self.hard_limits:
+    def sample(self, n_samples = 1, hard_limits = False):
+        if hard_limits:
             samples = self._generate_w_hard_limits(n_samples)
         else:
-            samples = pd.DataFrame(self.model.sample(n_samples), columns = self.cnames)
+            samples = self.model_.sample(n_samples)
         return samples
     
-    def _generate_w_hard_limits(self, n_samples) -> pd.DataFrame:
+    def _generate_w_hard_limits(self, n_samples):
         sample = self._cleaned_sample(n_samples)
-        mult = int(min(100, n_samples/max(sample.shape[0], 10) + 1))
+        mult = int(min(20, n_samples/max(sample.shape[0], 10) + 1))
         while sample.shape[0] < n_samples:
             additional = self._cleaned_sample(n_samples * mult)
             sample = np.append(sample, additional, axis = 0)
             if (sample.shape[0]/n_samples < 0.01):
                 sys.exit("< 0.01 % of generated points are within the limits; please make sure you scaled the data")
-        return pd.DataFrame(sample[:n_samples], columns = self.cnames)
+        return sample[:n_samples]
 
-    def _cleaned_sample(self, n_samples) -> np.ndarray:
-        new_samples = self.model.sample(n_samples)
-        filtered = (new_samples <= self._limits[1]) & (new_samples >= self._limits[0])
-        new_samples = new_samples[filtered.all(axis = 1)]
+    def _cleaned_sample(self, n_samples):
+        new_samples = self.model_.sample(n_samples)
+        new_samples = new_samples[((new_samples <= self.limits_[1]) & (new_samples >= self.limits_[0])).all(axis = 1)]
         return new_samples
 
-      
+
+
 # =============================================================================
-# # no limits
+# # TEST 
 # 
-# df = pd.read_csv("testdata.csv")
-# df = df.iloc[:,[1,2]]
-# x = KernelDensityBW(method = 'silverman')
-# x.fit(df)
-# df1 = x.sample(n_samples = 201)
-# 
-# df.max(axis = 0)-df1.max(axis = 0)
-# df1.min(axis = 0)-df.min(axis = 0)
-# 
+# mean = [0, 0]
+# cov = [[1, 0], [0, 1]]
+# x = np.random.multivariate_normal(mean, cov, 500)
+# mean = [5, 5]
+# x = np.vstack((x,np.random.multivariate_normal(mean, cov, 500)))
+# x = x[((x <= [6,6]) & (x>=[-1,-1])).all(axis = 1)]
 # import matplotlib.pyplot as plt
-# df['color'] = np.zeros(len(df))
-# df1['color'] = np.ones(len(df1))
-# df = pd.concat([df, df1])
-# plt.scatter(df.iloc[:, 0], df.iloc[:, 1], c = df['color'])
+# plt.scatter(x[:,0], x[:,1])
 # 
-# # hard limits (1)
-# # Here it is likely that too points are outside the limits
-# # since the attribute's scales are very different. Should output an exception
+# kde = KernelDensityBW()
+# kde.fit(x)
+# df1 = kde.sample(n_samples = 200, hard_limits = True)
+# plt.scatter(df1[:,0], df1[:,1])
+# df2 = kde.sample(n_samples = 200)
+# plt.scatter(df2[:,0], df2[:,1])
+#       
+# x[:,1] = x[:,1]*100
+# kde.fit(x)
 # 
-# df = pd.read_csv("testdata.csv")
-# df = df.iloc[:,0:6]
-# x = KernelDensityBW(method = 'silverman', hard_limits = True)
-# x.fit(df)
-# df1 = x.sample(n_samples = 201)
-# 
-# # hard limits (2)
-# # This should work as the relative scales are similar
-# 
-# df = pd.read_csv("testdata.csv")
-# df = df.iloc[:,[1,2]]
-# x = KernelDensityBW(method = 'silverman', hard_limits = True)
-# x.fit(df)
-# df1 = x.sample(n_samples = 201)
-# 
-# df.max(axis = 0)-df1.max(axis = 0)
-# df1.min(axis = 0)-df.min(axis = 0)
-# 
-# import matplotlib.pyplot as plt
-# df['color'] = np.zeros(len(df))
-# df1['color'] = np.ones(len(df1))
-# df = pd.concat([df, df1])
-# plt.scatter(df.iloc[:, 0], df.iloc[:, 1], c = df['color'])
 # =============================================================================
+
 
 
 
