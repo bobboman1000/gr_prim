@@ -1,60 +1,121 @@
 
 import sys
-import pandas as pd
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 
 class Munge:
     
-    def __init__(self, local_var = 5, p_swap = 0.5):
+    def __init__(self, local_var = 5, p_swap = 0.5, seed = 2020):
         if p_swap < 0.01:
             sys.exit("p_swap parameter is too small")
-        self.data = None
-        self.p_swap = p_swap
-        self.local_var = local_var
-        self.cnames = None
+        self.p_swap_ = p_swap
+        self.local_var_ = local_var
+        self.seed_ = seed
 
     def fit(self, X):
-        self.data = X.copy()
-        self.cnames = X.columns
+        self.data_ = X.copy()
+        self.index_ = NearestNeighbors(n_neighbors = 1).fit(self.data_).kneighbors()[1]
         return self
+    
+    def sample_once_(self):
+        dtemp = self.data_.copy()
+        for j in range(0, dtemp.shape[0]):
+            nn = self.data_[self.index_[j],:].flatten()
+            for k in range(0,dtemp.shape[1]):
+                swap = np.random.uniform(0, 1, 1)
+                if swap <= self.p_swap_:
+                    dtemp[j, k] = np.random.normal(nn[k], abs(nn[k] - dtemp[j, k])/self.local_var_, 1)
+        
+        return dtemp
 
     def sample(self, n_samples):
-        index = NearestNeighbors(n_neighbors = 1).fit(self.data).kneighbors()[1]
-        reps = int(n_samples/(self.data.shape[0]*(1 - (1 - self.p_swap)**self.data.shape[1])) + 1)
+        reps = int(n_samples/(self.data_.shape[0]*(1 - (1 - self.p_swap_)**self.data_.shape[1])) + 1)
         dlist = []
 
         for i in range(0, reps):
-            dtemp = self.data.copy().to_numpy()
-            for j in range(0, dtemp.shape[0]):
-                nn = self.data.to_numpy()[index[j],:].flatten()
-                for k in range(0,dtemp.shape[1]):
-                    swap = np.random.uniform(0, 1, 1)
-                    if swap <= self.p_swap:
-                        dtemp[j, k] = np.random.normal(nn[k], abs(nn[k] - dtemp[j, k])/self.local_var, 1)
-            dlist.append(dtemp)
-
-        new_data = np.concatenate(dlist, axis = 0)
-        sort_ind = sorted(np.unique(new_data, axis = 0, return_index = True)[1])
-        new_data = new_data[sort_ind,:]
+            dlist.append(self.sample_once_())
+        new_data = np.unique(np.concatenate(dlist, axis = 0), axis = 0)
         
         # if the number of generated points is still lower than the required, generate more
         while new_data.shape[0] < n_samples:
-            dtemp = self.data.to_numpy()
-            for j in range(0, dtemp.shape[0]):
-                nn = self.data.to_numpy()[index[j,:]].flatten()
-                for k in range(0,dtemp.shape[1]):
-                    swap = np.random.uniform(0, 1, 1)
-                    if swap <= self.p_swap:
-                        dtemp[j, k] = np.random.normal(nn[k], abs(nn[k] - dtemp[j, k])/self.local_var, 1)
-            new_data = np.concatenate([new_data, dtemp], axis = 0)
-            sort_ind = sorted(np.unique(new_data, axis = 0, return_index = True)[1])
-            new_data = new_data[sort_ind,:]
+            new_data = np.unique(np.concatenate([new_data, self.sample_once_()], axis = 0), axis = 0)
+        inds = np.random.RandomState(self.seed_).choice(np.arange(new_data.shape[0]), size = new_data.shape[0], replace = False)
         
-        return pd.DataFrame(new_data[:n_samples,:], columns = self.cnames)
+        return new_data[inds,:][:n_samples,:]
 
 
+
+# =============================================================================
+# # TEST 
+# # TODO^ compare to R
+# 
+# mean = [0, 0]
+# cov = [[1, 0], [0, 1]]
+# x = np.random.multivariate_normal(mean, cov, 50)
+# mean = [5, 5]
+# x = np.vstack((x,np.random.multivariate_normal(mean, cov, 50)))
+# import matplotlib.pyplot as plt
+# plt.scatter(x[:,0], x[:,1])
+# 
+# munge = Munge(local_var = 1)
+# munge.fit(x)
+# df = munge.sample(n_samples = 201)
+# plt.scatter(df[:,0], df[:,1])
+# =============================================================================
+
+
+
+
+# =============================================================================
+# class Munge:
+#     
+#     def __init__(self, local_var = 5, p_swap = 0.5):
+#         if p_swap < 0.01:
+#             sys.exit("p_swap parameter is too small")
+#         self.p_swap_ = p_swap
+#         self.local_var_ = local_var
+# 
+#     def fit(self, X):
+#         self.data = X.copy()
+#         self.index_ = NearestNeighbors(n_neighbors = 1).fit(self.data).kneighbors()[1]
+#         return self
+# 
+#     def sample(self, n_samples):
+#         index = NearestNeighbors(n_neighbors = 1).fit(self.data).kneighbors()[1]
+#         reps = int(n_samples/(self.data.shape[0]*(1 - (1 - self.p_swap)**self.data.shape[1])) + 1)
+#         dlist = []
+# 
+#         for i in range(0, reps):
+#             dtemp = self.data.copy().to_numpy()
+#             for j in range(0, dtemp.shape[0]):
+#                 nn = self.data.to_numpy()[index[j],:].flatten()
+#                 for k in range(0,dtemp.shape[1]):
+#                     swap = np.random.uniform(0, 1, 1)
+#                     if swap <= self.p_swap:
+#                         dtemp[j, k] = np.random.normal(nn[k], abs(nn[k] - dtemp[j, k])/self.local_var, 1)
+#             dlist.append(dtemp)
+# 
+#         new_data = np.concatenate(dlist, axis = 0)
+#         sort_ind = sorted(np.unique(new_data, axis = 0, return_index = True)[1])
+#         new_data = new_data[sort_ind,:]
+#         
+#         # if the number of generated points is still lower than the required, generate more
+#         while new_data.shape[0] < n_samples:
+#             dtemp = self.data.to_numpy()
+#             for j in range(0, dtemp.shape[0]):
+#                 nn = self.data.to_numpy()[index[j,:]].flatten()
+#                 for k in range(0,dtemp.shape[1]):
+#                     swap = np.random.uniform(0, 1, 1)
+#                     if swap <= self.p_swap:
+#                         dtemp[j, k] = np.random.normal(nn[k], abs(nn[k] - dtemp[j, k])/self.local_var, 1)
+#             new_data = np.concatenate([new_data, dtemp], axis = 0)
+#             sort_ind = sorted(np.unique(new_data, axis = 0, return_index = True)[1])
+#             new_data = new_data[sort_ind,:]
+#         
+#         return pd.DataFrame(new_data[:n_samples,:], columns = self.cnames)
+# 
+# =============================================================================
 
 # =============================================================================
 # TODO: maybe also compare to R implementation?
@@ -73,10 +134,6 @@ class Munge:
 # plt.legend(loc='upper right');
 # plt.show()
 # =============================================================================
-
-
-
-
 
 '''
 import math

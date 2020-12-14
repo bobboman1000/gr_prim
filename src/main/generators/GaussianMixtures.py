@@ -40,7 +40,7 @@ class GMMBIC:
         self.model_ = best_gmm
         return self
 
-    def sample(self, n_samples = 1, X_new = None):
+    def sample(self, n_samples = 1):
         return self.model_.sample(n_samples)[0]
 
 

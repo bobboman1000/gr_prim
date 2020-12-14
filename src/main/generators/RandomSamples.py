@@ -1,121 +1,90 @@
 import numpy as np
-import pandas as pd
+from sklearn.covariance import MinCovDet
 
 
-class NormalRandomSampleGenerator:
+class NormalRandom:
 
-    def __init__(self):
-        self.data = None
+    def __init__(self, seed = 2020):
+        self.seed_ = seed
 
-    def fit(self, X: pd.DataFrame):
-        self.data = X.copy()
+    def fit(self, X):
+        cov = MinCovDet(random_state = self.seed_).fit(X)
+        self.covariance_ = cov.covariance_
+        self.location_ = cov.location_
         return self
 
-    def sample(self, n_samples = 1) -> pd.DataFrame:
-        sample = pd.DataFrame()
-        for attr in self.data:
-            mu, sigma = pd.Series.mean(self.data[attr]), pd.Series.std(self.data[attr])
-            sample[attr] = np.random.normal(mu, sigma, n_samples)
-        return sample
+    def sample(self, n_samples = 1):
+        return np.random.multivariate_normal(self.location_, self.covariance_, n_samples)
     
 
-# =============================================================================
-# This generator creates a dataset with independently generated attributes
-# from nornal distribution with the same mean values and standard deviations
-# as in original data
-# 
-# df = pd.read_csv("testdata.csv")
-# df = df.iloc[:,0:6]
-# x = NormalRandomSampleGenerator()
-# x.fit(df)
-# df1 = x.sample(n_samples = 201)
-# 
-# df.mean(axis = 0)
-# df1.mean(axis = 0)
-# df.std(axis = 0)
-# df1.std(axis = 0)
-# 
-# import matplotlib.pyplot as plt
-# df['color'] = np.zeros(len(df))
-# df1['color'] = np.ones(len(df1))
-# df = pd.concat([df, df1])
-# plt.scatter(df.iloc[:, 3], df.iloc[:, 4], c = df['color'])
-# =============================================================================
-    
 
-class UniformRandomSamplesGenerator:
+class UniformRandom:
 
     def __init__(self):
-        self.data = None
+        return None
 
-    def fit(self, X: pd.DataFrame):
-        self.data = X.copy()
+    def fit(self, X):
+        self.range_ = X.max(axis=0) - X.min(axis=0)
+        self.minimum_ = X.min(axis=0)
         return self
 
-    def sample(self, n_samples = 1) -> pd.DataFrame:
-        sample = pd.DataFrame()
-        for attr in self.data:
-            attr_min, attr_max = self.data[attr].min(), self.data[attr].max()
-            sample[attr] = np.random.uniform(attr_min, attr_max, n_samples)
-        return sample
+    def sample(self, n_samples = 1):
+        return np.random.random((n_samples, len(self.range_)))*self.range_ + self.minimum_
+    
 
 
 # =============================================================================
-# This generator creates a dataset with independently generated attributes
-# from uniform distribution with the same ranges as in original data
-#
-# df = pd.read_csv("testdata.csv")
-# df = df.iloc[:,0:6]
-# x = UniformRandomSamplesGenerator()
-# x.fit(df)
-# df1 = x.sample(n_samples = 201)
+# # TEST 
 # 
-# df.max(axis = 0)-df1.max(axis = 0)
-# df1.min(axis = 0)-df.min(axis = 0)
-# 
+# mean = [0, 0]
+# cov = [[1, 0], [0, 1]]
+# x = np.random.multivariate_normal(mean, cov, 500)
+# mean = [5, 5]
+# x = np.vstack((x,np.random.multivariate_normal(mean, cov, 500)))
 # import matplotlib.pyplot as plt
-# df['color'] = np.zeros(len(df))
-# df1['color'] = np.ones(len(df1))
-# df = pd.concat([df, df1])
-# plt.scatter(df.iloc[:, 3], df.iloc[:, 4], c = df['color'])
+# plt.scatter(x[:,0], x[:,1])
+# 
+# nr = NormalRandom()
+# nr.fit(x)
+# df = nr.sample(n_samples = 201)
+# plt.scatter(df[:,0], df[:,1])
+# 
+# ur = UniformRandom()
+# ur.fit(x)
+# df = ur.sample(n_samples = 201)
+# plt.scatter(df[:,0], df[:,1])
 # =============================================================================
 
+    
 
 class NoiseGenerator:
 
-    def __init__(self, divisor: float = 3):
-        self.data = None
-        self.divisor = divisor
+    def __init__(self, scale = 0.3):
+        self.scale_ = scale
 
-    def fit(self, X: pd.DataFrame):
-        self.data = X.copy()
+    def fit(self, X):
+        self.data_ = X.copy()
+        self.data_ = self.data_.astype(float)
         return self
 
-    def sample(self, n_samples = 1) -> pd.DataFrame:
-        mod_data: pd.DataFrame = self.data.copy()
-        for col in mod_data:
-            col_values = mod_data[col].to_numpy()
-            div_mind_dist = min(np.diff(np.unique(col_values)))/self.divisor
-            col_values = np.add(col_values, np.random.uniform(-div_mind_dist, div_mind_dist, len(col_values)))
-            mod_data[col] = col_values
+    def sample(self, n_samples = 1):
+        mod_data = self.data_.copy()
+        for col in range(0,mod_data.shape[1]):
+            mindist = min(np.diff(np.unique(mod_data[:,col])))*self.scale_
+            mod_data[:,col] = mod_data[:,col] + np.random.uniform(-mindist, mindist, len(mod_data[:,col]))
         return mod_data
     
 
 # =============================================================================
-# df = pd.read_csv("testdata.csv")
-# df = df.iloc[:,1:3]
-# x = NoiseGenerator()
-# x.fit(df)
-# df1 = x.sample(n_samples = 1000)
+# # TEST
 # 
-# dfn = df.to_numpy()
-# df1n = df1.to_numpy()
-# np.unique(dfn).size
-# np.unique(df1n).size
-# 
+# x = np.array([[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]], dtype=float)
 # import matplotlib.pyplot as plt
-# df['color'] = np.zeros(len(df))
-# df1['color'] = np.ones(len(df1))
-# df = pd.concat([df, df1])
-# plt.scatter(df.iloc[:, 3], df.iloc[:, 4], c = df['color'])
+# plt.scatter(x[:,0], x[:,1])
+# 
+# ng = NoiseGenerator()
+# ng.fit(x)
+# df = ng.sample(n_samples = 201)
+# plt.scatter(df[:,0], df[:,1])
 # =============================================================================
+
