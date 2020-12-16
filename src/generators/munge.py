@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 
-class Munge:
+class Gen_munge:
     
     def __init__(self, local_var = 5, p_swap = 0.5, seed = 2020):
         if p_swap < 0.01:
@@ -58,7 +58,7 @@ class Munge:
 # import matplotlib.pyplot as plt
 # plt.scatter(x[:,0], x[:,1])
 # 
-# munge = Munge(local_var = 1)
+# munge = Gen_munge(local_var = 1)
 # munge.fit(x)
 # df = munge.sample(n_samples = 201)
 # plt.scatter(df[:,0], df[:,1])
@@ -68,7 +68,7 @@ class Munge:
 
 
 # =============================================================================
-# class Munge:
+# class Gen_munge:
 #     
 #     def __init__(self, local_var = 5, p_swap = 0.5):
 #         if p_swap < 0.01:
@@ -122,7 +122,7 @@ class Munge:
 #
 # df = pd.read_csv("testdata.csv")
 # df = df.iloc[:,[0,1]]
-# x = Munge(p_swap = 0.5, local_var = 0.5)
+# x = Gen_munge(p_swap = 0.5, local_var = 0.5)
 # x.fit(df)
 # df1 = x.sample(n_samples = 201)
 # 

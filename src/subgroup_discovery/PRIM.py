@@ -2,7 +2,7 @@ import numpy as np
 import sys
 from sklearn.utils.validation import check_X_y, check_is_fitted
 
-class Prim:
+class PRIM:
     def __init__(self, alpha = 0.05, mass_min = 20, target = 'pr_auc'):
         self.alpha = alpha
         self.mass_min = mass_min
@@ -133,7 +133,7 @@ class Prim:
 # dy = ((dx > 0.3).sum(axis = 1) == 4) - 0
 # 
 # import time
-# pr_new = Prim()
+# pr_new = PRIM()
 # start = time.time()
 # pr_new.fit(dx,dy)  
 # end = time.time()
@@ -145,8 +145,8 @@ class Prim:
 # # compare different target functions
 # 
 # dy = np.linspace(0, 1, num = dx.shape[0])
-# pr_prec = Prim()
-# pr_wracc = Prim(target = 'wracc')
+# pr_prec = PRIM()
+# pr_wracc = PRIM(target = 'wracc')
 # pr_prec.fit(dx,dy)
 # pr_wracc.fit(dx,dy)
 # pr_prec.score(dx, dy, score_fun = 'precision')
@@ -161,18 +161,18 @@ class Prim:
 # df.head()
 # dx = df.to_numpy()[9500:,0:12].copy()
 # dy = df.to_numpy()[9500:,12].copy()
-# pr_new = Prim()
+# pr_new = PRIM()
 # pr_new.fit(dx,dy)
 # pr_new.score(dx, dy, score_fun = 'precision')
 # 
 # # HPO
 # 
 # from sklearn.utils.estimator_checks import check_estimator
-# check_estimator(Prim())
+# check_estimator(PRIM())
 # 
 # from sklearn.model_selection import GridSearchCV
 # parameters = {'alpha':[0.01, 0.1, 0.45]}
-# pr_new = Prim()
+# pr_new = PRIM()
 # reds = GridSearchCV(pr_new, parameters)
 # reds.fit(dx, dy)
 # reds.best_params_
@@ -181,10 +181,10 @@ class Prim:
 # 
 # parameters = {'alpha':[0.01, 0.1, 0.45]}
 # 
-# pr_w = Prim(target = 'wracc')
-# pr_001_w = Prim(target = 'wracc', alpha = 0.01)
-# pr_01_w = Prim(target = 'wracc', alpha = 0.1)
-# pr_045_w = Prim(target = 'wracc', alpha = 0.45)
+# pr_w = PRIM(target = 'wracc')
+# pr_001_w = PRIM(target = 'wracc', alpha = 0.01)
+# pr_01_w = PRIM(target = 'wracc', alpha = 0.1)
+# pr_045_w = PRIM(target = 'wracc', alpha = 0.45)
 # reds_w = GridSearchCV(pr_w, parameters)
 # 
 # pr_w.fit(dx, dy)
@@ -230,7 +230,7 @@ class PRIM:
         else:
             obj_function = pu.PRIMObjectiveFunctions.ORIGINAL
 
-        prim = p.Prim(x=X, y=y, threshold=self.threshold, mode=loc_mode, obj_function=obj_function, mass_min=self.mass_min)
+        prim = p.PRIM(x=X, y=y, threshold=self.threshold, mode=loc_mode, obj_function=obj_function, mass_min=self.mass_min)
         box_pred = prim.find_box()
 
         return box_pred.box_lims

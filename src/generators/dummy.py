@@ -1,5 +1,5 @@
 
-class DummyGenerator:
+class Gen_dummy:
     def __init__(self):
         self.X_ = None
 
@@ -23,7 +23,7 @@ class DummyGenerator:
 # mean = [5, 5]
 # x = np.vstack((x,np.random.multivariate_normal(mean, cov, 500)))
 # 
-# dg = DummyGenerator()
+# dg = Gen_dummy()
 # dg.fit(x)
 # dg.sample(n_samples = 201) - x
 # =============================================================================

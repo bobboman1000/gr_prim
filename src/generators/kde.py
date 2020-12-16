@@ -8,7 +8,7 @@ from statsmodels.nonparametric.bandwidths import bw_silverman, bw_scott
 # to choose bandwidth via CV, see, for instance, 
 # https://scikit-learn.org/stable/auto_examples/neighbors/plot_digits_kde_sampling.html#sphx-glr-auto-examples-neighbors-plot-digits-kde-sampling-py
 
-class KernelDensityBW:          
+class Gen_kdebw:          
 
     def __init__(self, method = 'silverman'):
         if method == 'silverman':
@@ -63,7 +63,7 @@ class KernelDensityBW:
 # import matplotlib.pyplot as plt
 # plt.scatter(x[:,0], x[:,1])
 # 
-# kde = KernelDensityBW()
+# kde = Gen_kdebw()
 # kde.fit(x)
 # df1 = kde.sample(n_samples = 200, hard_limits = True)
 # plt.scatter(df1[:,0], df1[:,1])

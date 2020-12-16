@@ -1,7 +1,7 @@
 import numpy as np
 import warnings
 
-class PerfectGenerator:
+class Gen_perfect:
     def __init__(self):
         return None
         
@@ -29,7 +29,7 @@ class PerfectGenerator:
 # import matplotlib.pyplot as plt
 # plt.scatter(x[:,0], x[:,1])
 # 
-# pg = PerfectGenerator()
+# pg = Gen_perfect()
 # pg.fit(x)
 # df = pg.sample(n_samples = 20000)
 # plt.scatter(df[:,0], df[:,1])

@@ -3,7 +3,7 @@ import warnings
 from sklearn.utils.validation import check_X_y, check_is_fitted
 
 
-class BestInterval:
+class BI:
 
     def __init__(self, depth = 5, beam_size = 1, add_iter = 50):
         self.beam_size = beam_size
@@ -176,7 +176,7 @@ class BestInterval:
 # df.head()
 # dx = df.to_numpy()[9500:,0:12].copy()
 # dy = df.to_numpy()[9500:,12].copy()
-# bi = BestInterval(depth = 12)
+# bi = BI(depth = 12)
 # bi.fit(dx,dy)  
 # bi.score(df.to_numpy()[:9500,0:12], df.to_numpy()[:9500,12]) # 0.051309052631578915
 # 
@@ -184,17 +184,17 @@ class BestInterval:
 # # HPO
 # 
 # from sklearn.utils.estimator_checks import check_estimator
-# check_estimator(BestInterval())
+# check_estimator(BI())
 # 
 # from sklearn.model_selection import GridSearchCV
 # parameters = {'depth':[1,3,5,7,9,11]}
-# bi = BestInterval()
+# bi = BI()
 # reds = GridSearchCV(bi, parameters)
 # reds.fit(dx, dy)
 # reds.best_params_
 # reds.score(df.to_numpy()[:9500,0:12], df.to_numpy()[:9500,12])
 # 
-# bi = BestInterval(depth = 5)
+# bi = BI(depth = 5)
 # bi.fit(dx,dy)
 # bi.score(df.to_numpy()[:9500,0:12], df.to_numpy()[:9500,12])
 # 
@@ -207,7 +207,7 @@ class BestInterval:
 # 
 # # 1
 # import time
-# bi = BestInterval()
+# bi = BI()
 # start = time.time()
 # bi.fit(dx,dy)  
 # end = time.time()
@@ -217,54 +217,15 @@ class BestInterval:
 # # 2
 # dx[:,1] = dx[:,1]*2
 # 
-# bi = BestInterval(depth = 4, beam_size = 1)
+# bi = BI(depth = 4, beam_size = 1)
 # bi.fit(dx, dy)
 # bi.score(dx, dy)
 # 
-# bi = BestInterval(depth = 4, beam_size = 4)
+# bi = BI(depth = 4, beam_size = 4)
 # bi.fit(dx, dy)
 # bi.score(dx, dy)
 # 
-# bi = BestInterval(depth = 3, beam_size = 1)
+# bi = BI(depth = 3, beam_size = 1)
 # bi.fit(dx, dy)
 # bi.score(dx, dy)
 # =============================================================================
-
-
-
-'''
-from typing import List
-
-import numpy as np
-
-import pandas as pd
-from rpy2.robjects import pandas2ri  # install any dependency package if you get error like "module not found"
-from rpy2.robjects.packages import importr
-from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
-
-
-pandas2ri.activate()
-base = importr('base')
-
-class BestInterval:
-
-    def __init__(self, beam_size=1, depth=5):
-        self.beam_size = beam_size
-        self.depth = depth
-
-    def find(self, X, y, regression=True) -> List[pd.DataFrame]:
-        bi = SignatureTranslatedAnonymousPackage(self.get_rstring(), "bi")
-        X_cols = X.columns
-        result = bi.beam_refine(X, y, beam_size=self.beam_size, depth=self.depth)
-        result = pd.DataFrame(result, columns=X_cols)
-        return [_get_initial_restrictions(X), result]
-
-    def get_rstring(self):
-        return open("src/main/R/Refinement.R", mode="r").read()
-    
-    def _get_initial_restrictions(data: pd.DataFrame) -> pd.DataFrame:
-        maximum: pd.DataFrame = data.max(axis=0)
-        minimum: pd.DataFrame = data.min(axis=0)
-        return pd.DataFrame(data=[minimum, maximum], columns=data.columns)
-
-'''

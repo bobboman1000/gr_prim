@@ -4,7 +4,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import GridSearchCV
 
 
-class GMM:
+class Gen_gmm:
     
     def __init__(self, params = {"n_components": list(range(1, 30)), 
                                  "covariance_type": ["full", "tied", "diag", "spherical"]}, cv = 5):
@@ -19,7 +19,7 @@ class GMM:
         return self.model_.sample(n_samples)[0]
     
     
-class GMMBIC:
+class Gen_gmmbic:
 
     def __init__(self, params = {"n_components": list(range(1, 30)), 
                                  "covariance_type": ["full", "tied", "diag", "spherical"]}, cv = 5):
@@ -56,12 +56,12 @@ class GMMBIC:
 # import matplotlib.pyplot as plt
 # plt.scatter(x[:,0], x[:,1])
 # 
-# gmm = GMM()
+# gmm = Gen_gmm()
 # gmm.fit(x)
 # df = gmm.sample(n_samples = 201)
 # plt.scatter(df[:,0], df[:,1])
 # 
-# gmm = GMMBIC()
+# gmm = Gen_gmmbic()
 # gmm.fit(x)
 # df = gmm.sample(n_samples = 201)
 # plt.scatter(df[:,0], df[:,1])
