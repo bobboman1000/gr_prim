@@ -1,0 +1,5 @@
+statsmodels     # Computing bw_silverman and bw_scott
+scipy           # Reading .arff files
+pandas          # Dataframes, Series
+sklearn         # Learning models, generators
+numpy           # Numpy arrays

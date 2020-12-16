@@ -333,8 +333,9 @@ rsconnect/
 output/*.log
 **/__pycache__
 
-resources/
+data/
 src/main/subgroup_discovery/dssd/
+src/main/data/
 setup/EMAworkbench/
 output/
 src/subgroup_discovery/

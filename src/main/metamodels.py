@@ -10,7 +10,7 @@ from xgboost import XGBClassifier
 from scipy.stats import uniform, randint
 
 
-class RF:
+class Meta_rf:
     def __init__(self, params = {"max_features": [2, "sqrt", None]}, cv = 5, seed = 2020):
         self.params_ = params
         self.cv_ = cv
@@ -28,7 +28,7 @@ class RF:
 
 
 
-class SVCCV:
+class Meta_svm:
     def __init__(self, params = {"C": [0.1, 1, 10, 100], "gamma": [0.001, 0.01, 0.1, 1]}, cv = 5, seed = 2020):
         self.params_ = params
         self.cv_ = cv
@@ -46,7 +46,7 @@ class SVCCV:
     
     
 
-class GP:
+class Meta_kriging:
     def __init__(self, seed = 2020):
         self.seed_ = seed
 
@@ -62,7 +62,7 @@ class GP:
 
 
 
-class NB:
+class Meta_nb:
     def __init__(self):
         return None
 
@@ -78,7 +78,7 @@ class NB:
     
    
     
-class XGBCV:
+class Meta_xgb:
     def __init__(self, params = {'n_estimators' : randint(10,990),
         'learning_rate' : uniform(0.0001,0.2),
         'gamma' : uniform(0,0.4),
@@ -119,36 +119,35 @@ gmm = GMMBIC()
 gmm.fit(x)
 df = gmm.sample(n_samples = 201)
 
-rf = RF()
+rf = Meta_rf()
 rf.fit(x, y)
 sum(abs(rf.predict(x) - y))
 sum(abs(rf.predict_proba(x) - y))
 ynew = rf.predict(df)
 plt.scatter(df[:,0], df[:,1], c = ynew)
 
-svc_cv = SVCCV()
+svc_cv = Meta_svm()
 svc_cv.fit(x, y)
 sum(abs(svc_cv.predict(x) - y))
 sum(abs(svc_cv.predict_proba(x) - y))
 ynew = svc_cv.predict(df)
 plt.scatter(df[:,0], df[:,1], c = ynew)
 
-gp = GP()
+gp = Meta_kriging()
 gp.fit(x, y)
 sum(abs(gp.predict(x) - y)) 
 sum(abs(gp.predict_proba(x) - y))
 ynew = gp.predict(df)
 plt.scatter(df[:,0], df[:,1], c = ynew)
 
-nb = NB()
+nb = Meta_nb()
 nb.fit(x, y)
 sum(abs(nb.predict(x) - y)) 
 sum(abs(nb.predict_proba(x) - y))
 ynew = nb.predict(df)
 plt.scatter(df[:,0], df[:,1], c = ynew)
 
-
-xgb = XGBCV()
+xgb = Meta_xgb()
 xgb.fit(x, y)
 sum(abs(xgb.predict(x) - y)) 
 sum(abs(xgb.predict_proba(x) - y))
