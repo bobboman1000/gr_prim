@@ -334,8 +334,5 @@ output/*.log
 **/__pycache__
 
 data/
-src/main/subgroup_discovery/dssd/
-src/main/data/
-setup/EMAworkbench/
-output/
-src/subgroup_discovery/
+src/subgroup_discovery/dssd/
+src/data/
